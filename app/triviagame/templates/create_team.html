@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block heading %}Create a team{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <p>Creating a team for {{ game.name }}</p>
+    <div>
+    <form action="{% url 'create_team' %}" method="post" autocomplete="off">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary">Create team</button>
+    </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

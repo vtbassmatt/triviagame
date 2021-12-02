@@ -1,0 +1,49 @@
+{% extends 'host_base.html' %}
+{% block heading %}{% if hosting.open %}✅{% else %}🔒{% endif %} Hosting {{ hosting.name }}{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12 mb-2">
+    <h2>Access</h2>
+    <p><form method="post" action="{% url 'toggle_game' %}">{% csrf_token %}<button type="submit" class="btn btn-{% if hosting.open %}outline-danger{% else %}primary{% endif %}">{% if hosting.open %}Close{% else %}Open{% endif %} the game</button></form></p>
+    <h2>Pages</h2>
+    {% for page in hosting.page_set.all %}
+      <div class="card mb-3{% if page.open and hosting.open %} border-success{% elif page.open %} border-warning{% endif %}">
+      <div class="card-header{% if page.open and hosting.open %} text-white bg-success{% elif page.open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>
+      <div class="card-body">
+        <div class="card-title">{{ page.description|linebreaksbr }}</div>
+        <div class="card-text"><a href="{% url 'score_page' page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
+        {% if page.open %}
+        {# we're hacking a copy of forms.SomePageForm here #}
+        <div class="card-text"><form method="post" action="{% url 'close_page' %}">{% csrf_token %}<input type="hidden" name="page" value="{{ page.id }}"><button type="submit" class="btn btn-outline-danger">Close this page</button> <small>(This will hide it from players, even if they've entered answers.)</small></form></div>
+        {% else %}
+        {# more SomePageForm hacking #}
+        <div class="card-text"><form method="post" action="{% url 'open_page' %}">{% csrf_token %}<input type="hidden" name="page" value="{{ page.id }}"><button type="submit" class="btn btn-primary">Open this page 👉</button></form></div>
+        {% endif %}
+      </div>
+      </div>
+    {% empty %}
+    <p>No pages found.</p>
+    {% endfor %}
+  </div>
+  <div class="col-12 mb-2">
+    <h2>Teams</h2>
+    {% for team in hosting.team_set.all %}
+    <div><a href="{% url 'team_page' team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</div>
+    {% endfor %}
+  </div>
+  <div class="col-12 mb-2">
+    <h2>Utilities</h2>
+    <table class="table table-striped">
+    <tr>
+      <th>Player link</th><td><code>{{ player_join_url }}</code></td>
+    </tr>
+    <tr>
+      <th>Leaderboard</th><td><a href="{% url 'host_leaderboard' %}">Leaderboard</a></td>
+    </tr>
+    <tr>
+      <th>Host home</th><td><a href="{% url 'host_home' %}">Host home</a></td>
+    </tr>
+    </table>
+  </div>
+</div>
+{% endblock %}

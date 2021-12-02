@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block heading %}Welcome to trivia{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    {% if game %}
+      <p>You're playing <strong>{{ game.name }}</strong>.{% if team %} <a href="{% url 'play' %}">Go to the game 👉</a>.</p>
+      <p>Your team is <em>{{ team.name }}</em>.</p>
+      {% else %}
+      </p><p><a href="{% url 'create_team' %}">Create a team</a></p>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% if not game %}
+  <div class="col-12">
+    <p>You aren't connected to a game. You'll need its ID and code to join.</p>
+    <div>{% include 'join_form.html' %}</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

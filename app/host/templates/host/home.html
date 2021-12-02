@@ -1,0 +1,25 @@
+{% extends 'host_base.html' %}
+{% block heading %}Hosting trivia{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    {% if hosting %}
+      <p>
+        You're hosting <strong>{{ hosting.name }}</strong>.
+        {% if hosting.open %}
+        <a href="{% url 'pages' %}">Manage it here.</a>
+        {% else %}
+        It's currently <span class="text-danger">closed</span>. <a href="{% url 'pages' %}">Preview it here.</a>
+        {% endif %}
+      </p>
+      <p><form method="post" action="{% url 'toggle_game' %}">{% csrf_token %}<button type="submit" class="btn btn-{% if hosting.open %}outline-danger{% else %}primary{% endif %}">{% if hosting.open %}Close{% else %}Open{% endif %} the game</button></form></p>
+      <p>If a player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
+      <hr>
+    {% endif %}
+    <p>Host a different game?</p>
+    <div>
+    {% include 'host/host_form.html' %}
+    </div>
+  </div>
+</div>
+{% endblock %}

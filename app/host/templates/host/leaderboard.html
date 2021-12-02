@@ -1,0 +1,35 @@
+{% extends 'host_base.html' %}
+{% block heading %}Leaderboard for {{ game.name }}{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <td>team ⬇️ / round ➡️</td>
+        {% for round in rounds %}
+        <td>{{ round }}</td>
+        {% endfor %}
+      </tr>
+    </thead>
+    {% for line in leaderboard %}
+      <tr>
+        {% for entry in line %}
+        {% if forloop.first %}
+        <th scope="row">{% if entry in gold_medals %}🥇 {% endif %}{{ entry }}</th>
+        {% else %}
+        <td>{{ entry }}</td>
+        {% endif %}
+        {% endfor %}
+      </tr>
+    {% empty %}
+    <tr><td colspan="{{ rounds|length|add:1 }}"><em>No teams have joined.</em></td></tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+<div class="row">
+<hr>
+<a href="{% url 'pages' %}">🔙 Manage the game</a>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block heading %}Join a game{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    {% if game_name %}
+    <p>Join <strong>{{ game_name }}</strong>?</p>
+    {% else %}
+    <p>Join game</p>
+    {% endif %}
+    <div>{% include 'join_form.html' %}</div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block heading %}Reconnect team{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    {% if team_name %}
+    <p>Reconnect to <em>{{ team_name }}</em>?</p>
+    {% else %}
+    <p>Reconnect to team</p>
+    {% endif %}
+    <div>
+    <form action="{% url 'rejoin_team' %}" method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit" class="btn btn-primary">Reconnect to team</button>
+    </form>    
+    </div>
+  </div>
+</div>
+{% endblock %}

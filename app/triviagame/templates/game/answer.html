@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}🧠 Trivia - {{ game.name }}{% endblock %}
+{% block heading %}{{ game.name }}{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <p>Playing as <em>{{ team.name }}</em>.</p>
+  <h2>{{ page.order }}. {{ page.title }}</h2>
+  {% if page.description %}<p>{{ page.description|linebreaksbr }}</p>{% endif %}
+</div>
+<div class="row">
+  {% if page_score %}
+  <div class="col-12">
+    <div class="card text-white bg-secondary mb-3">
+      <div class="card-body">
+        <div class="card-text"><span class="align-middle">Score for page: </span><span class="fs-1 badge bg-success">{{ page_score }}</span></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if unanswered_questions > 0 %}<form action="{% url 'accept_answers' page.order %}" method="post" autocomplete="off">{% csrf_token %}{% endif %}
+  {% for question, response in questions %}
+  <div class="col-12">
+  <div class="card mb-3{% if not response %} border-primary{% endif %}">
+    <div class="card-header{% if not response %} bg-primary text-white{% endif %}">Question {{ question.order }}</div>
+    <div class="card-body">
+      <p class="card-text">{{ question.question }}</p>
+      {% if response %}
+      <p class="card-text">Your team answered: <strong>{{ response.value }}</strong>
+        {% if response.graded %}
+          {% if response.score %}
+            (✅ +{{ response.score }}: &ldquo;{{ response.question.answer }}&rdquo;)
+          {% else %}
+            (❌, correct answer was &ldquo;{{ response.question.answer }}&rdquo;)
+          {% endif %}
+        {% else %}
+        (<a href="{% url 'delete_answer' response.id %}" class="link-danger">delete and change answer?</a>)
+        {% endif %}</p>
+      {% else %}
+      <p class="card-text">
+        <label for="response_{{ question.id }}" class="form-label">Your answer: </label>
+        <input type="text" class="form-control" name="response_{{ question.id }}" id="response_{{ question.id }}">
+      </p>
+      {% endif %}
+    </div>
+  </div>
+  </div>
+  {% empty %}
+  <p>There aren't any questions here.</p>
+  {% endfor %}
+  {% if unanswered_questions > 0 %}
+  <button type="submit" class="btn btn-primary">Submit {{ page.title }} answers</button>
+  </form>
+  {% else %}
+  <p><a href="{% url 'play' %}" class="btn btn-primary">👈 Return to {{ game.name }}</a></p>
+  {% endif %}
+</div>
+{% endblock %}

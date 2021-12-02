@@ -1,0 +1,5 @@
+<form action="{% url 'join_game' %}" method="post" autocomplete="off">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary">Join game</button>
+</form>
