@@ -3,7 +3,8 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
-    <p>Creating a team for {{ game.name }}</p>
+    <p>Creating a team for {{ game.name }}.</p>
+    <p>Stuck for team name ideas? How about: <code>{{ sample_team_name }}</code></p>
     <div>
     <form action="{% url 'create_team' %}" method="post" autocomplete="off">
     {% csrf_token %}

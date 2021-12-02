@@ -1,3 +1,5 @@
+import random
+
 from django.db import IntegrityError
 from django.db.models import Sum
 from django.forms import ValidationError, HiddenInput
@@ -116,6 +118,7 @@ def create_team(request):
     return render(request, 'create_team.html', {
         'game': game,
         'form': form,
+        'sample_team_name': random.choice(CreateTeamForm.TEAM_NAME_IDEAS),
     })
 
 
