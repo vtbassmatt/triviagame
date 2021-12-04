@@ -8,7 +8,9 @@ Tested with Python 3.9 on macOS and Ubuntu 20.04.
 
 ```
 pip install -r requirements.txt
+cp data/.env.example data/.env
 cd app
+./manage.py migrate
 ./manage.py createsuperuser
 ./manage.py runserver
 ```
