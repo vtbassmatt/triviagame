@@ -1,8 +1,6 @@
-import random
-
 from django import forms
 
-from .widgets import Bs5TextInput, Bs5NumberInput, Bs5Textarea, Bs5RadioSelect
+from .widgets import Bs5TextInput, Bs5NumberInput, Bs5Textarea
 
 
 class JoinGameForm(forms.Form):
