@@ -31,6 +31,12 @@ class Team(models.Model):
 
     class Meta:
         ordering = ['game', 'name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['game', 'name'],
+                name='ensure_unique_team_names',
+            ),
+        ]
 
 
 class Page(models.Model):

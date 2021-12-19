@@ -1,6 +1,6 @@
 import random
 
-from django.db import IntegrityError
+from django.db import Error as DjangoDbError
 from django.db.models import Sum
 from django.forms import ValidationError, HiddenInput
 from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
@@ -100,18 +100,22 @@ def create_team(request):
     game = models.Game.objects.get(pk=request.session['game'])
 
     if request.method == 'POST':
-        form = CreateTeamForm(request.POST)
+        partial_team = models.Team(game=game, passcode=get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789'))
+        form = CreateTeamForm(request.POST, instance=partial_team)
         if form.is_valid():
-            recovery_code = get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
-            team = models.Team(
-                game=game,
-                name=form.cleaned_data['name'],
-                members=form.cleaned_data['members'],
-                passcode=recovery_code,
-            )
-            team.save()
-            request.session['team'] = team.id
-            return HttpResponseRedirect(reverse('play'))
+            try:
+                # because the CreateTeamForm doesn't include every field, `team`
+                # gets excluded from validation checks - we must explicitly
+                # validate uniques on the instance and only exclude the id
+                form.instance.validate_unique(exclude=['id',])
+                team = form.save()
+                request.session['team'] = team.id
+                return HttpResponseRedirect(reverse('play'))
+            except ValidationError as e:
+                form.add_error(None, e)
+            except DjangoDbError as e:
+                form.add_error('', ValidationError(e, code='database'))
+
     else:
         form = CreateTeamForm()
 

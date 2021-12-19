@@ -1,8 +1,7 @@
-import random
-
 from django import forms
 
-from .widgets import Bs5TextInput, Bs5NumberInput, Bs5Textarea, Bs5RadioSelect
+from .models import Team
+from .widgets import Bs5TextInput, Bs5NumberInput, Bs5Textarea
 
 
 class JoinGameForm(forms.Form):
@@ -10,7 +9,7 @@ class JoinGameForm(forms.Form):
     code = forms.CharField(label="Code", max_length=20, widget=Bs5TextInput)
 
 
-class CreateTeamForm(forms.Form):
+class CreateTeamForm(forms.ModelForm):
     TEAM_NAME_IDEAS = (
         "Win, Booze, or Draw",
         "Red Hot Trivia Peppers",
@@ -23,12 +22,17 @@ class CreateTeamForm(forms.Form):
         "Dame Agatha Quiztie",
     )
 
-    name = forms.CharField(
-        label='Team name',
-        max_length=200,
-        widget=Bs5TextInput,
-    )
-    members = forms.CharField(label='Team members', widget=Bs5Textarea)
+    class Meta:
+        model = Team
+        fields = ('name', 'members')
+        widgets = {
+            'name': Bs5TextInput,
+            'members': Bs5Textarea,
+        }
+        labels = {
+            'name': 'Team name',
+            'members': 'Team members',
+        }
 
 
 class ReJoinTeamForm(forms.Form):
