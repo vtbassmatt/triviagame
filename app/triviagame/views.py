@@ -1,6 +1,6 @@
 import random
 
-from django.db import Error as DjangoDbError
+from django.db import Error as DjangoDbError, IntegrityError
 from django.db.models import Sum
 from django.forms import ValidationError, HiddenInput
 from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
