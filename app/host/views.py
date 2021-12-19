@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.forms import ValidationError
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
@@ -24,6 +25,7 @@ def host_home(request):
         'hosting': hosting,
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
         'form': HostGameForm(),
+        'commit': settings.DEPLOYED_COMMIT,
     })
 
 
