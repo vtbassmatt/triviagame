@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from . import views
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('pages/close/', views.toggle_page, { 'open': False }, name='close_page'),
     path('leaderboard/', views.host_leaderboard, name='host_leaderboard'),
     path('team/<int:team_id>', views.team_page, name='team_page'),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
