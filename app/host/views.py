@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
@@ -9,8 +10,10 @@ from triviagame.models import Game, Page, Response, Team
 from triviagame.forms import CsrfDummyForm
 from triviagame.views import compute_leaderboard_data
 from .forms import HostGameForm, SomePageForm
+from .models import GameHostPermissions
 
 
+@login_required
 def host_home(request):
     hosting = None
 
@@ -20,11 +23,16 @@ def host_home(request):
             hosting = Game.objects.get(pk=hosting_cookie)
         except Game.DoesNotExist:
             pass
+    
+    available = GameHostPermissions.objects.filter(
+        user=request.user,
+        can_host=True,
+    )
 
     return render(request, 'host/home.html', {
         'hosting': hosting,
+        'available': [a.game for a in available],
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
-        'form': HostGameForm(),
         'commit': settings.DEPLOYED_COMMIT,
     })
 
