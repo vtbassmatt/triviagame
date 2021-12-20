@@ -37,6 +37,7 @@ def host_home(request):
     })
 
 
+@login_required
 def host_join(request, id=0, code=None):
     if request.method == 'POST':
         form = HostGameForm(request.POST)
@@ -62,6 +63,7 @@ def host_join(request, id=0, code=None):
     })
 
 
+@login_required
 def toggle_game(request):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -79,6 +81,7 @@ def toggle_game(request):
     return HttpResponseRedirect(reverse('host_home'))
 
 
+@login_required
 def pages(request):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -93,6 +96,7 @@ def pages(request):
     })
 
 
+@login_required
 def toggle_page(request, open):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -107,6 +111,7 @@ def toggle_page(request, open):
     return HttpResponseRedirect(reverse('pages'))
 
 
+@login_required
 def score_page(request, page_id):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -147,6 +152,7 @@ def _record_scores(post_data):
     Response.objects.bulk_update(responses, fields=['graded', 'score'])
 
 
+@login_required
 def host_leaderboard(request):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -163,6 +169,7 @@ def host_leaderboard(request):
     })
 
 
+@login_required
 def team_page(request, team_id):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
