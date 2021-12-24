@@ -13,7 +13,7 @@ class GameAdmin(admin.ModelAdmin):
     )
     def view_on_site(self, obj):
         # HACK: layer violation, as this URL is defined in `host`
-        url = reverse('host_join', args=(obj.id, obj.hostkey))
+        url = reverse('host_join', args=(obj.id,))
         return url
 
 

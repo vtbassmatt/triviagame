@@ -9,7 +9,7 @@ from django.urls import reverse
 from triviagame.models import Game, Page, Response, Team
 from triviagame.forms import CsrfDummyForm
 from triviagame.views import compute_leaderboard_data
-from .forms import HostGameForm, SomePageForm
+from .forms import SomePageForm
 from .models import GameHostPermissions
 
 
@@ -38,28 +38,22 @@ def host_home(request):
 
 
 @login_required
-def host_join(request, id=0, code=None):
+def host_join(request, id):
+    try:
+        permission = GameHostPermissions.objects.get(
+            user=request.user,
+            game__id=id,
+            can_host=True,
+        )
+    except GameHostPermissions.DoesNotExist:
+        return HttpResponseRedirect(reverse('host_home'))
+
     if request.method == 'POST':
-        form = HostGameForm(request.POST)
-        if form.is_valid():
-            _id = form.cleaned_data['id']
-            _code = form.cleaned_data['code']
-            try:
-                desired_game = Game.objects.get(pk=_id, hostkey=_code)
-                request.session['hosting'] = desired_game.id
-                return HttpResponseRedirect(reverse('host_home'))
-            except Game.DoesNotExist:
-                form.add_error(None, ValidationError('Could not find that game', code='notfound'))
-    else:
-        initial = {}
-        if id > 0:
-            initial['id'] = id
-        if code:
-            initial['code'] = code
-        form = HostGameForm(initial=initial)
+        request.session['hosting'] = permission.game.id
+        return HttpResponseRedirect(reverse('pages'))
 
     return render(request, 'host/host.html', {
-        'form': form,
+        'game': permission.game,
     })
 
 

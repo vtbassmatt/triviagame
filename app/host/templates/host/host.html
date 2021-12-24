@@ -3,8 +3,11 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
-    <p>Host a game?</p>
-    <div>{% include 'host/host_form.html' %}</div>
+    <p>Host <code>{{ game.name }}</code>?</p>
+    <div><form action="{% url 'host_join' game.id %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Host game</button>
+  </form></div>
   </div>
 </div>
 {% endblock %}
