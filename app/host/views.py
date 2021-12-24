@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
@@ -8,9 +9,11 @@ from django.urls import reverse
 from triviagame.models import Game, Page, Response, Team
 from triviagame.forms import CsrfDummyForm
 from triviagame.views import compute_leaderboard_data
-from .forms import HostGameForm, SomePageForm
+from .forms import SomePageForm
+from .models import GameHostPermissions
 
 
+@login_required
 def host_home(request):
     hosting = None
 
@@ -20,40 +23,41 @@ def host_home(request):
             hosting = Game.objects.get(pk=hosting_cookie)
         except Game.DoesNotExist:
             pass
+    
+    available = GameHostPermissions.objects.filter(
+        user=request.user,
+        can_host=True,
+    )
 
     return render(request, 'host/home.html', {
         'hosting': hosting,
+        'available': [a.game for a in available],
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
-        'form': HostGameForm(),
         'commit': settings.DEPLOYED_COMMIT,
     })
 
 
-def host_join(request, id=0, code=None):
+@login_required
+def host_join(request, id):
+    try:
+        permission = GameHostPermissions.objects.get(
+            user=request.user,
+            game__id=id,
+            can_host=True,
+        )
+    except GameHostPermissions.DoesNotExist:
+        return HttpResponseRedirect(reverse('host_home'))
+
     if request.method == 'POST':
-        form = HostGameForm(request.POST)
-        if form.is_valid():
-            _id = form.cleaned_data['id']
-            _code = form.cleaned_data['code']
-            try:
-                desired_game = Game.objects.get(pk=_id, hostkey=_code)
-                request.session['hosting'] = desired_game.id
-                return HttpResponseRedirect(reverse('host_home'))
-            except Game.DoesNotExist:
-                form.add_error(None, ValidationError('Could not find that game', code='notfound'))
-    else:
-        initial = {}
-        if id > 0:
-            initial['id'] = id
-        if code:
-            initial['code'] = code
-        form = HostGameForm(initial=initial)
+        request.session['hosting'] = permission.game.id
+        return HttpResponseRedirect(reverse('pages'))
 
     return render(request, 'host/host.html', {
-        'form': form,
+        'game': permission.game,
     })
 
 
+@login_required
 def toggle_game(request):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -71,6 +75,7 @@ def toggle_game(request):
     return HttpResponseRedirect(reverse('host_home'))
 
 
+@login_required
 def pages(request):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -85,6 +90,7 @@ def pages(request):
     })
 
 
+@login_required
 def toggle_page(request, open):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -99,6 +105,7 @@ def toggle_page(request, open):
     return HttpResponseRedirect(reverse('pages'))
 
 
+@login_required
 def score_page(request, page_id):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -139,6 +146,7 @@ def _record_scores(post_data):
     Response.objects.bulk_update(responses, fields=['graded', 'score'])
 
 
+@login_required
 def host_leaderboard(request):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))
@@ -155,6 +163,7 @@ def host_leaderboard(request):
     })
 
 
+@login_required
 def team_page(request, team_id):
     if 'hosting' not in request.session:
         return HttpResponseRedirect(reverse('host_home'))

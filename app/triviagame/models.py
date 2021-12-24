@@ -6,14 +6,9 @@ def generate_passcode():
     return get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
 
 
-def generate_hostkey():
-    return get_random_string(20, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
-
-
 class Game(models.Model):
     name = models.CharField(max_length=60)
     passcode = models.CharField(max_length=20, default=generate_passcode)
-    hostkey = models.CharField(max_length=40, default=generate_hostkey)
     open = models.BooleanField(default=False)
 
     def __str__(self):

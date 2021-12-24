@@ -2,7 +2,13 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.utils.crypto import get_random_string
 import triviagame.models
+
+
+# formerly in models.py
+def generate_hostkey():
+    return get_random_string(20, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
 
 
 class Migration(migrations.Migration):
@@ -19,7 +25,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=60)),
                 ('passcode', models.CharField(default=triviagame.models.generate_passcode, max_length=20)),
-                ('hostkey', models.CharField(default=triviagame.models.generate_hostkey, max_length=40)),
+                ('hostkey', models.CharField(default=generate_hostkey, max_length=40)),
                 ('open', models.BooleanField(default=False)),
             ],
         ),
