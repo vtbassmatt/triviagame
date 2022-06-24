@@ -1,6 +1,6 @@
 from django import forms
-from triviagame.models import Game
-from triviagame.widgets import Bs5TextInput
+from triviagame.models import Game, Page
+from triviagame.widgets import Bs5TextInput, Bs5Textarea
 
 
 
@@ -19,4 +19,21 @@ class GameForm(forms.ModelForm):
         }
         labels = {
             'name': 'Game name',
+        }
+
+
+class PageForm(forms.ModelForm):
+    class Meta:
+        model = Page
+        fields = [
+            'title',
+            'description',
+        ]
+        widgets = {
+            'title': Bs5TextInput,
+            'description': Bs5Textarea,
+        }
+        labels = {
+            'title': 'Page title',
+            'description': 'Long description',
         }

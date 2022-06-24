@@ -1,0 +1,33 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}Editing page <q>{{ page.title }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Page metadata</div>
+      <div class="card-body">
+        <p class="card-text">From game <q><a href="{% url 'edit_game' page.game.id %}">{{ page.game.name }}</a></q></p>
+        <form method="post" autocomplete="off">
+          <p class="card-text">
+            {% csrf_token %}
+            {{ page_form }}
+          </p>
+          <button type="submit" class="btn btn-outline-primary">Update page</button>
+        </form>    
+      </div>
+    </div>
+
+    {% for question in page.question_set.all %}
+    <div class="card mb-3">
+      <div class="card-header">{{ question.order }}.</div>
+      <div class="card-body">
+        <p class="card-text">{{ question.question }}</p>
+        <p class="card-text">{{ question.answer }}</p>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

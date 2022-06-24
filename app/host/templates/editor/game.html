@@ -20,9 +20,11 @@
     <div class="card mb-3">
       <div class="card-header">Pages</div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">An item</li>
-        <li class="list-group-item">A second item</li>
-        <li class="list-group-item">A third item</li>
+        {% for page in game.page_set.all %}
+        <li class="list-group-item">{{ page.order }}. <a href="{% url 'edit_page' page.id %}">{{ page.title }}</a></li>
+        {% empty %}
+        <li class="list-group-item text-secondary">No pages yet</li>
+        {% endfor %}
       </ul>
     </div>
   </div>
