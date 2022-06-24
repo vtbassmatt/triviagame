@@ -16,11 +16,12 @@
       <p>If a player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
       <hr>
     {% endif %}
-    <h2>Available games</h2>
+    <h2>Games</h2>
+    <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary">Create a new game</a></p>
     {% for game in available %}
       <p><a href="{% url 'host_join' game.id %}">{{ game }}</a></p>
     {% empty %}
-      <p><em>No games available for you to host.</em></p>
+      <p><em>No existing games available for you to host.</em></p>
     {% endfor %}
     <hr>
     <div><p>Running from commit <code>{{ commit }}</code></p></div>

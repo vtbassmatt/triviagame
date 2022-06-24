@@ -1,0 +1,30 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}Editing <q>{{ game.name }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Game metadata</div>
+      <div class="card-body">
+        <form method="post" autocomplete="off">
+          <p class="card-text">
+            {% csrf_token %}
+            {{ game_form }}
+          </p>
+          <button type="submit" class="btn btn-outline-primary">Update game</button>
+        </form>    
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">Pages</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">An item</li>
+        <li class="list-group-item">A second item</li>
+        <li class="list-group-item">A third item</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

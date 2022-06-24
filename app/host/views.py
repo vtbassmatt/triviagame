@@ -1,15 +1,16 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.forms import ValidationError
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 
 from triviagame.models import Game, Page, Response, Team
 from triviagame.forms import CsrfDummyForm
 from triviagame.views import compute_leaderboard_data
-from .forms import SomePageForm
+from .forms import SomePageForm, GameForm
 from .models import GameHostPermissions
 
 
@@ -176,4 +177,50 @@ def team_page(request, team_id):
         'team': team,
         'rejoin_link': request.build_absolute_uri(
             reverse('rejoin_team', args=(team.id,team.passcode))),
+    })
+
+
+# Editor views
+# TODO: check edit permission
+
+@login_required
+def new_game(request):
+    if request.method == 'POST':
+        form = GameForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                game = form.save()
+                perms = GameHostPermissions(
+                    game=game,
+                    user=request.user,
+                    can_view=True,
+                    can_host=True,
+                    can_edit=True,
+                )
+                perms.save()
+            return HttpResponseRedirect(reverse('edit_game', args=(game.id,)))
+    
+    else:
+        form = GameForm()
+
+    return render(request, 'editor/new.html', {
+        'form': form,
+    })
+
+
+@login_required
+def edit_game(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.method == 'POST':
+        game_form = GameForm(request.POST, instance=game)
+        if game_form.is_valid():
+            updated_game = game_form.save()
+            return HttpResponseRedirect(reverse('edit_game', args=(updated_game.id,)))
+    else:
+        game_form = GameForm(instance=game)
+
+    return render(request, 'editor/home.html', {
+        'game': game,
+        'game_form': game_form,
     })
