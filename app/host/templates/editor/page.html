@@ -1,0 +1,38 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}Editing page <q>{{ page.title }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Page metadata</div>
+      <div class="card-body">
+        <p class="card-text">From game <q><a href="{% url 'edit_game' page.game.id %}">{{ page.game.name }}</a></q></p>
+        <form method="post" autocomplete="off">
+          <p class="card-text">
+            {% csrf_token %}
+            {{ page_form }}
+          </p>
+          <button type="submit" class="btn btn-outline-primary">Update page</button>
+        </form>    
+      </div>
+    </div>
+
+    {% for question in page.question_set.all %}
+    <div class="card mb-3">
+      <div class="card-header">{{ question.order }}. {{ question.question|linebreaksbr }}</div>
+      <div class="card-body">
+        <p class="card-text">{{ question.answer|linebreaksbr }}</p>
+        <a href="{% url 'edit_question' question.id %}" class="btn btn-outline-primary">Edit</a>
+        <form style="display: inline" method="post" action="{% url 'question_up' question.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</button></form>
+        <form style="display: inline" method="post" action="{% url 'question_down' question.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</button></form>
+        <a href="{% url 'delete_question' question.id %}" class="btn btn-outline-danger">Delete</a>
+      </div>
+    </div>
+    {% endfor %}
+
+    <p><a href="{% url 'new_question' page.id %}" class="btn btn-primary">Add new question</a></p>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}Editing game <q>{{ game.name }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Game metadata</div>
+      <div class="card-body">
+        {% if game.open %}
+        <p class="card-text">Name: {{ game.name }}</p>
+        <p class="card-text"><em>Can't edit an open game.</em> You must <a href="{% url 'host_join' game.id %}">host it and close it first</a>.</p>
+        {% else %}
+        <form method="post" autocomplete="off">
+          <p class="card-text">
+            {% csrf_token %}
+            {{ game_form }}
+          </p>
+          <button type="submit" class="btn btn-outline-primary">Update game</button>
+        </form>    
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">Pages</div>
+      <ul class="list-group list-group-flush">
+        {% for page in game.page_set.all %}
+        <li class="list-group-item">
+          {{ page.order }}. <a href="{% url 'edit_page' page.id %}">{{ page.title }}</a>
+          <form style="display: inline" method="post" action="{% url 'page_up' page.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</button></form>
+          <form style="display: inline" method="post" action="{% url 'page_down' page.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</button></form>  
+          <a href="{% url 'delete_page' page.id %}" class="btn btn-outline-danger">Delete</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-secondary">No pages yet</li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer">
+        <a href="{% url 'new_page' game.id %}" class="btn btn-outline-primary">Add new page</a>
+      </div>
+    </div>
+
+    <a href="{% url 'host_home' %}">Return to host interface</a>
+  </div>
+</div>
+{% endblock %}

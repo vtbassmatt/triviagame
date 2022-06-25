@@ -1,0 +1,22 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}Editing question <q>{{ question.question }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Question editor</div>
+      <div class="card-body">
+        <p class="card-text">From page <q><a href="{% url 'edit_page' question.page.id %}">{{ question.page.title }}</a></q> in game <q><a href="{% url 'edit_game' question.page.game.id %}">{{ question.page.game.name }}</a></q></p>
+        <form method="post" autocomplete="off">
+          <p class="card-text">
+            {% csrf_token %}
+            {{ question_form }}
+          </p>
+          <button type="submit" class="btn btn-outline-primary">Update question</button>
+        </form>    
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}New page for <q>{{ game.name }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit" class="btn btn-outline-primary">Create page</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
