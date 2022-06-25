@@ -1,0 +1,21 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Trivia editor{% endblock %}
+{% block heading %}Really delete question <q>{{ question.question }}</q>?{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header bg-danger text-white">Deleting question {{ question.order }} from page <q><a href="{% url 'edit_page' question.page.id %}" class="link-light">{{ question.page.title }}</a></q> in game <q><a href="{% url 'edit_game' question.page.game.id %}" class="link-light">{{ question.page.game.name }}</a></q></div>
+      <div class="card-body">
+          <h5 class="card-title">Question: {{ question.question|linebreaksbr }}</h5>
+          <p class="card-text">Answer: {{ question.answer|linebreaksbr }}</p>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger">Yes, delete the question</button>
+            <a href="{% url 'edit_page' question.page.id %}" class="btn btn-outline-secondary">Nope, changed my mind</a>
+        </form>    
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

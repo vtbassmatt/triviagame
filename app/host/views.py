@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.forms import ValidationError
+from django.db.models import F
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -274,6 +274,53 @@ def edit_page(request, page_id):
 
 
 @login_required
+def delete_page(request, page_id):
+    page = get_object_or_404(Page, pk=page_id)
+
+    if request.method in ('POST', 'DELETE'):
+        game = page.game
+        order = page.order
+        with transaction.atomic():
+            page.question_set.all().delete()
+            page.delete()
+            game.page_set.filter(order__gt=order).update(order=F('order') - 1)
+        return HttpResponseRedirect(reverse('edit_game', args=(game.id,)))
+
+    return render(request, 'editor/delete_page.html', {
+        'page': page,
+    })
+
+
+@login_required
+def new_question(request, page_id):
+    page = get_object_or_404(Page, pk=page_id)
+
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            # connect question to page
+            question.page = page
+            # find largest question and make this one more
+            max_question = page.question_set.last()
+            if max_question:
+                new_question_order = max_question.order + 1
+            else:
+                new_question_order = 1
+            question.order = new_question_order
+            question.save()
+            return HttpResponseRedirect(reverse('edit_page', args=(page.id,)))
+    
+    else:
+        form = QuestionForm()
+
+    return render(request, 'editor/new_question.html', {
+        'page': page,
+        'form': form,
+    })
+
+
+@login_required
 def edit_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
 
@@ -288,4 +335,21 @@ def edit_question(request, question_id):
     return render(request, 'editor/question.html', {
         'question': question,
         'question_form': question_form,
+    })
+
+
+@login_required
+def delete_question(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+
+    if request.method in ('POST', 'DELETE'):
+        page = question.page
+        order = question.order
+        with transaction.atomic():
+            question.delete()
+            page.question_set.filter(order__gt=order).update(order=F('order') - 1)
+        return HttpResponseRedirect(reverse('edit_page', args=(page.id,)))
+
+    return render(request, 'editor/delete_question.html', {
+        'question': question,
     })
