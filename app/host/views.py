@@ -293,6 +293,37 @@ def delete_page(request, page_id):
 
 
 @login_required
+@require_POST
+def page_move(request, page_id, delta):
+    # this assertion comes from urls.py
+    assert delta == 1 or delta == -1
+
+    page = get_object_or_404(Page, pk=page_id)
+    max_page = page.game.page_set.last()
+    if delta == 1 and page.id == max_page.id:
+        raise IndexError
+    if delta == -1 and page.order == 1:
+        raise IndexError
+
+    try:
+        other_page = Page.objects.get(game=page.game, order=page.order + delta)
+        with transaction.atomic():
+            desired_order = page.order + delta
+            placeholder_order = max_page.order + 1
+            page.order = placeholder_order
+            page.save()
+            other_page.order = F('order') - delta
+            other_page.save()
+            page.order = desired_order
+            page.save()
+    except Page.DoesNotExist:
+        page.order = F('order') + delta
+        page.save()
+    
+    return HttpResponseRedirect(reverse('edit_game', args=(page.game.id,)))
+
+
+@login_required
 def new_question(request, page_id):
     page = get_object_or_404(Page, pk=page_id)
 
