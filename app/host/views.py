@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -50,9 +50,9 @@ def host_home(request):
 def host_join(request, id):
     try:
         permission = GameHostPermissions.objects.get(
-            user=request.user,
-            game__id=id,
-            can_host=True,
+            Q(user=request.user),
+            Q(game__id=id),
+            Q(can_host=True) | Q(can_edit=True),
         )
     except GameHostPermissions.DoesNotExist:
         return HttpResponseRedirect(reverse('host_home'))
