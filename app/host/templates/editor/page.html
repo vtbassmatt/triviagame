@@ -24,8 +24,8 @@
       <div class="card-body">
         <p class="card-text">{{ question.answer|linebreaksbr }}</p>
         <a href="{% url 'edit_question' question.id %}" class="btn btn-outline-primary">Edit</a>
-        <a href="#" class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</a>
-        <a href="#" class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</a>
+        <form style="display: inline" method="post" action="{% url 'question_up' question.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</button></form>
+        <form style="display: inline" method="post" action="{% url 'question_down' question.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</button></form>
         <a href="{% url 'delete_question' question.id %}" class="btn btn-outline-danger">Delete</a>
       </div>
     </div>

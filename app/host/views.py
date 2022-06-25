@@ -5,6 +5,7 @@ from django.db.models import F
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 
 from triviagame.models import Game, Page, Response, Team, Question
@@ -353,3 +354,27 @@ def delete_question(request, question_id):
     return render(request, 'editor/delete_question.html', {
         'question': question,
     })
+
+
+@login_required
+@require_POST
+def question_move(request, question_id, delta):
+    question = get_object_or_404(Question, pk=question_id)
+
+    try:
+        other_question = Question.objects.get(page=question.page, order=question.order + delta)
+        with transaction.atomic():
+            desired_order = question.order + delta
+            max_question = question.page.question_set.last()
+            placeholder_order = max_question.order + 1
+            question.order = placeholder_order
+            question.save()
+            other_question.order = F('order') - delta
+            other_question.save()
+            question.order = desired_order
+            question.save()
+    except Question.DoesNotExist:
+        question.order = F('order') + delta
+        question.save()
+    
+    return HttpResponseRedirect(reverse('edit_page', args=(question.page.id,)))

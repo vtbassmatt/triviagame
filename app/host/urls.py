@@ -19,6 +19,8 @@ urlpatterns = [
     path('editor/page/new/<int:game_id>/', views.new_page, name='new_page'),
     path('editor/page/<int:page_id>/delete/', views.delete_page, name='delete_page'),
     path('editor/question/<int:question_id>/', views.edit_question, name='edit_question'),
+    path('editor/question/<int:question_id>/up/', views.question_move, { 'delta': -1 }, name='question_up'),
+    path('editor/question/<int:question_id>/down/', views.question_move, { 'delta': 1 }, name='question_down'),
     path('editor/question/new/<int:page_id>/', views.new_question, name='new_question'),
     path('editor/question/<int:question_id>/delete/', views.delete_question, name='delete_question'),
     path('accounts/', include('django.contrib.auth.urls')),
