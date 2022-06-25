@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import F
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -26,14 +26,21 @@ def host_home(request):
         except Game.DoesNotExist:
             pass
     
-    available = GameHostPermissions.objects.filter(
+    editable = GameHostPermissions.objects.filter(
+        user=request.user,
+        can_edit=True,
+    )
+
+    hostable = GameHostPermissions.objects.filter(
         user=request.user,
         can_host=True,
+        can_edit=False,
     )
 
     return render(request, 'host/home.html', {
         'hosting': hosting,
-        'available': [a.game for a in available],
+        'hostable': [h.game for h in hostable],
+        'editable': [e.game for e in editable],
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
         'commit': settings.DEPLOYED_COMMIT,
     })
@@ -182,7 +189,6 @@ def team_page(request, team_id):
 
 
 # Editor views
-# TODO: check edit permission
 
 @login_required
 def new_game(request):
@@ -212,6 +218,8 @@ def new_game(request):
 @login_required
 def edit_game(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
+    if not _can_edit_game(request.user, game):
+        return HttpResponseForbidden()
 
     if request.method == 'POST':
         game_form = GameForm(request.POST, instance=game)
@@ -230,6 +238,8 @@ def edit_game(request, game_id):
 @login_required
 def new_page(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
+    if not _can_edit_game(request.user, game):
+        return HttpResponseForbidden()
 
     if request.method == 'POST':
         form = PageForm(request.POST)
@@ -259,6 +269,8 @@ def new_page(request, game_id):
 @login_required
 def edit_page(request, page_id):
     page = get_object_or_404(Page, pk=page_id)
+    if not _can_edit_game(request.user, page.game):
+        return HttpResponseForbidden()
 
     if request.method == 'POST':
         page_form = PageForm(request.POST, instance=page)
@@ -277,6 +289,8 @@ def edit_page(request, page_id):
 @login_required
 def delete_page(request, page_id):
     page = get_object_or_404(Page, pk=page_id)
+    if not _can_edit_game(request.user, page.game):
+        return HttpResponseForbidden()
 
     if request.method in ('POST', 'DELETE'):
         game = page.game
@@ -299,6 +313,9 @@ def page_move(request, page_id, delta):
     assert delta == 1 or delta == -1
 
     page = get_object_or_404(Page, pk=page_id)
+    if not _can_edit_game(request.user, page.game):
+        return HttpResponseForbidden()
+
     max_page = page.game.page_set.last()
     if delta == 1 and page.id == max_page.id:
         raise IndexError
@@ -326,6 +343,8 @@ def page_move(request, page_id, delta):
 @login_required
 def new_question(request, page_id):
     page = get_object_or_404(Page, pk=page_id)
+    if not _can_edit_game(request.user, page.game):
+        return HttpResponseForbidden()
 
     if request.method == 'POST':
         form = QuestionForm(request.POST)
@@ -355,6 +374,8 @@ def new_question(request, page_id):
 @login_required
 def edit_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+    if not _can_edit_game(request.user, question.page.game):
+        return HttpResponseForbidden()
 
     if request.method == 'POST':
         question_form = QuestionForm(request.POST, instance=question)
@@ -373,6 +394,8 @@ def edit_question(request, question_id):
 @login_required
 def delete_question(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+    if not _can_edit_game(request.user, question.page.game):
+        return HttpResponseForbidden()
 
     if request.method in ('POST', 'DELETE'):
         page = question.page
@@ -394,6 +417,9 @@ def question_move(request, question_id, delta):
     assert delta == 1 or delta == -1
 
     question = get_object_or_404(Question, pk=question_id)
+    if not _can_edit_game(request.user, question.page.game):
+        return HttpResponseForbidden()
+
     max_question = question.page.question_set.last()
     if delta == 1 and question.id == max_question.id:
         raise IndexError
@@ -416,3 +442,11 @@ def question_move(request, question_id, delta):
         question.save()
     
     return HttpResponseRedirect(reverse('edit_page', args=(question.page.id,)))
+
+
+def _can_edit_game(user, game):
+    return GameHostPermissions.objects.filter(
+        game=game,
+        user=user,
+        can_edit=True,
+    ).count() > 0

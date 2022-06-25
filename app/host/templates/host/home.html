@@ -18,10 +18,11 @@
     {% endif %}
     <h2>Games</h2>
     <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary">Create a new game</a></p>
-    {% for game in available %}
+    {% for game in editable %}
       <p><a href="{% url 'host_join' game.id %}">{{ game }}</a> (<a href="{% url 'edit_game' game.id %}">edit</a>)</p>
-    {% empty %}
-      <p><em>No existing games available for you to host.</em></p>
+    {% endfor %}
+    {% for game in hostable %}
+      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a> <span class="text-secondary">(not editable)</span></p>
     {% endfor %}
     <hr>
     <div><p>Running from commit <code>{{ commit }}</code></p></div>
