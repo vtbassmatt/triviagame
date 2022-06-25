@@ -7,10 +7,10 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 
-from triviagame.models import Game, Page, Response, Team
+from triviagame.models import Game, Page, Response, Team, Question
 from triviagame.forms import CsrfDummyForm
 from triviagame.views import compute_leaderboard_data
-from .forms import SomePageForm, GameForm, PageForm
+from .forms import SomePageForm, GameForm, PageForm, QuestionForm
 from .models import GameHostPermissions
 
 
@@ -241,4 +241,22 @@ def edit_page(request, page_id):
     return render(request, 'editor/page.html', {
         'page': page,
         'page_form': page_form,
+    })
+
+
+@login_required
+def edit_question(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+
+    if request.method == 'POST':
+        question_form = QuestionForm(request.POST, instance=question)
+        if question_form.is_valid():
+            updated_question = question_form.save()
+            return HttpResponseRedirect(reverse('edit_page', args=(updated_question.page.id,)))
+    else:
+        question_form = QuestionForm(instance=question)
+
+    return render(request, 'editor/question.html', {
+        'question': question,
+        'question_form': question_form,
     })

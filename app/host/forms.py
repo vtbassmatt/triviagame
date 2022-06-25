@@ -1,5 +1,5 @@
 from django import forms
-from triviagame.models import Game, Page
+from triviagame.models import Game, Page, Question
 from triviagame.widgets import Bs5TextInput, Bs5Textarea
 
 
@@ -36,4 +36,17 @@ class PageForm(forms.ModelForm):
         labels = {
             'title': 'Page title',
             'description': 'Long description',
+        }
+
+
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = [
+            'question',
+            'answer',
+        ]
+        widgets = {
+            'question': Bs5Textarea,
+            'answer': Bs5Textarea,
         }
