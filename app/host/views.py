@@ -359,13 +359,20 @@ def delete_question(request, question_id):
 @login_required
 @require_POST
 def question_move(request, question_id, delta):
+    # this assertion comes from urls.py
+    assert delta == 1 or delta == -1
+
     question = get_object_or_404(Question, pk=question_id)
+    max_question = question.page.question_set.last()
+    if delta == 1 and question.id == max_question.id:
+        raise IndexError
+    if delta == -1 and question.order == 1:
+        raise IndexError
 
     try:
         other_question = Question.objects.get(page=question.page, order=question.order + delta)
         with transaction.atomic():
             desired_order = question.order + delta
-            max_question = question.page.question_set.last()
             placeholder_order = max_question.order + 1
             question.order = placeholder_order
             question.save()
