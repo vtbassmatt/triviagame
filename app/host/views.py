@@ -227,6 +227,35 @@ def edit_game(request, game_id):
 
 
 @login_required
+def new_page(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+        if form.is_valid():
+            page = form.save(commit=False)
+            # connect page to game
+            page.game = game
+            # find largest page and make this one more
+            max_page = game.page_set.last()
+            if max_page:
+                new_page_order = max_page.order + 1
+            else:
+                new_page_order = 1
+            page.order = new_page_order
+            page.save()
+            return HttpResponseRedirect(reverse('edit_page', args=(page.id,)))
+    
+    else:
+        form = PageForm()
+
+    return render(request, 'editor/new_page.html', {
+        'game': game,
+        'form': form,
+    })
+
+
+@login_required
 def edit_page(request, page_id):
     page = get_object_or_404(Page, pk=page_id)
 
