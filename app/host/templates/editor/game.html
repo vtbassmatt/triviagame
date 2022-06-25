@@ -7,6 +7,10 @@
     <div class="card mb-3">
       <div class="card-header bg-primary text-white">Game metadata</div>
       <div class="card-body">
+        {% if game.open %}
+        <p class="card-text">Name: {{ game.name }}</p>
+        <p class="card-text"><em>Can't edit an open game.</em> You must <a href="{% url 'host_join' game.id %}">host it and close it first</a>.</p>
+        {% else %}
         <form method="post" autocomplete="off">
           <p class="card-text">
             {% csrf_token %}
@@ -14,6 +18,7 @@
           </p>
           <button type="submit" class="btn btn-outline-primary">Update game</button>
         </form>    
+        {% endif %}
       </div>
     </div>
 

@@ -19,10 +19,10 @@
     <h2>Games</h2>
     <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary">Create a new game</a></p>
     {% for game in editable %}
-      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a> (<a href="{% url 'edit_game' game.id %}">edit</a>)</p>
+      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a>{% if game.open %} (<span class="text-secondary">can't edit while open</span>){% else %} (<a href="{% url 'edit_game' game.id %}">edit</a>){% endif %}</p>
     {% endfor %}
     {% for game in hostable %}
-      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a> <span class="text-secondary">(not editable)</span></p>
+      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a></p>
     {% endfor %}
     <hr>
     <div><p>Running from commit <code>{{ commit }}</code></p></div>

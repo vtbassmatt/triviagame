@@ -1,8 +1,12 @@
+from http import HTTPStatus
+
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import F, Q
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
+from django.forms import ValidationError
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -13,6 +17,10 @@ from triviagame.forms import CsrfDummyForm
 from triviagame.views import compute_leaderboard_data
 from .forms import SomePageForm, GameForm, PageForm, QuestionForm
 from .models import GameHostPermissions
+
+
+class HttpResponseConflict(HttpResponse):
+    status_code = HTTPStatus.CONFLICT
 
 
 @login_required
@@ -223,7 +231,9 @@ def edit_game(request, game_id):
 
     if request.method == 'POST':
         game_form = GameForm(request.POST, instance=game)
-        if game_form.is_valid():
+        if game.open:
+            game_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif game_form.is_valid():
             updated_game = game_form.save()
             return HttpResponseRedirect(reverse('edit_game', args=(updated_game.id,)))
     else:
@@ -243,7 +253,9 @@ def new_page(request, game_id):
 
     if request.method == 'POST':
         form = PageForm(request.POST)
-        if form.is_valid():
+        if game.open:
+            form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif form.is_valid():
             page = form.save(commit=False)
             # connect page to game
             page.game = game
@@ -274,7 +286,9 @@ def edit_page(request, page_id):
 
     if request.method == 'POST':
         page_form = PageForm(request.POST, instance=page)
-        if page_form.is_valid():
+        if page.game.open:
+            page_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif page_form.is_valid():
             updated_page = page_form.save()
             return HttpResponseRedirect(reverse('edit_page', args=(updated_page.id,)))
     else:
@@ -294,6 +308,8 @@ def delete_page(request, page_id):
 
     if request.method in ('POST', 'DELETE'):
         game = page.game
+        if game.open:
+            return HttpResponseConflict('Cannot edit an open game')
         order = page.order
         with transaction.atomic():
             page.question_set.all().delete()
@@ -315,6 +331,8 @@ def page_move(request, page_id, delta):
     page = get_object_or_404(Page, pk=page_id)
     if not _can_edit_game(request.user, page.game):
         return HttpResponseForbidden()
+    if page.game.open:
+        return HttpResponseConflict('Cannot edit an open game')
 
     max_page = page.game.page_set.last()
     if delta == 1 and page.id == max_page.id:
@@ -348,7 +366,9 @@ def new_question(request, page_id):
 
     if request.method == 'POST':
         form = QuestionForm(request.POST)
-        if form.is_valid():
+        if page.game.open:
+            form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif form.is_valid():
             question = form.save(commit=False)
             # connect question to page
             question.page = page
@@ -379,7 +399,9 @@ def edit_question(request, question_id):
 
     if request.method == 'POST':
         question_form = QuestionForm(request.POST, instance=question)
-        if question_form.is_valid():
+        if question.page.game.open:
+            question_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif question_form.is_valid():
             updated_question = question_form.save()
             return HttpResponseRedirect(reverse('edit_page', args=(updated_question.page.id,)))
     else:
@@ -399,6 +421,8 @@ def delete_question(request, question_id):
 
     if request.method in ('POST', 'DELETE'):
         page = question.page
+        if page.game.open:
+            return HttpResponseConflict('Cannot edit an open game')
         order = question.order
         with transaction.atomic():
             question.delete()
@@ -419,6 +443,8 @@ def question_move(request, question_id, delta):
     question = get_object_or_404(Question, pk=question_id)
     if not _can_edit_game(request.user, question.page.game):
         return HttpResponseForbidden()
+    if question.page.game.open:
+        return HttpResponseConflict('Cannot edit an open game')
 
     max_question = question.page.question_set.last()
     if delta == 1 and question.id == max_question.id:
