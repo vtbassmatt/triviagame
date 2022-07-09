@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import environ
 from pathlib import Path
+from django.contrib.messages import constants as message_constants
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -77,6 +78,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
+
+# Messages framework -> Bootstrap 5
+MESSAGE_TAGS = {
+    message_constants.INFO: 'primary',
+    message_constants.DEBUG: 'info',
+    message_constants.ERROR: 'danger',
+}
 
 
 # Database

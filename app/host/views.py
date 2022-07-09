@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db import transaction
 from django.db.models import F, Q
 from django.forms import ValidationError
@@ -63,6 +64,7 @@ def host_join(request, id):
             Q(can_host=True) | Q(can_edit=True),
         )
     except GameHostPermissions.DoesNotExist:
+        messages.error(request, "Can't host that game.")
         return HttpResponseRedirect(reverse('host_home'))
 
     if request.method == 'POST':
@@ -77,6 +79,7 @@ def host_join(request, id):
 @login_required
 def toggle_game(request):
     if 'hosting' not in request.session:
+        _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
@@ -87,7 +90,10 @@ def toggle_game(request):
             hosting.open = not hosting.open
             hosting.save()
             if hosting.open:
+                messages.success(request, "You opened the game.")
                 return HttpResponseRedirect(reverse('pages'))
+            else:
+                messages.success(request, "You closed the game.")
     
     return HttpResponseRedirect(reverse('host_home'))
 
@@ -95,6 +101,7 @@ def toggle_game(request):
 @login_required
 def pages(request):
     if 'hosting' not in request.session:
+        _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
@@ -110,6 +117,7 @@ def pages(request):
 @login_required
 def toggle_page(request, open):
     if 'hosting' not in request.session:
+        _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
     if request.method == 'POST':
@@ -117,6 +125,7 @@ def toggle_page(request, open):
         if form.is_valid():
             page = Page.objects.get(pk=form.cleaned_data['page'])
             page.open = open
+            messages.success(request, f"You {'opened' if open else 'closed'} \"{page.title}\".")
             page.save()
     
     return HttpResponseRedirect(reverse('pages'))
@@ -125,6 +134,7 @@ def toggle_page(request, open):
 @login_required
 def score_page(request, page_id):
     if 'hosting' not in request.session:
+        _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
@@ -134,6 +144,7 @@ def score_page(request, page_id):
         form = CsrfDummyForm(request.POST)
         if form.is_valid():
             _record_scores(request.POST)
+            messages.success(request, "Scores recorded.")
             return HttpResponseRedirect(reverse('score_page', args=(page.id,)))
         else:
             return HttpResponseBadRequest('failed csrf validation')
@@ -166,6 +177,7 @@ def _record_scores(post_data):
 @login_required
 def host_leaderboard(request):
     if 'hosting' not in request.session:
+        _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
@@ -183,6 +195,7 @@ def host_leaderboard(request):
 @login_required
 def team_page(request, team_id):
     if 'hosting' not in request.session:
+        _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
@@ -235,6 +248,7 @@ def edit_game(request, game_id):
             game_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif game_form.is_valid():
             updated_game = game_form.save()
+            messages.success(request, "Game data saved.")
             return HttpResponseRedirect(reverse('edit_game', args=(updated_game.id,)))
     else:
         game_form = GameForm(instance=game)
@@ -290,6 +304,7 @@ def edit_page(request, page_id):
             page_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif page_form.is_valid():
             updated_page = page_form.save()
+            messages.success(request, "Page data saved.")
             return HttpResponseRedirect(reverse('edit_page', args=(updated_page.id,)))
     else:
         page_form = PageForm(instance=page)
@@ -315,6 +330,7 @@ def delete_page(request, page_id):
             page.question_set.all().delete()
             page.delete()
             game.page_set.filter(order__gt=order).update(order=F('order') - 1)
+        messages.success(request, f"Page {order} deleted.")
         return HttpResponseRedirect(reverse('edit_game', args=(game.id,)))
 
     return render(request, 'editor/delete_page.html', {
@@ -403,6 +419,7 @@ def edit_question(request, question_id):
             question_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif question_form.is_valid():
             updated_question = question_form.save()
+            messages.success(request, "Question data saved.")
             return HttpResponseRedirect(reverse('edit_page', args=(updated_question.page.id,)))
     else:
         question_form = QuestionForm(instance=question)
@@ -427,6 +444,7 @@ def delete_question(request, question_id):
         with transaction.atomic():
             question.delete()
             page.question_set.filter(order__gt=order).update(order=F('order') - 1)
+        messages.success(request, f"Question {order} deleted.")
         return HttpResponseRedirect(reverse('edit_page', args=(page.id,)))
 
     return render(request, 'editor/delete_question.html', {
@@ -476,3 +494,7 @@ def _can_edit_game(user, game):
         user=user,
         can_edit=True,
     ).count() > 0
+
+
+def _flash_not_hosting(request):
+    messages.error(request, "You aren't hosting a game.")

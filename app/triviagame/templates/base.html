@@ -22,6 +22,19 @@
           <h1>{% block heading %}🧠 Trivia{% endblock %}</h1>
         </div>
       </div>
+
+      {% if messages %}
+      <div class="row">
+        <div class="col-12">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.level_tag }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}  
+        </div>
+      </div>
+      {% endif %}
 {% block contents %}check your 🧠 - something's gone wrong{% endblock %}
     </div>
 
