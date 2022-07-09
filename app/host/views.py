@@ -248,6 +248,7 @@ def edit_game(request, game_id):
             game_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif game_form.is_valid():
             updated_game = game_form.save()
+            messages.success(request, "Game data saved.")
             return HttpResponseRedirect(reverse('edit_game', args=(updated_game.id,)))
     else:
         game_form = GameForm(instance=game)
@@ -303,6 +304,7 @@ def edit_page(request, page_id):
             page_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif page_form.is_valid():
             updated_page = page_form.save()
+            messages.success(request, "Page data saved.")
             return HttpResponseRedirect(reverse('edit_page', args=(updated_page.id,)))
     else:
         page_form = PageForm(instance=page)
@@ -328,6 +330,7 @@ def delete_page(request, page_id):
             page.question_set.all().delete()
             page.delete()
             game.page_set.filter(order__gt=order).update(order=F('order') - 1)
+        messages.success(request, f"Page {order} deleted.")
         return HttpResponseRedirect(reverse('edit_game', args=(game.id,)))
 
     return render(request, 'editor/delete_page.html', {
@@ -416,6 +419,7 @@ def edit_question(request, question_id):
             question_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif question_form.is_valid():
             updated_question = question_form.save()
+            messages.success(request, "Question data saved.")
             return HttpResponseRedirect(reverse('edit_page', args=(updated_question.page.id,)))
     else:
         question_form = QuestionForm(instance=question)
@@ -440,6 +444,7 @@ def delete_question(request, question_id):
         with transaction.atomic():
             question.delete()
             page.question_set.filter(order__gt=order).update(order=F('order') - 1)
+        messages.success(request, f"Question {order} deleted.")
         return HttpResponseRedirect(reverse('edit_page', args=(page.id,)))
 
     return render(request, 'editor/delete_question.html', {
