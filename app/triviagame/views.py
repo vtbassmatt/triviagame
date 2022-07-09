@@ -1,5 +1,7 @@
 import random
+import re
 
+from django.contrib import messages
 from django.db import Error as DjangoDbError, IntegrityError
 from django.db.models import Sum
 from django.forms import ValidationError, HiddenInput
@@ -50,6 +52,7 @@ def home(request):
 def uncurse(request):
     # if something bad has happened, this will clear the session
     request.session.clear()
+    messages.debug(request, "Deleted your session. That should clear things up.")
     return HttpResponseRedirect(reverse('home'))
 
 
@@ -95,6 +98,7 @@ def join_game(request, id=0, code=None):
 
 def create_team(request):
     if 'game' not in request.session:
+        _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
 
     game = models.Game.objects.get(pk=request.session['game'])
@@ -144,6 +148,7 @@ def rejoin_team(request, id=0, code=None):
                 desired_team = models.Team.objects.get(pk=_id, passcode=_code)
                 request.session['team'] = desired_team.id
                 request.session['game'] = desired_team.game.id
+                messages.success(request, f"You reconnected to {desired_team.name}.")
                 return HttpResponseRedirect(reverse('play'))
             except models.Team.DoesNotExist:
                 form.add_error(None, ValidationError('Could not reconnect that team', code='notfound'))
@@ -167,8 +172,10 @@ def rejoin_team(request, id=0, code=None):
 
 def play(request):
     if 'game' not in request.session:
+        _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
     if 'team' not in request.session:
+        _flash_no_team(request)
         return HttpResponseRedirect(reverse('home'))
 
     game = models.Game.objects.get(pk=request.session['game'])
@@ -188,8 +195,10 @@ def play(request):
 
 def answer_sheet(request, page_order):
     if 'game' not in request.session:
+        _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
     if 'team' not in request.session:
+        _flash_no_team(request)
         return HttpResponseRedirect(reverse('home'))
 
     game = models.Game.objects.get(pk=request.session['game'])
@@ -202,7 +211,11 @@ def answer_sheet(request, page_order):
     except models.Page.DoesNotExist:
         page = None
 
-    if not game.open or not page:
+    if not game.open:
+        _flash_game_not_open(request)
+        return HttpResponseRedirect(reverse('play'))
+    if not page:
+        _flash_bad_page(request)
         return HttpResponseRedirect(reverse('play'))
     
     # if a question has a response for this team, grab it here
@@ -228,8 +241,10 @@ def answer_sheet(request, page_order):
 
 def accept_answers(request, page_order):
     if 'game' not in request.session:
+        _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
     if 'team' not in request.session:
+        _flash_no_team(request)
         return HttpResponseRedirect(reverse('home'))
     
     game = models.Game.objects.get(pk=request.session['game'])
@@ -242,7 +257,11 @@ def accept_answers(request, page_order):
     except models.Page.DoesNotExist:
         page = None
 
-    if not game.open or not page:
+    if not game.open:
+        _flash_game_not_open(request)
+        return HttpResponseRedirect(reverse('play'))
+    if not page:
+        _flash_bad_page(request)
         return HttpResponseRedirect(reverse('play'))
 
     valid_questions = {q.id: q for q in page.question_set.all()}
@@ -251,6 +270,7 @@ def accept_answers(request, page_order):
         form = CsrfDummyForm(request.POST)
         if form.is_valid():
             _save_responses(request.POST, valid_questions, team)
+            messages.success(request, "Your answers have been recorded for this page.")
             return HttpResponseRedirect(reverse('answer_sheet', args=(page_order,)))
         else:
             return HttpResponseBadRequest('failed csrf validation')
@@ -277,8 +297,10 @@ def _save_responses(post_data, valid_questions, team):
 
 def delete_answer(request, response_id):
     if 'game' not in request.session:
+        _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
     if 'team' not in request.session:
+        _flash_no_team(request)
         return HttpResponseRedirect(reverse('home'))
     
     try:
@@ -293,7 +315,9 @@ def delete_answer(request, response_id):
         form = CsrfDummyForm(request.POST)
         if form.is_valid():
             return_page = response.question.page.order
+            question_number = response.question.order
             response.delete()
+            messages.success(request, f"Deleted your answer for question #{question_number}.")
             return HttpResponseRedirect(reverse('answer_sheet', args=(return_page,)))
         else:
             return HttpResponseBadRequest('failed csrf validation')
@@ -309,8 +333,10 @@ def delete_answer(request, response_id):
 
 def leaderboard(request):
     if 'game' not in request.session:
+        _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
     if 'team' not in request.session:
+        _flash_no_team(request)
         return HttpResponseRedirect(reverse('home'))
 
     game = models.Game.objects.get(pk=request.session['game'])
@@ -353,3 +379,16 @@ def compute_leaderboard_data(game):
             gold_medals = [line[0] for line in final_board if line[-1] == top_score]
 
     return rounds, final_board, gold_medals
+
+
+def _flash_not_in_game(request):
+    messages.error(request, "You're not in a game.")
+
+def _flash_no_team(request):
+    messages.warning(request, "You don't have a team.")
+
+def _flash_game_not_open(request):
+    messages.error(request, "The game isn't open.")
+
+def _flash_bad_page(request):
+    messages.error(request, "That's not a page in the game.")
