@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Girassol
+- Font Author: Copyright 2019 The Girassol Project Authors (https://github.com/liamspradlin/Girassol-Display)
+- Font Source: http://fonts.gstatic.com/s/girassol/v16/JTUUjIo_-DK48laaNC9Nz2pJzxbi.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
