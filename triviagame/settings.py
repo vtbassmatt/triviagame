@@ -146,11 +146,3 @@ STATIC_ROOT = 'static'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# TODO: fix this for fly.io
-try:
-    # do _NOT_ create commit.py; this is used in deployment
-    from .commit import DEPLOYED_COMMIT  # type: ignore
-except ImportError:
-    DEPLOYED_COMMIT = '~development~'

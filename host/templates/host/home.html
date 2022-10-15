@@ -24,8 +24,6 @@
     {% for game in hostable %}
       <p><a href="{% url 'host_join' game.id %}">{{ game }}</a></p>
     {% endfor %}
-    <hr>
-    <div><p>Running from commit <code>{{ commit }}</code></p></div>
   </div>
 </div>
 {% endblock %}
