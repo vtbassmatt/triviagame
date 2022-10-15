@@ -47,3 +47,9 @@ https://fly.io/docs/app-guides/custom-domains-with-fly/#teaching-your-app-about-
 ## Running a game
 
 `TODO`!
+
+## Thanks
+
+Thanks to:
+- the Git Fundamentals team at GitHub for playtesting early versions of this ap
+- https://favicon.io/favicon-generator/ for the favicon generator
