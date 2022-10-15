@@ -20,6 +20,14 @@ class CreateTeamForm(forms.ModelForm):
         "Walt Quizney World",
         "Bears, Beets, Battlestar Galactica",
         "Dame Agatha Quiztie",
+        "Alternative Facts",
+        "Air of Truthiness",
+        "Les Quizerables",
+        "John Trivialta",
+        "Risky Quizness",
+        "Trivia Newton John",
+        "Quizteama Aguilera",
+        "Just Google It",
     )
 
     class Meta:

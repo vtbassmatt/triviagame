@@ -1,6 +1,7 @@
-# Trivia Game
+# Tr¿via
 
 This was built as a little project to host live trivia over video chat.
+It was recently named "Tr¿via" because I couldn't think of a better name.
 
 ## To get started
 
