@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 from django.utils.crypto import get_random_string
-import triviagame.models
+import game.models
 
 
 # formerly in models.py
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=60)),
-                ('passcode', models.CharField(default=triviagame.models.generate_passcode, max_length=20)),
+                ('passcode', models.CharField(default=game.models.generate_passcode, max_length=20)),
                 ('hostkey', models.CharField(default=generate_hostkey, max_length=40)),
                 ('open', models.BooleanField(default=False)),
             ],
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('open', models.BooleanField(default=False)),
                 ('title', models.CharField(max_length=100)),
                 ('description', models.TextField(blank=True)),
-                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='triviagame.game')),
+                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='game.game')),
             ],
             options={
                 'ordering': ['order'],
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('order', models.SmallIntegerField()),
                 ('question', models.TextField()),
                 ('answer', models.TextField(blank=True)),
-                ('page', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='triviagame.page')),
+                ('page', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='game.page')),
             ],
             options={
                 'ordering': ['order'],
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=200)),
                 ('members', models.TextField(blank=True)),
                 ('passcode', models.CharField(blank=True, max_length=20)),
-                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='triviagame.game')),
+                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='game.game')),
             ],
         ),
         migrations.CreateModel(
@@ -73,8 +73,8 @@ class Migration(migrations.Migration):
                 ('value', models.CharField(max_length=100)),
                 ('graded', models.BooleanField(default=False)),
                 ('score', models.SmallIntegerField(default=0)),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='triviagame.question')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='triviagame.team')),
+                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='game.question')),
+                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='game.team')),
             ],
             options={
                 'ordering': ['question', 'team'],

@@ -13,9 +13,9 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 
-from triviagame.models import Game, Page, Response, Team, Question
-from triviagame.forms import CsrfDummyForm
-from triviagame.views import compute_leaderboard_data
+from game.models import Game, Page, Response, Team, Question
+from game.forms import CsrfDummyForm
+from game.views import compute_leaderboard_data
 from .forms import SomePageForm, GameForm, PageForm, QuestionForm
 from .models import GameHostPermissions
 

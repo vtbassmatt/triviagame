@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from triviagame.models import Game
+from game.models import Game
 
 
 class GameHostPermissions(models.Model):
