@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('triviagame', '0003_team_ensure_unique_team_names'),
+        ('game', '0003_team_ensure_unique_team_names'),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('can_view', models.BooleanField()),
                 ('can_host', models.BooleanField()),
                 ('can_edit', models.BooleanField()),
-                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='triviagame.game')),
+                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='game.game')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='auth.user')),
             ],
         ),

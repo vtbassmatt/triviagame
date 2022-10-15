@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 
-from triviagame import models
+from game import models
 
 
 class PageInline(admin.StackedInline):

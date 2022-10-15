@@ -1,6 +1,6 @@
 from django import forms
-from triviagame.models import Game, Page, Question
-from triviagame.widgets import Bs5TextInput, Bs5Textarea
+from game.models import Game, Page, Question
+from game.widgets import Bs5TextInput, Bs5Textarea
 
 
 

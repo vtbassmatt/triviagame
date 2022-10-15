@@ -4,15 +4,13 @@ This was built as a little project to host live trivia over video chat.
 
 ## To get started
 
-Tested with Python 3.9 on macOS and Ubuntu 20.04.
+Tested locally with Python 3.10 on macOS.
 
 ```
-pip install -r requirements.txt
-cp data/.env.example data/.env
-cd app
-./manage.py migrate
-./manage.py createsuperuser
-./manage.py runserver
+poetry install
+poetry run ./manage.py migrate
+poetry run ./manage.py createsuperuser
+poetry run ./manage.py runserver
 ```
 
 - Open your browser and head to https://127.0.0.1:8000/backstage
@@ -24,6 +22,16 @@ cd app
 
 On the Game entry in the admin, you can click "View on site" to open the "join as host" flow.
 From there, click "Manage game" and you can find the "Player join" link.
+
+## Deploying to fly.io
+
+If you aren't me, you'll need to edit fly.toml with a new app name.
+You'll also need a fly.io-hosted Postgres database and some of the instructions here:
+https://davi.sh/blog/2022/10/django-with-flyio/
+
+## Editing a game
+
+`TODO`!
 
 ## Running a game
 
