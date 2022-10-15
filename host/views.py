@@ -51,7 +51,6 @@ def host_home(request):
         'hostable': [h.game for h in hostable],
         'editable': [e.game for e in editable],
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
-        'commit': settings.DEPLOYED_COMMIT,
     })
 
 

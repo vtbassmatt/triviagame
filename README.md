@@ -26,8 +26,19 @@ From there, click "Manage game" and you can find the "Player join" link.
 ## Deploying to fly.io
 
 If you aren't me, you'll need to edit fly.toml with a new app name.
-You'll also need a fly.io-hosted Postgres database and some of the instructions here:
-https://davi.sh/blog/2022/10/django-with-flyio/
+
+Assuming you've got that, you need a fly.io-hosted Postgres database:
+```ShellSession
+% flyctl postgres create -a some-db-app-name-1234
+% flyctl postgres attach some-db-app-name-1234
+```
+
+`postgres attach` subcommand creates a database user and stores a secret named `DATABASE_URL` with the connection string.
+You will also need to `flyctl secrets set DJANGO_SECRET_KEY=<some generated secret key>`.
+(Thanks to https://davi.sh/blog/2022/10/django-with-flyio/ for originally posting these instructions!)
+
+After you've `flyctl deploy`'d, you will probably also want to follow fly.io's instructions for adding a custom domain and HTTPS certificate.
+https://fly.io/docs/app-guides/custom-domains-with-fly/#teaching-your-app-about-custom-domains
 
 ## Editing a game
 
