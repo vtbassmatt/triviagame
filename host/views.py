@@ -230,7 +230,7 @@ def new_game(request):
     else:
         form = GameForm()
 
-    return render(request, 'editor/new.html', {
+    return render(request, 'editor/new_game.html', {
         'form': form,
     })
 
