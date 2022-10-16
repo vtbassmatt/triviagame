@@ -43,6 +43,7 @@ if not DEBUG:
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -83,6 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'triviagame.wsgi.application'
+ASGI_APPLICATION = 'triviagame.asgi.application'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
