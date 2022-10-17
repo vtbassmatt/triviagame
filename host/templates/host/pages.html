@@ -1,11 +1,14 @@
 {% extends 'host_base.html' %}
-{% block heading %}{% if hosting.open %}✅{% else %}🔒{% endif %} Hosting {{ hosting.name }}{% endblock %}
+{% block heading %}Host view: {{ hosting.name }}{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12 mb-2">
-    <h2>Access</h2>
-    <p><form method="post" action="{% url 'toggle_game' %}">{% csrf_token %}<button type="submit" class="btn btn-{% if hosting.open %}outline-danger{% else %}primary{% endif %}">{% if hosting.open %}Close{% else %}Open{% endif %} the game</button></form></p>
+    <h2>Game status</h2>
+    <p hx-post="{% url 'toggle_game' %}">
+      {% include 'editor/_toggle_game.html' %}
+    </p>
     <h2>Pages</h2>
+    {# TODO: this needs to be a partial, and when the game state is toggled, should reload #}
     {% for page in hosting.page_set.all %}
       <div class="card mb-3{% if page.open and hosting.open %} border-success{% elif page.open %} border-warning{% endif %}">
       <div class="card-header{% if page.open and hosting.open %} text-white bg-success{% elif page.open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>

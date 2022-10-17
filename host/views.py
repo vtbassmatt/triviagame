@@ -11,6 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django_htmx.http import HttpResponseClientRedirect
 
 
 from game.models import Game, Page, Response, Team, Question
@@ -76,25 +77,28 @@ def host_join(request, id):
 
 
 @login_required
+@require_POST
 def toggle_game(request):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
     if 'hosting' not in request.session:
         _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+        return HttpResponseClientRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
 
-    if request.method == 'POST':
-        form = CsrfDummyForm(request.POST)
-        if form.is_valid():
-            hosting.open = not hosting.open
-            hosting.save()
-            if hosting.open:
-                messages.success(request, "You opened the game.")
-                return HttpResponseRedirect(reverse('pages'))
-            else:
-                messages.success(request, "You closed the game.")
+    hosting.open = not hosting.open
+    hosting.save()
+    if hosting.open:
+        messages.success(request, "You opened the game.")
+    else:
+        messages.success(request, "You closed the game.")
     
-    return HttpResponseRedirect(reverse('host_home'))
+    return render(request, 'editor/_toggle_game.html', {
+        'hosting': hosting,
+    })
 
 
 @login_required
