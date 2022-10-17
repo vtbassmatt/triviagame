@@ -65,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
+    'triviagame.middleware.htmx_message_middleware',
 ]
 
 ROOT_URLCONF = 'triviagame.urls'

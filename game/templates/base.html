@@ -29,9 +29,14 @@
         </div>
       </div>
 
-      {% if messages %}
       <div class="row">
-        <div class="col-12">
+        <div class="col-12" data-msg-container>
+          <template data-msg-template>
+            <div data-msg-wrapper class="alert alert-dismissible fade show" role="alert">
+              <div data-msg-body></div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          </template>
           {% for message in messages %}
           <div class="alert alert-{{ message.level_tag }} alert-dismissible fade show" role="alert">
             {{ message }}
@@ -40,12 +45,12 @@
           {% endfor %}  
         </div>
       </div>
-      {% endif %}
 {% block contents %}check your 🧠 - something's gone wrong{% endblock %}
     </div>
 
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'htmx/htmx.min.js' %}" defer></script>
+    <script src="{% static 'htmx/htmx.min.js' %}"></script>
+    <script src="{% static 'htmx/messages.js' %}"></script>
     {% django_htmx_script %}
   </body>
 </html>
