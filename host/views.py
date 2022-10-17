@@ -47,7 +47,12 @@ def host_home(request):
         can_edit=False,
     )
 
-    return render(request, 'host/home.html', {
+    template = 'host/home.html'
+
+    if request.htmx and request.htmx.trigger_name == 'gamesList':
+        template = 'host/_games_list.html'
+
+    return render(request, template, {
         'hosting': hosting,
         'hostable': [h.game for h in hostable],
         'editable': [e.game for e in editable],
@@ -96,9 +101,14 @@ def toggle_game(request):
     else:
         messages.success(request, "You closed the game.")
     
-    return render(request, 'editor/_toggle_game.html', {
+    response = render(request, 'editor/_toggle_game.html', {
         'hosting': hosting,
     })
+    # tell the page that game state has updated
+    # TODO: django_htmx.http.trigger_client_event instead
+    response.headers['HX-Trigger'] = 'hostedGameStateUpdated'
+
+    return response
 
 
 @login_required
@@ -111,7 +121,12 @@ def pages(request):
     player_join_url = request.build_absolute_uri(
         reverse('join_game', args=(hosting.id, hosting.passcode)))
 
-    return render(request, 'host/pages.html', {
+    template = 'host/pages.html'
+
+    if request.htmx and request.htmx.trigger_name == 'pagesList':
+        template = 'host/_pages_list.html'
+
+    return render(request, template, {
         'hosting': hosting,
         'player_join_url': player_join_url,
     })

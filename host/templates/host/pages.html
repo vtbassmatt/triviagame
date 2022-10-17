@@ -8,25 +8,12 @@
       {% include 'editor/_toggle_game.html' %}
     </p>
     <h2>Pages</h2>
-    {# TODO: this needs to be a partial, and when the game state is toggled, should reload #}
-    {% for page in hosting.page_set.all %}
-      <div class="card mb-3{% if page.open and hosting.open %} border-success{% elif page.open %} border-warning{% endif %}">
-      <div class="card-header{% if page.open and hosting.open %} text-white bg-success{% elif page.open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>
-      <div class="card-body">
-        <div class="card-title">{{ page.description|linebreaksbr }}</div>
-        <div class="card-text"><a href="{% url 'score_page' page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
-        {% if page.open %}
-        {# we're hacking a copy of forms.SomePageForm here #}
-        <div class="card-text"><form method="post" action="{% url 'close_page' %}">{% csrf_token %}<input type="hidden" name="page" value="{{ page.id }}"><button type="submit" class="btn btn-outline-danger">Close this page</button> <small>(This will hide it from players, even if they've entered answers.)</small></form></div>
-        {% else %}
-        {# more SomePageForm hacking #}
-        <div class="card-text"><form method="post" action="{% url 'open_page' %}">{% csrf_token %}<input type="hidden" name="page" value="{{ page.id }}"><button type="submit" class="btn btn-primary">Open this page 👉</button></form></div>
-        {% endif %}
-      </div>
-      </div>
-    {% empty %}
-    <p>No pages found.</p>
-    {% endfor %}
+    {# when the game state is toggled, this section reloads #}
+    <div hx-get="{% url 'pages' %}"
+         hx-trigger="hostedGameStateUpdated from:body"
+         name="pagesList">
+    {% include 'host/_pages_list.html' %}
+    </div>
   </div>
   <div class="col-12 mb-2">
     <h2>Teams</h2>
