@@ -9,6 +9,7 @@ urlpatterns = [
     path('toggle/', views.toggle_game, name='toggle_game'),
     path('pages/', views.pages, name='pages'),
     path('pages/<int:page_id>', views.score_page, name='score_page'),
+    path('score/', views.assign_score, name='assign_score'),
     path('pages/state/', views.set_page_state, name='set_page_state'),
     path('leaderboard/', views.host_leaderboard, name='host_leaderboard'),
     path('team/<int:team_id>', views.team_page, name='team_page'),
