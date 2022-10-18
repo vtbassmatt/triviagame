@@ -6,7 +6,7 @@ def generate_passcode():
     return get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
 
 
-class Game(models.Model):
+class Game(models.Model):    
     name = models.CharField(max_length=60)
     passcode = models.CharField(max_length=20, default=generate_passcode)
     open = models.BooleanField(default=False)
@@ -43,9 +43,17 @@ class Page(models.Model):
         'It\'s a secret to everybody.',
     ]
 
+    class PageState(models.IntegerChoices):
+        LOCKED = 0      # players cannot see the page at all
+        OPEN = 1        # players can see and answer the page
+        SCORING = 2     # players can see, but not answer, the page
+
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     order = models.SmallIntegerField()
-    open = models.BooleanField(default=False)
+    state = models.IntegerField(
+        choices=PageState.choices,
+        default=PageState.LOCKED,
+    )
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
