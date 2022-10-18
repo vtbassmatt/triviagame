@@ -23,7 +23,7 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
-
+    
     class Meta:
         ordering = ['game', 'name']
         constraints = [
@@ -72,6 +72,53 @@ class Page(models.Model):
     def mystery_description(self):
         index = self.game.id + self.order
         return Page.MYSTERIES[index % len(Page.MYSTERIES)]
+
+    # these properties are convenient in templates    
+    @property
+    def is_locked(self):
+        return self.state == Page.PageState.LOCKED
+    
+    @property
+    def is_open(self):
+        return self.state == Page.PageState.OPEN
+    
+    @property
+    def is_scoring(self):
+        return self.state == Page.PageState.SCORING
+    
+    @property
+    def bootstrap_locked_button_styles(self):
+        match self.state:
+            case Page.PageState.LOCKED:
+                return 'btn-outline-secondary disabled'
+            case Page.PageState.OPEN:
+                return 'btn-outline-primary'
+            case Page.PageState.SCORING:
+                return 'btn-outline-primary'
+        return ''
+    
+    @property
+    def bootstrap_open_button_styles(self):
+        match self.state:
+            case Page.PageState.LOCKED:
+                return 'btn-primary'
+            case Page.PageState.OPEN:
+                return 'btn-outline-secondary disabled'
+            case Page.PageState.SCORING:
+                return 'btn-outline-primary'
+        return ''
+    
+    @property
+    def bootstrap_scoring_button_styles(self):
+        match self.state:
+            case Page.PageState.LOCKED:
+                return 'btn-outline-primary'
+            case Page.PageState.OPEN:
+                return 'btn-primary'
+            case Page.PageState.SCORING:
+                return 'btn-outline-secondary disabled'
+        return ''
+    # end template properties
 
 
 class Question(models.Model):

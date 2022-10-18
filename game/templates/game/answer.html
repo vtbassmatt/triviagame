@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{# TODO: with the introduction of multiple "open" states, this is now #}
+{# a hot mess which needs to be rethought. This can go hand-in-hand with #}
+{# HTMXifying the player experience. #}
 {% block title %}Tr¿via - {{ game.name }}{% endblock %}
 {% block heading %}{{ game.name }}{% endblock %}
 {% block contents %}
@@ -20,8 +23,8 @@
   {% if unanswered_questions > 0 %}<form action="{% url 'accept_answers' page.order %}" method="post" autocomplete="off">{% csrf_token %}{% endif %}
   {% for question, response in questions %}
   <div class="col-12">
-  <div class="card mb-3{% if not response %} border-primary{% endif %}">
-    <div class="card-header{% if not response %} bg-primary text-white{% endif %}">Question {{ question.order }}</div>
+  <div class="card mb-3{% if not response and page.is_open %} border-primary{% endif %}">
+    <div class="card-header{% if not response and page.is_open %} bg-primary text-white{% endif %}">Question {{ question.order }}</div>
     <div class="card-body">
       <p class="card-text">{{ question.question }}</p>
       {% if response %}
@@ -32,13 +35,19 @@
           {% else %}
             (❌, correct answer was &ldquo;{{ response.question.answer }}&rdquo;)
           {% endif %}
-        {% else %}
+        {% elif page.is_open %}
         (<a href="{% url 'delete_answer' response.id %}" class="link-danger">delete and change answer?</a>)
+        {% else %}
+        (<em>...please be patient, scoring in progress</em>)
         {% endif %}</p>
-      {% else %}
+      {% elif page.is_open %}
       <p class="card-text">
         <label for="response_{{ question.id }}" class="form-label">Your answer: </label>
         <input type="text" class="form-control" name="response_{{ question.id }}" id="response_{{ question.id }}">
+      </p>
+      {% else %}{# no response and page is not open, so reveal answer #}
+      <p class="card-text">
+        Your team submitted no answer. The correct answer was &ldquo;{{ question.answer }}&rdquo;.
       </p>
       {% endif %}
     </div>
@@ -47,9 +56,10 @@
   {% empty %}
   <p>There aren't any questions here.</p>
   {% endfor %}
-  {% if unanswered_questions > 0 %}
-  <button type="submit" class="btn btn-primary">Submit {{ page.title }} answers</button>
+  {% if unanswered_questions > 0 and page.is_open %}
+  <button type="submit" class="btn btn-primary mb-2">Submit {{ page.title }} answers</button>
   </form>
+  <p><a href="{% url 'play' %}">👈 Or return to {{ game.name }}</a> (⚠️ will not save your answers!)</p>
   {% else %}
   <p><a href="{% url 'play' %}" class="btn btn-primary">👈 Return to {{ game.name }}</a></p>
   {% endif %}

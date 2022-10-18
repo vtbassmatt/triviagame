@@ -216,7 +216,7 @@ def answer_sheet(request, page_order):
 
     try:
         page = game.page_set.get(order=page_order)
-        if not page.open:
+        if page.state == models.Page.PageState.LOCKED:
             page = None
     except models.Page.DoesNotExist:
         page = None
@@ -262,7 +262,7 @@ def accept_answers(request, page_order):
 
     try:
         page = game.page_set.get(order=page_order)
-        if not page.open:
+        if page.state != models.Page.PageState.OPEN:
             page = None
     except models.Page.DoesNotExist:
         page = None

@@ -138,7 +138,7 @@ def pages(request):
 
 @login_required
 @require_POST
-def toggle_page(request, open):
+def set_page_state(request):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
@@ -149,12 +149,16 @@ def toggle_page(request, open):
     
     if 'page' not in request.POST:
         return HttpResponseBadRequest("expected page id")
+    
+    if 'state' not in request.POST:
+        return HttpResponseBadRequest("expected new page state")
 
     page_id = int(request.POST['page'])
     page = get_object_or_404(Page, pk=page_id)
-    page.open = open
+    new_state = Page.PageState[request.POST['state']]
+    page.state = new_state
     page.save()
-    messages.success(request, f"You {'opened' if open else 'closed'} \"{page.title}\".")
+    messages.success(request, f"{page.title} is now {page.state.label}.")
 
     response = HttpResponseNoContent()
     # report that some page's state has updated
