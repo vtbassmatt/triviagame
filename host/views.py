@@ -405,6 +405,11 @@ def page_move(request, page_id, delta):
         page.order = F('order') + delta
         page.save()
     
+    if request.htmx:
+        return render(request, 'editor/_page_list.html', {
+            'game': page.game,
+        })
+
     return HttpResponseRedirect(reverse('edit_game', args=(page.game.id,)))
 
 
@@ -519,6 +524,11 @@ def question_move(request, question_id, delta):
         question.order = F('order') + delta
         question.save()
     
+    if request.htmx:
+        return render(request, 'editor/_question_list.html', {
+            'page': question.page,
+        })
+
     return HttpResponseRedirect(reverse('edit_page', args=(question.page.id,)))
 
 
