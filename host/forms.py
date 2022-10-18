@@ -4,10 +4,6 @@ from game.widgets import Bs5TextInput, Bs5Textarea
 
 
 
-class SomePageForm(forms.Form):
-    page = forms.IntegerField(widget=forms.HiddenInput)
-
-
 class GameForm(forms.ModelForm):
     class Meta:
         model = Game

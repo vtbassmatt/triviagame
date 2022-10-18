@@ -17,7 +17,7 @@ from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from game.models import Game, Page, Response, Team, Question
 from game.forms import CsrfDummyForm
 from game.views import compute_leaderboard_data
-from .forms import SomePageForm, GameForm, PageForm, QuestionForm
+from .forms import GameForm, PageForm, QuestionForm
 from .models import GameHostPermissions
 
 
