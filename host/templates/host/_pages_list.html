@@ -7,16 +7,14 @@
   {% if page.open %}
   <div class="card-text"
        hx-post="{% url 'close_page' %}"
-       hx-vals='{"page":{{ page.id }}}'
-       hx-swap="none">
+       hx-vals='{"page":{{ page.id }}}'>
     <button class="btn btn-outline-danger">Close this page</button> <small>(This will hide it from players, even if they've entered answers.)</small>
   </div>
   {% else %}
   <div class="card-text"
        hx-post="{% url 'open_page' %}"
-       hx-vals='{"page":{{ page.id }}}'
-       hx-swap="none">
-    <button class="btn btn-primary">Open this page 👉</button>
+       hx-vals='{"page":{{ page.id }}}'>
+    <button class="btn btn{% if not hosting.open %}-outline-secondary{% else %}-primary{% endif %}">Open this page 👉</button>
   </div>
   {% endif %}
   </div>
