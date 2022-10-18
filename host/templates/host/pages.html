@@ -8,9 +8,9 @@
       {% include 'editor/_toggle_game.html' %}
     </p>
     <h2>Pages</h2>
-    {# when the game state is toggled, this section reloads #}
+    {# when the game or page state is toggled, this section reloads #}
     <div hx-get="{% url 'pages' %}"
-         hx-trigger="hostedGameStateUpdated from:body"
+         hx-trigger="hostedGameStateUpdated from:body, pageStateUpdated from:body"
          name="pagesList">
     {% include 'host/_pages_list.html' %}
     </div>

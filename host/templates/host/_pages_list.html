@@ -5,13 +5,21 @@
   <div class="card-title">{{ page.description|linebreaksbr }}</div>
   <div class="card-text"><a href="{% url 'score_page' page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
   {% if page.open %}
-  {# we're hacking a copy of forms.SomePageForm here #}
-  <div class="card-text"><form method="post" action="{% url 'close_page' %}">{% csrf_token %}<input type="hidden" name="page" value="{{ page.id }}"><button type="submit" class="btn btn-outline-danger">Close this page</button> <small>(This will hide it from players, even if they've entered answers.)</small></form></div>
+  <div class="card-text"
+       hx-post="{% url 'close_page' %}"
+       hx-vals='{"page":{{ page.id }}}'
+       hx-swap="none">
+    <button class="btn btn-outline-danger">Close this page</button> <small>(This will hide it from players, even if they've entered answers.)</small>
+  </div>
   {% else %}
-  {# more SomePageForm hacking #}
-  <div class="card-text"><form method="post" action="{% url 'open_page' %}">{% csrf_token %}<input type="hidden" name="page" value="{{ page.id }}"><button type="submit" class="btn btn-primary">Open this page 👉</button></form></div>
+  <div class="card-text"
+       hx-post="{% url 'open_page' %}"
+       hx-vals='{"page":{{ page.id }}}'
+       hx-swap="none">
+    <button class="btn btn-primary">Open this page 👉</button>
+  </div>
   {% endif %}
-</div>
+  </div>
 </div>
 {% empty %}
 <p>No pages found.</p>

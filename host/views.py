@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 
 from game.models import Game, Page, Response, Team, Question
@@ -23,6 +23,10 @@ from .models import GameHostPermissions
 
 class HttpResponseConflict(HttpResponse):
     status_code = HTTPStatus.CONFLICT
+
+
+class HttpResponseNoContent(HttpResponse):
+    status_code = HTTPStatus.NO_CONTENT
 
 
 @login_required
@@ -133,20 +137,32 @@ def pages(request):
 
 
 @login_required
+@require_POST
 def toggle_page(request, open):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
     if 'hosting' not in request.session:
         _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
-
-    if request.method == 'POST':
-        form = SomePageForm(request.POST)
-        if form.is_valid():
-            page = Page.objects.get(pk=form.cleaned_data['page'])
-            page.open = open
-            messages.success(request, f"You {'opened' if open else 'closed'} \"{page.title}\".")
-            page.save()
+        return HttpResponseClientRedirect(reverse('host_home'))
     
-    return HttpResponseRedirect(reverse('pages'))
+    if 'page' not in request.POST:
+        return HttpResponseBadRequest("expected page id")
+
+    page_id = int(request.POST['page'])
+    page = get_object_or_404(Page, pk=page_id)
+    page.open = open
+    page.save()
+    messages.success(request, f"You {'opened' if open else 'closed'} \"{page.title}\".")
+
+    response = HttpResponseNoContent()
+    # report that some page's state has updated
+    return trigger_client_event(
+        response,
+        'pageStateUpdated',
+        {'page': page_id},
+    )
 
 
 @login_required
