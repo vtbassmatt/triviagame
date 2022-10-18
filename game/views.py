@@ -321,6 +321,8 @@ def delete_answer(request, response_id):
     if response.team.id != request.session['team']:
         return HttpResponseNotAllowed()
 
+    # TODO: block deletion if page not open
+
     if request.method == 'POST':
         form = CsrfDummyForm(request.POST)
         if form.is_valid():
