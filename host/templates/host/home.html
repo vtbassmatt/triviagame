@@ -6,24 +6,22 @@
     {% if hosting %}
       <p>
         You're hosting <strong>{{ hosting.name }}</strong>.
-        {% if hosting.open %}
-        <a href="{% url 'pages' %}">Manage it here.</a>
-        {% else %}
-        It's currently <span class="text-danger">closed</span>. <a href="{% url 'pages' %}">Preview it here.</a>
-        {% endif %}
+        <a href="{% url 'pages' %}">Manage or preview it here.</a>
       </p>
-      <p><form method="post" action="{% url 'toggle_game' %}">{% csrf_token %}<button type="submit" class="btn btn-{% if hosting.open %}outline-danger{% else %}primary{% endif %}">{% if hosting.open %}Close{% else %}Open{% endif %} the game</button></form></p>
+      <p hx-post="{% url 'toggle_game' %}">
+        {% include 'editor/_toggle_game.html' %}
+      </p>
       <p>If a player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
       <hr>
     {% endif %}
     <h2>Games</h2>
     <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary">Create a new game</a></p>
-    {% for game in editable %}
-      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a>{% if game.open %} (<span class="text-secondary">can't edit while open</span>){% else %} (<a href="{% url 'edit_game' game.id %}">edit</a>){% endif %}</p>
-    {% endfor %}
-    {% for game in hostable %}
-      <p><a href="{% url 'host_join' game.id %}">{{ game }}</a></p>
-    {% endfor %}
+    {# refresh when the game is opened/closed #}
+    <div hx-get="{% url 'host_home' %}"
+         hx-trigger="hostedGameStateUpdated from:body"
+         name="gamesList">
+    {% include 'host/_games_list.html' %}
+    </div>
   </div>
 </div>
 {% endblock %}

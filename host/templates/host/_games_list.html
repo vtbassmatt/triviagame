@@ -1,0 +1,6 @@
+{% for game in editable %}
+<p><a href="{% url 'host_join' game.id %}">{{ game }}</a>{% if game.open %} (<span class="text-secondary">can't edit while open</span>){% else %} (<a href="{% url 'edit_game' game.id %}">edit</a>){% endif %}</p>
+{% endfor %}
+{% for game in hostable %}
+<p><a href="{% url 'host_join' game.id %}">{{ game }}</a></p>
+{% endfor %}

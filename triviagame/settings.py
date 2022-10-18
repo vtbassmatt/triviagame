@@ -43,12 +43,14 @@ if not DEBUG:
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_htmx',  
     'game.apps.GameConfig',
     'host.apps.HostConfig',
     'django.forms',
@@ -62,6 +64,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
+    'triviagame.middleware.htmx_message_middleware',
 ]
 
 ROOT_URLCONF = 'triviagame.urls'
@@ -83,6 +87,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'triviagame.wsgi.application'
+ASGI_APPLICATION = 'triviagame.asgi.application'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 

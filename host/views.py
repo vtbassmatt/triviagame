@@ -11,17 +11,22 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 
 from game.models import Game, Page, Response, Team, Question
 from game.forms import CsrfDummyForm
 from game.views import compute_leaderboard_data
-from .forms import SomePageForm, GameForm, PageForm, QuestionForm
+from .forms import GameForm, PageForm, QuestionForm
 from .models import GameHostPermissions
 
 
 class HttpResponseConflict(HttpResponse):
     status_code = HTTPStatus.CONFLICT
+
+
+class HttpResponseNoContent(HttpResponse):
+    status_code = HTTPStatus.NO_CONTENT
 
 
 @login_required
@@ -46,7 +51,12 @@ def host_home(request):
         can_edit=False,
     )
 
-    return render(request, 'host/home.html', {
+    template = 'host/home.html'
+
+    if request.htmx and request.htmx.trigger_name == 'gamesList':
+        template = 'host/_games_list.html'
+
+    return render(request, template, {
         'hosting': hosting,
         'hostable': [h.game for h in hostable],
         'editable': [e.game for e in editable],
@@ -76,25 +86,33 @@ def host_join(request, id):
 
 
 @login_required
+@require_POST
 def toggle_game(request):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
     if 'hosting' not in request.session:
         _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+        return HttpResponseClientRedirect(reverse('host_home'))
 
     hosting = Game.objects.get(pk=request.session['hosting'])
 
-    if request.method == 'POST':
-        form = CsrfDummyForm(request.POST)
-        if form.is_valid():
-            hosting.open = not hosting.open
-            hosting.save()
-            if hosting.open:
-                messages.success(request, "You opened the game.")
-                return HttpResponseRedirect(reverse('pages'))
-            else:
-                messages.success(request, "You closed the game.")
+    hosting.open = not hosting.open
+    hosting.save()
+    if hosting.open:
+        messages.success(request, "You opened the game.")
+    else:
+        messages.success(request, "You closed the game.")
     
-    return HttpResponseRedirect(reverse('host_home'))
+    response = render(request, 'editor/_toggle_game.html', {
+        'hosting': hosting,
+    })
+    # tell the page that game state has updated
+    # TODO: django_htmx.http.trigger_client_event instead
+    response.headers['HX-Trigger'] = 'hostedGameStateUpdated'
+
+    return response
 
 
 @login_required
@@ -107,27 +125,44 @@ def pages(request):
     player_join_url = request.build_absolute_uri(
         reverse('join_game', args=(hosting.id, hosting.passcode)))
 
-    return render(request, 'host/pages.html', {
+    template = 'host/pages.html'
+
+    if request.htmx and request.htmx.trigger_name == 'pagesList':
+        template = 'host/_pages_list.html'
+
+    return render(request, template, {
         'hosting': hosting,
         'player_join_url': player_join_url,
     })
 
 
 @login_required
+@require_POST
 def toggle_page(request, open):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
     if 'hosting' not in request.session:
         _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
-
-    if request.method == 'POST':
-        form = SomePageForm(request.POST)
-        if form.is_valid():
-            page = Page.objects.get(pk=form.cleaned_data['page'])
-            page.open = open
-            messages.success(request, f"You {'opened' if open else 'closed'} \"{page.title}\".")
-            page.save()
+        return HttpResponseClientRedirect(reverse('host_home'))
     
-    return HttpResponseRedirect(reverse('pages'))
+    if 'page' not in request.POST:
+        return HttpResponseBadRequest("expected page id")
+
+    page_id = int(request.POST['page'])
+    page = get_object_or_404(Page, pk=page_id)
+    page.open = open
+    page.save()
+    messages.success(request, f"You {'opened' if open else 'closed'} \"{page.title}\".")
+
+    response = HttpResponseNoContent()
+    # report that some page's state has updated
+    return trigger_client_event(
+        response,
+        'pageStateUpdated',
+        {'page': page_id},
+    )
 
 
 @login_required
@@ -230,7 +265,7 @@ def new_game(request):
     else:
         form = GameForm()
 
-    return render(request, 'editor/new.html', {
+    return render(request, 'editor/new_game.html', {
         'form': form,
     })
 
@@ -370,6 +405,11 @@ def page_move(request, page_id, delta):
         page.order = F('order') + delta
         page.save()
     
+    if request.htmx:
+        return render(request, 'editor/_page_list.html', {
+            'game': page.game,
+        })
+
     return HttpResponseRedirect(reverse('edit_game', args=(page.game.id,)))
 
 
@@ -484,6 +524,11 @@ def question_move(request, question_id, delta):
         question.order = F('order') + delta
         question.save()
     
+    if request.htmx:
+        return render(request, 'editor/_question_list.html', {
+            'page': question.page,
+        })
+
     return HttpResponseRedirect(reverse('edit_page', args=(question.page.id,)))
 
 

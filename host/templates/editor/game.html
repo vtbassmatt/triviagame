@@ -25,16 +25,7 @@
     <div class="card mb-3">
       <div class="card-header">Pages</div>
       <ul class="list-group list-group-flush">
-        {% for page in game.page_set.all %}
-        <li class="list-group-item">
-          {{ page.order }}. <a href="{% url 'edit_page' page.id %}">{{ page.title }}</a>
-          <form style="display: inline" method="post" action="{% url 'page_up' page.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</button></form>
-          <form style="display: inline" method="post" action="{% url 'page_down' page.id %}">{% csrf_token %}<button class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</button></form>  
-          <a href="{% url 'delete_page' page.id %}" class="btn btn-outline-danger">Delete</a>
-        </li>
-        {% empty %}
-        <li class="list-group-item text-secondary">No pages yet</li>
-        {% endfor %}
+        {% include 'editor/_page_list.html' %}
       </ul>
       <div class="card-footer">
         <a href="{% url 'new_page' game.id %}" class="btn btn-outline-primary">Add new page</a>

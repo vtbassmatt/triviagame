@@ -1,0 +1,14 @@
+<div id="question-list">
+{% for question in page.question_set.all %}
+<div class="card mb-3">
+  <div class="card-header">{{ question.order }}. {{ question.question|linebreaksbr }}</div>
+  <div class="card-body">
+    <p class="card-text">{{ question.answer|linebreaksbr }}</p>
+    <a href="{% url 'edit_question' question.id %}" class="btn btn-outline-primary">Edit</a>
+    <a hx-post="{% url 'question_up' question.id %}" hx-target="#question-list" class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</a>
+    <a hx-post="{% url 'question_down' question.id %}" hx-target="#question-list" class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</a>
+    <a href="{% url 'delete_question' question.id %}" class="btn btn-outline-danger">Delete</a>
+  </div>
+</div>
+{% endfor %}
+</div>
