@@ -1,0 +1,9 @@
+{% for page in game.page_set.all %}
+  {% if page.open %}
+  <dt class="col-sm-3">{{ page.order }}. <a href="{% url 'answer_sheet' page.order %}">{{ page.title }}</a></dt>
+  <dd class="col-sm-9"><p>{{ page.description|linebreaksbr }}</p></dd>
+  {% else %}
+  <dt class="col-sm-3 text-muted">{{ page.order }}. ????????????? 🔒</dt>
+  <dd class="col-sm-9 text-muted"><em>{{ page.mystery_description }}</em></dd>
+  {% endif %}
+{% endfor %}

@@ -9,6 +9,7 @@ from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed,
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.crypto import get_random_string
+from django_htmx.http import HttpResponseClientRedirect, HttpResponseStopPolling
 
 from . import models
 from .forms import JoinGameForm, CreateTeamForm, ReJoinTeamForm, CsrfDummyForm
@@ -171,26 +172,35 @@ def rejoin_team(request, id=0, code=None):
 
 
 def play(request):
+    if request.htmx:
+        Redirect = HttpResponseClientRedirect
+    else:
+        Redirect = HttpResponseRedirect
+
     if 'game' not in request.session:
         _flash_not_in_game(request)
-        return HttpResponseRedirect(reverse('home'))
+        return Redirect(reverse('home'))
     if 'team' not in request.session:
         _flash_no_team(request)
-        return HttpResponseRedirect(reverse('home'))
+        return Redirect(reverse('home'))
 
-    game = models.Game.objects.get(pk=request.session['game'])
-    team = models.Team.objects.get(pk=request.session['team'])
+    config = {
+        'game': models.Game.objects.get(pk=request.session['game']),
+        'team': models.Team.objects.get(pk=request.session['team']),
+    }
 
-    if not game.open:
-        return render(request, 'game/closed.html', {
-            'game': game,
-            'team': team,
-        })
+    if request.htmx:
+        if not config['game'].open:
+            # redirects to self, which will render the closed page next time
+            return Redirect(reverse('play'))
+        
+        return render(request, 'game/_page_list.html', config)
 
-    return render(request, 'game/pages.html', {
-        'game': game,
-        'team': team,
-    })
+    else:
+        if not config['game'].open:
+            return render(request, 'game/closed.html', config)
+
+        return render(request, 'game/pages.html', config)
 
 
 def answer_sheet(request, page_order):
