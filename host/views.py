@@ -15,7 +15,6 @@ from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 
 from game.models import Game, Page, Response, Team, Question
-from game.forms import CsrfDummyForm
 from game.views import compute_leaderboard_data
 from .forms import GameForm, PageForm, QuestionForm
 from .models import GameHostPermissions
@@ -178,38 +177,38 @@ def score_page(request, page_id):
     hosting = Game.objects.get(pk=request.session['hosting'])
     page = Page.objects.get(pk=page_id, game=hosting)
 
-    if request.method == 'POST':
-        form = CsrfDummyForm(request.POST)
-        if form.is_valid():
-            _record_scores(request.POST)
-            messages.success(request, "Scores recorded.")
-            return HttpResponseRedirect(reverse('score_page', args=(page.id,)))
-        else:
-            return HttpResponseBadRequest('failed csrf validation')
-
     return render(request, 'host/scoring.html', {
         'hosting': hosting,
         'page': page,
-        'dummy_form': CsrfDummyForm(),
     })
 
+@login_required
+@require_POST
+def assign_score(request):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
 
-def _record_scores(post_data):
-    incoming_data = {}
-    for key in post_data:
-        if key[:6] == 'exist_':
-            # HTML forms are a hot mess - an unchecked checkbox isn't sent!
-            response_id = int(key[6:])
-            check_key = f'check_{response_id}'
-            value = check_key in post_data
-            print(f"{response_id}: {value}")
-            incoming_data[response_id] = value
+    if 'hosting' not in request.session:
+        _flash_not_hosting(request)
+        return HttpResponseClientRedirect(reverse('host_home'))
+    
+    if 'response' not in request.POST:
+        return HttpResponseBadRequest("expected response id")
+    
+    if 'score' not in request.POST:
+        return HttpResponseBadRequest("expected score")
 
-    responses = Response.objects.filter(id__in=incoming_data.keys())
-    for r in responses:
-        r.graded = True
-        r.score = 1 if incoming_data.get(r.id, False) else 0
-    Response.objects.bulk_update(responses, fields=['graded', 'score'])
+    response_id = int(request.POST['response'])
+    response = get_object_or_404(Response, pk=response_id)
+    score = int(request.POST['score'])
+    response.score = score
+    response.graded = True
+    response.save()
+
+    return render(request, 'host/_question_score.html', {
+        'question': response.question,
+    })
 
 
 @login_required

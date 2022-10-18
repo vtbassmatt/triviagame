@@ -1,0 +1,52 @@
+{# this template must only depend on `question` because it is #}
+{# invoked in the HTMX view `assign_score` in addition to being #}
+{# included in scoring.html #}
+<div class="card mb-3" id="question-card-{{ question.id }}">
+  <div class="card-header">
+  {{ question.order }}. {{ question.question }}
+  </div>
+  <div class="card-body">
+    <div class="card-title">Correct answer: <span class="text-success">{{ question.answer }}</span></div>
+    <table class="table table-sm">
+    <thead>
+      <tr>
+        <td>❓</td>
+        <td>Response</td>
+        <td>Team</td>
+      </tr>
+    </thead>
+    {% for response in question.response_set.all %}
+    <tr{% if not response.graded %} class="table-warning"{% endif %}>
+      <td>
+        <div class="btn-group" role="group">
+          <button
+            {% if response.graded and response.score > 0 %}
+            class="btn btn-sm btn-success"
+            disabled
+            {% else %}
+            class="btn btn-sm btn-outline-success"
+            {% endif %}
+            hx-post="{% url 'assign_score' %}"
+            hx-vals='{"response":{{ response.id }},"score":1}'
+            hx-target="#question-card-{{ response.question.id }}"
+            hx-swap="outerHTML">✅</button>
+          <button
+            {% if response.graded and response.score <= 0 %}
+            class="btn btn-sm btn-danger"
+            disabled
+            {% else %}
+            class="btn btn-sm btn-outline-danger"
+            {% endif %}
+            hx-post="{% url 'assign_score' %}"
+            hx-vals='{"response":{{ response.id }},"score":0}'
+            hx-target="#question-card-{{ response.question.id }}"
+            hx-swap="outerHTML">❌</button>
+          </div>
+      </td>
+      <td>{% if not response.graded %}⚠️ {% endif %}{{ response.value }}</td>
+      <td>{{ response.team.name }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+  </div>
+</div>
