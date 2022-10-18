@@ -6,7 +6,7 @@ def generate_passcode():
     return get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
 
 
-class Game(models.Model):
+class Game(models.Model):    
     name = models.CharField(max_length=60)
     passcode = models.CharField(max_length=20, default=generate_passcode)
     open = models.BooleanField(default=False)
@@ -23,7 +23,7 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
-
+    
     class Meta:
         ordering = ['game', 'name']
         constraints = [
@@ -43,9 +43,17 @@ class Page(models.Model):
         'It\'s a secret to everybody.',
     ]
 
+    class PageState(models.IntegerChoices):
+        LOCKED = 0      # players cannot see the page at all
+        OPEN = 1        # players can see and answer the page
+        SCORING = 2     # players can see, but not answer, the page
+
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     order = models.SmallIntegerField()
-    open = models.BooleanField(default=False)
+    state = models.IntegerField(
+        choices=PageState.choices,
+        default=PageState.LOCKED,
+    )
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
@@ -64,6 +72,53 @@ class Page(models.Model):
     def mystery_description(self):
         index = self.game.id + self.order
         return Page.MYSTERIES[index % len(Page.MYSTERIES)]
+
+    # these properties are convenient in templates    
+    @property
+    def is_locked(self):
+        return self.state == Page.PageState.LOCKED
+    
+    @property
+    def is_open(self):
+        return self.state == Page.PageState.OPEN
+    
+    @property
+    def is_scoring(self):
+        return self.state == Page.PageState.SCORING
+    
+    @property
+    def bootstrap_locked_button_styles(self):
+        match self.state:
+            case Page.PageState.LOCKED:
+                return 'btn-outline-secondary disabled'
+            case Page.PageState.OPEN:
+                return 'btn-outline-primary'
+            case Page.PageState.SCORING:
+                return 'btn-outline-primary'
+        return ''
+    
+    @property
+    def bootstrap_open_button_styles(self):
+        match self.state:
+            case Page.PageState.LOCKED:
+                return 'btn-primary'
+            case Page.PageState.OPEN:
+                return 'btn-outline-secondary disabled'
+            case Page.PageState.SCORING:
+                return 'btn-outline-primary'
+        return ''
+    
+    @property
+    def bootstrap_scoring_button_styles(self):
+        match self.state:
+            case Page.PageState.LOCKED:
+                return 'btn-outline-primary'
+            case Page.PageState.OPEN:
+                return 'btn-primary'
+            case Page.PageState.SCORING:
+                return 'btn-outline-secondary disabled'
+        return ''
+    # end template properties
 
 
 class Question(models.Model):

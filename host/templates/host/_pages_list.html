@@ -1,22 +1,26 @@
 {% for page in hosting.page_set.all %}
-<div class="card mb-3{% if page.open and hosting.open %} border-success{% elif page.open %} border-warning{% endif %}">
-<div class="card-header{% if page.open and hosting.open %} text-white bg-success{% elif page.open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>
-<div class="card-body">
-  <div class="card-title">{{ page.description|linebreaksbr }}</div>
-  <div class="card-text"><a href="{% url 'score_page' page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
-  {% if page.open %}
-  <div class="card-text"
-       hx-post="{% url 'close_page' %}"
-       hx-vals='{"page":{{ page.id }}}'>
-    <button class="btn btn-outline-danger">Close this page</button> <small>(This will hide it from players, even if they've entered answers.)</small>
-  </div>
-  {% else %}
-  <div class="card-text"
-       hx-post="{% url 'open_page' %}"
-       hx-vals='{"page":{{ page.id }}}'>
-    <button class="btn btn{% if not hosting.open %}-outline-secondary{% else %}-primary{% endif %}">Open this page 👉</button>
-  </div>
-  {% endif %}
+<div class="card mb-3{% if page.is_open and hosting.open %} border-success{% elif page.is_open %} border-warning{% endif %}">
+  <div class="card-header{% if page.is_open and hosting.open %} text-white bg-success{% elif page.is_open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>
+  <div class="card-body">
+    <div class="card-title">{{ page.description|linebreaksbr }}</div>
+    <div class="card-text"><a href="{% url 'score_page' page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
+    <div class="card-text">
+      <a class="btn {{ page.bootstrap_locked_button_styles }}"
+        hx-post="{% url 'set_page_state' %}"
+        hx-vals='{"page":{{ page.id }},"state":"LOCKED"}'>
+        Lock this page 🔒
+      </a>
+      <a class="btn {{ page.bootstrap_open_button_styles }}"
+        hx-post="{% url 'set_page_state' %}"
+        hx-vals='{"page":{{ page.id }},"state":"OPEN"}'>
+        Open this page ✏️
+      </a>
+      <a class="btn {{ page.bootstrap_scoring_button_styles }}"
+        hx-post="{% url 'set_page_state' %}"
+        hx-vals='{"page":{{ page.id }},"state":"SCORING"}'>
+        Close this page to begin scoring ✋
+      </a>
+    </div>
   </div>
 </div>
 {% empty %}
