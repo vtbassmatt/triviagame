@@ -17,7 +17,7 @@
         {% csrf_token %}
         {{ form }}
         <button type="submit" class="btn btn-danger">Delete answer</button>
-        <a href="{% url 'answer_sheet' response.question.page.order %}" class="btn btn-outline-primary">I changed my mind! Leave it!</a>
+        <a href="{% url 'answer_sheet_old' response.question.page.order %}" class="btn btn-outline-primary">I changed my mind! Leave it!</a>
         </form>
       </div>
     </div>

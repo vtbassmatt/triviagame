@@ -1,0 +1,74 @@
+<div class="col-12" id="question-{{ question.id }}" hx-ext="morph">
+  <div class="card mb-3">
+    <div class="card-header">Question {{ question.order }}</div>
+    <div class="card-body">
+      <p class="card-text">{{ question.question }}</p>
+
+      {% comment %}
+      assured by the view:
+      - game open
+      - on a team
+      - page not locked
+      - question exists
+      {% endcomment %}
+
+      {# page accepting answers, response not scored #}
+      {% if question.page.is_open and not response.graded %}
+      <p class="card-text">
+        <form>
+          <div class="row">
+            <label class="visually-hidden" for="response_{{ question.id }}">Your answer</label>
+            <div class="input-group">
+              <div class="input-group-text">Answer?</div>
+              <input
+                type="text"
+                class="form-control"
+                name="response_value"
+                placeholder="..."
+                value="{{ response.value }}"
+                hx-post="{% url 'question_hx' question.id %}"
+                hx-target="#question-{{ question.id }}"
+                hx-swap="morph:outerHTML"
+                hx-trigger="keyup changed delay:500ms">
+              <div class="input-group-text">{% if did_save == True %}✅{% elif did_save == False %}‼️{% else %}◻️{% endif %}</div>
+            </div>
+          </div>
+        </form>
+      </p>
+      {% endif %}
+
+      {# page accepting answers but response scored #}
+      {% if question.page.is_open and response.graded %}
+      <p class="card-text">
+      You answered
+      <span class="text-info">{{ response.value }}</span>,
+      it's being scored, so you can't change it now.
+      </p>
+      {% endif %}
+
+      {# page not accepting answers #}
+      {% if question.page.is_scoring %}
+      <p class="card-text">Correct answer: <span class="text-info">{{ question.answer }}</span></p>
+      <p class="card-text">
+        {% if response %}
+          Your answer:
+          {% if response.graded %}
+            {% if response.score > 0 %}
+            <span class="text-success">
+            {% else %}{# score <= 0 #}
+            <span class="text-danger">
+            {% endif %}
+          {{ response.value }}
+          {% if response.score > 0 %}✅{% else %}❌{% endif %}
+          {% else %}{# not graded #}
+            {{ response.value }} not marked right or wrong
+          {% endif %}
+          </span>
+        {% else %}{# no response #}
+        <span class="text-secondary">❌ You did not submit a response.</span>
+        {% endif %}
+      </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
