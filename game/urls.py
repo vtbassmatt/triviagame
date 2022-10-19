@@ -13,6 +13,8 @@ urlpatterns = [
     path('play/', views.play, name='play'),
     path('play/<int:page_order>/', views.answer_sheet, name='answer_sheet'),
     path('play/<int:page_order>/answer/', views.accept_answers, name='accept_answers'),
+    path('play_new/<int:page_order>/', views.answer_sheet_page, name='answer_sheet_page'),
+    path('play_new/q/<int:question_id>/', views.question_hx, name='question_hx'),
     path('erase/<int:response_id>/', views.delete_answer, name='delete_answer'),
     path('leaderboard/', views.leaderboard, name='leaderboard'),
 ]

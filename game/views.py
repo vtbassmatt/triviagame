@@ -1,3 +1,4 @@
+import http
 import random
 import re
 
@@ -9,7 +10,7 @@ from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed,
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from django_htmx.http import HttpResponseClientRedirect, HttpResponseStopPolling
+from django_htmx.http import HttpResponseClientRedirect
 
 from . import models
 from .forms import JoinGameForm, CreateTeamForm, ReJoinTeamForm, CsrfDummyForm
@@ -201,6 +202,110 @@ def play(request):
             return render(request, 'game/closed.html', config)
 
         return render(request, 'game/pages.html', config)
+
+
+def _get_game_team(request, Redirect=HttpResponseRedirect):
+    if 'game' not in request.session:
+        _flash_not_in_game(request)
+        return None, None, Redirect(reverse('home'))
+
+    if 'team' not in request.session:
+        _flash_no_team(request)
+        return None, None, Redirect(reverse('home'))
+    
+    try:
+        game = models.Game.objects.get(pk=request.session['game'])
+    except models.Game.DoesNotExist:
+        game = None
+
+    if not game.open:
+        _flash_game_not_open(request)
+        return game, None, Redirect(reverse('play'))
+
+    try:
+        team = models.Team.objects.get(pk=request.session['team'])
+    except models.Team.DoesNotExist:
+        _flash_no_team(request)
+        return game, None, Redirect(reverse('home'))
+    
+    return game, team, None
+
+
+def answer_sheet_page(request, page_order):
+    game, team, response = _get_game_team(request)
+    if response:
+        return response
+
+    try:
+        page = game.page_set.get(order=page_order)
+        if page.state == models.Page.PageState.LOCKED:
+            page = None
+    except models.Page.DoesNotExist:
+        page = None
+
+    if not page:
+        _flash_bad_page(request)
+        return HttpResponseRedirect(reverse('play'))
+
+    return render(request, 'game/answer2.html', {
+        'game': game,
+        'team': team,
+        'page': page,
+    })
+
+
+def question_hx(request, question_id):
+    game, team, response = _get_game_team(request, HttpResponseClientRedirect)
+    if response:
+        return response
+
+    try:
+        question = models.Question.objects.get(pk=question_id)
+        if question.page.state == models.Page.PageState.LOCKED:
+            question = None
+    except models.Question.DoesNotExist:
+        question = None
+
+    if not question:
+        _flash_bad_question(request)
+        return HttpResponseClientRedirect(reverse('play'))
+    
+    try:
+        response = models.Response.objects.get(team=team, question=question)
+    except models.Response.DoesNotExist:
+        response = None
+
+    did_save = None    
+    if request.method == 'POST':
+        # page must be accepting answers and existing response,
+        # if any, must not be scored yet
+        keep_going = True
+        did_save = False
+        if not question.page.is_open:
+            messages.error(request, "This page is not accepting answers now.")
+            keep_going = False
+        if response and response.graded:
+            messages.error(request, f"Your existing response to question {question.order} is already being scored.")
+            keep_going = False
+        
+        new_response = request.POST['response_value']
+        
+        if keep_going:
+            if response:
+                response.value = new_response
+            else:
+                response = models.Response(team=team, question=question, value=new_response)
+
+            response.save()
+            did_save = True
+    
+    return render(request, 'game/_question.html', {
+        'game': game,
+        'team': team,
+        'question': question,
+        'response': response,
+        'did_save': did_save,
+    })
 
 
 def answer_sheet(request, page_order):
@@ -404,3 +509,6 @@ def _flash_game_not_open(request):
 
 def _flash_bad_page(request):
     messages.error(request, "That's not a page in the game.")
+
+def _flash_bad_question(request):
+    messages.error(request, "Question not found or not open.")
