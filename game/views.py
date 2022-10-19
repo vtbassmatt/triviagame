@@ -231,7 +231,7 @@ def _get_game_team(request, Redirect=HttpResponseRedirect):
     return game, team, None
 
 
-def answer_sheet_page(request, page_order):
+def answer_sheet(request, page_order):
     game, team, response = _get_game_team(request)
     if response:
         return response
@@ -247,7 +247,7 @@ def answer_sheet_page(request, page_order):
         _flash_bad_page(request)
         return HttpResponseRedirect(reverse('play'))
 
-    return render(request, 'game/answer2.html', {
+    return render(request, 'game/answer.html', {
         'game': game,
         'team': team,
         'page': page,
@@ -308,7 +308,8 @@ def question_hx(request, question_id):
     })
 
 
-def answer_sheet(request, page_order):
+# TODO: delete this legacy!
+def answer_sheet_old(request, page_order):
     if 'game' not in request.session:
         _flash_not_in_game(request)
         return HttpResponseRedirect(reverse('home'))
@@ -344,7 +345,7 @@ def answer_sheet(request, page_order):
     ]
     score = response_objs.filter(graded=True).aggregate(Sum('score'))['score__sum']
 
-    return render(request, 'game/answer.html', {
+    return render(request, 'game/old_answer.html', {
         'game': game,
         'team': team,
         'page': page,
@@ -386,12 +387,12 @@ def accept_answers(request, page_order):
         if form.is_valid():
             _save_responses(request.POST, valid_questions, team)
             messages.success(request, "Your answers have been recorded for this page.")
-            return HttpResponseRedirect(reverse('answer_sheet', args=(page_order,)))
+            return HttpResponseRedirect(reverse('answer_sheet_old', args=(page_order,)))
         else:
             return HttpResponseBadRequest('failed csrf validation')
 
     else:
-        return HttpResponseRedirect(reverse('answer_sheet', args=(page_order,)))
+        return HttpResponseRedirect(reverse('answer_sheet_old', args=(page_order,)))
 
 
 def _save_responses(post_data, valid_questions, team):
@@ -435,7 +436,7 @@ def delete_answer(request, response_id):
             question_number = response.question.order
             response.delete()
             messages.success(request, f"Deleted your answer for question #{question_number}.")
-            return HttpResponseRedirect(reverse('answer_sheet', args=(return_page,)))
+            return HttpResponseRedirect(reverse('answer_sheet_old', args=(return_page,)))
         else:
             return HttpResponseBadRequest('failed csrf validation')
 
@@ -446,7 +447,7 @@ def delete_answer(request, response_id):
         'form': form,
         'response': response,
     })
-
+# TODO: end legacy
 
 def leaderboard(request):
     if 'game' not in request.session:
