@@ -46,7 +46,3 @@ class CreateTeamForm(forms.ModelForm):
 class ReJoinTeamForm(forms.Form):
     id = forms.IntegerField(label="Team ID", widget=Bs5NumberInput)
     code = forms.CharField(label="Code", max_length=20, widget=Bs5TextInput)
-
-
-class CsrfDummyForm(forms.Form):
-    pass

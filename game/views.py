@@ -1,19 +1,16 @@
-import http
 import random
-import re
 
 from django.contrib import messages
-from django.db import Error as DjangoDbError, IntegrityError
-from django.db.models import Sum
+from django.db import Error as DjangoDbError
 from django.forms import ValidationError, HiddenInput
-from django.http.response import HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from django_htmx.http import HttpResponseClientRedirect
 
 from . import models
-from .forms import JoinGameForm, CreateTeamForm, ReJoinTeamForm, CsrfDummyForm
+from .forms import JoinGameForm, CreateTeamForm, ReJoinTeamForm
 
 
 def home(request):
@@ -307,147 +304,6 @@ def question_hx(request, question_id):
         'did_save': did_save,
     })
 
-
-# TODO: delete this legacy!
-def answer_sheet_old(request, page_order):
-    if 'game' not in request.session:
-        _flash_not_in_game(request)
-        return HttpResponseRedirect(reverse('home'))
-    if 'team' not in request.session:
-        _flash_no_team(request)
-        return HttpResponseRedirect(reverse('home'))
-
-    game = models.Game.objects.get(pk=request.session['game'])
-    team = models.Team.objects.get(pk=request.session['team'])
-
-    try:
-        page = game.page_set.get(order=page_order)
-        if page.state == models.Page.PageState.LOCKED:
-            page = None
-    except models.Page.DoesNotExist:
-        page = None
-
-    if not game.open:
-        _flash_game_not_open(request)
-        return HttpResponseRedirect(reverse('play'))
-    if not page:
-        _flash_bad_page(request)
-        return HttpResponseRedirect(reverse('play'))
-    
-    # if a question has a response for this team, grab it here
-    response_objs = models.Response.objects.filter(
-        team=team, question__page=page)
-    responses = {
-        x.question.id: x for x in response_objs
-    }
-    questions = [
-        (q, responses.get(q.id, None)) for q in page.question_set.all()
-    ]
-    score = response_objs.filter(graded=True).aggregate(Sum('score'))['score__sum']
-
-    return render(request, 'game/old_answer.html', {
-        'game': game,
-        'team': team,
-        'page': page,
-        'questions': questions,
-        'unanswered_questions': len(questions) - len(responses),
-        'page_score': score,
-    })
-
-
-def accept_answers(request, page_order):
-    if 'game' not in request.session:
-        _flash_not_in_game(request)
-        return HttpResponseRedirect(reverse('home'))
-    if 'team' not in request.session:
-        _flash_no_team(request)
-        return HttpResponseRedirect(reverse('home'))
-    
-    game = models.Game.objects.get(pk=request.session['game'])
-    team = models.Team.objects.get(pk=request.session['team'])
-
-    try:
-        page = game.page_set.get(order=page_order)
-        if page.state != models.Page.PageState.OPEN:
-            page = None
-    except models.Page.DoesNotExist:
-        page = None
-
-    if not game.open:
-        _flash_game_not_open(request)
-        return HttpResponseRedirect(reverse('play'))
-    if not page:
-        _flash_bad_page(request)
-        return HttpResponseRedirect(reverse('play'))
-
-    valid_questions = {q.id: q for q in page.question_set.all()}
-
-    if request.method == 'POST':
-        form = CsrfDummyForm(request.POST)
-        if form.is_valid():
-            _save_responses(request.POST, valid_questions, team)
-            messages.success(request, "Your answers have been recorded for this page.")
-            return HttpResponseRedirect(reverse('answer_sheet_old', args=(page_order,)))
-        else:
-            return HttpResponseBadRequest('failed csrf validation')
-
-    else:
-        return HttpResponseRedirect(reverse('answer_sheet_old', args=(page_order,)))
-
-
-def _save_responses(post_data, valid_questions, team):
-    for key in post_data:
-        if key[:9] == 'response_':
-            response_question_id = int(key[9:])
-            response_value = str(post_data[key]).strip()[:100]
-            if response_question_id in valid_questions and response_value:
-                try:
-                    models.Response.objects.create(
-                        question=valid_questions[response_question_id],
-                        team=team,
-                        value=response_value,
-                    )
-                except IntegrityError:
-                    pass
-
-
-def delete_answer(request, response_id):
-    if 'game' not in request.session:
-        _flash_not_in_game(request)
-        return HttpResponseRedirect(reverse('home'))
-    if 'team' not in request.session:
-        _flash_no_team(request)
-        return HttpResponseRedirect(reverse('home'))
-    
-    try:
-        response = models.Response.objects.get(pk=response_id, graded=False)
-    except models.Response.DoesNotExist:
-        return HttpResponseRedirect(reverse('play'))
-    
-    if response.team.id != request.session['team']:
-        return HttpResponseNotAllowed()
-
-    # TODO: block deletion if page not open
-
-    if request.method == 'POST':
-        form = CsrfDummyForm(request.POST)
-        if form.is_valid():
-            return_page = response.question.page.order
-            question_number = response.question.order
-            response.delete()
-            messages.success(request, f"Deleted your answer for question #{question_number}.")
-            return HttpResponseRedirect(reverse('answer_sheet_old', args=(return_page,)))
-        else:
-            return HttpResponseBadRequest('failed csrf validation')
-
-    else:
-        form = CsrfDummyForm()
-
-    return render(request, 'game/delete.html', {
-        'form': form,
-        'response': response,
-    })
-# TODO: end legacy
 
 def leaderboard(request):
     if 'game' not in request.session:
