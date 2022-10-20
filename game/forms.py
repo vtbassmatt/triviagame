@@ -1,7 +1,7 @@
 from django import forms
 
 from .models import Team
-from .widgets import Bs5TextInput, Bs5NumberInput, Bs5Textarea
+from .widgets import Bs5TextInput, Bs5NumberInput
 
 
 class JoinGameForm(forms.Form):
@@ -35,11 +35,11 @@ class CreateTeamForm(forms.ModelForm):
         fields = ('name', 'members')
         widgets = {
             'name': Bs5TextInput,
-            'members': Bs5Textarea,
+            'members': Bs5TextInput,
         }
         labels = {
             'name': 'Team name',
-            'members': 'Team members',
+            'members': 'Team members (for display only, separate with spaces, commas, or whatever you want)',
         }
 
 
