@@ -44,7 +44,7 @@
           </div>
       </td>
       <td>{% if not response.graded %}⚠️ {% endif %}{{ response.value }}</td>
-      <td>{{ response.team.name }}</td>
+      <td><abbr title="{{ response.team.members }}">{{ response.team.name }}</abbr></td>
     </tr>
     {% endfor %}
     </table>
