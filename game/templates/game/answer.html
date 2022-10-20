@@ -11,11 +11,21 @@
 </div>
 <div class="row">
   {% for question in page.question_set.all %}
-  <div class="placeholder col-4 bg-secondary"
-       hx-get="{% url 'question_hx' question.id %}"
-       hx-trigger="load"
-       hx-swap="outerHTML">
-    <img class="htmx-indicator" src="{% static 'loaders/puff.svg' %}">
+  <div class="col-12" id="question-{{ question.id }}"
+        hx-get="{% url 'question_hx' question.id %}"
+        hx-trigger="load"
+        hx-ext="morph"
+        hx-swap="morph:outerHTML">
+    <div class="card mb-3">
+      <div class="card-header">Question {{ question.order }}</div>
+      <div class="card-body">
+        <p class="card-text">{{ question.question }}</p>
+        <p class="card-text placeholder-glow">
+          <span class="placeholder col-2 placeholder-lg"></span>
+          <span class="placeholder col-6 placeholder-lg"></span>
+        </p>
+      </div>
+    </div>
   </div>
   {% empty %}
   <p>There aren't any questions here.</p>

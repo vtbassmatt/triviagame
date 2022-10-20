@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load dict_extras %}
 {% block title %}Tr¿via - {{ game.name }} Leaderboard{% endblock %}
 {% block heading %}{{ game.name }}{% endblock %}
 {% block contents %}
@@ -9,7 +10,8 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <td>team ⬇️ / round ➡️</td>
+        <td>team</td>
+        <td>members</td>
         {% for round in rounds %}
         <td>{{ round }}</td>
         {% endfor %}
@@ -20,6 +22,7 @@
         {% for entry in line %}
         {% if forloop.first %}
         <th scope="row">{% if entry == team.name %}👉 {% endif %}{% if entry in gold_medals %}🥇 {% endif %}{{ entry }}</th>
+        <td>{{ teams|dict_value:entry }}</td>
         {% else %}
         <td>{{ entry }}</td>
         {% endif %}

@@ -18,7 +18,7 @@ class Game(models.Model):
 class Team(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    members = models.TextField(blank=True)
+    members = models.CharField(max_length=200, blank=True)
     passcode = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
