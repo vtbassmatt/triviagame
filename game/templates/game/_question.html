@@ -15,7 +15,7 @@
       {# page accepting answers, response not scored #}
       {% if question.page.is_open and not response.graded %}
       <p class="card-text">
-        <form{% if did_save == True or did_save == False %}novalidate class="was-validated"{% endif %}>
+        <form{% if did_save == True or did_save == False %} novalidate class="was-validated"{% endif %}>
           <div class="row">
             <label class="visually-hidden" for="response_{{ question.id }}">Your answer</label>
             <div class="input-group">
