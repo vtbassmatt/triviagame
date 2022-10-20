@@ -108,8 +108,11 @@ def toggle_game(request):
         'hosting': hosting,
     })
     # tell the page that game state has updated
-    # TODO: django_htmx.http.trigger_client_event instead
-    response.headers['HX-Trigger'] = 'hostedGameStateUpdated'
+    trigger_client_event(
+        response,
+        'hostedGameStateUpdated',
+        True,
+    )
 
     return response
 
