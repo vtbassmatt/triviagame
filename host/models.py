@@ -11,6 +11,10 @@ class GameHostPermissions(models.Model):
     can_host = models.BooleanField()
     can_edit = models.BooleanField()
 
+    class Meta:
+        verbose_name = 'Host perms'
+        verbose_name_plural = 'Host perms'
+
     def __str__(self):
         perm_bits = "".join([
             "E" if self.can_edit else "-",
