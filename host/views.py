@@ -224,6 +224,7 @@ def host_leaderboard(request):
     return render(request, 'host/leaderboard.html', {
         'game': hosting,
         'rounds': rounds,
+        'teams': { t.name: t.members for t in hosting.team_set.all() },
         'leaderboard': ldr_board,
         'gold_medals': gold_medals,
     })

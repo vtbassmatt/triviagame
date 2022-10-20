@@ -465,6 +465,7 @@ def leaderboard(request):
     return render(request, 'game/leaderboard.html', {
         'game': game,
         'team': team,
+        'teams': { t.name: t.members for t in game.team_set.all() },
         'rounds': rounds,
         'leaderboard': ldr_board,
         'gold_medals': gold_medals,

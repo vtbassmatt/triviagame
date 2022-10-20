@@ -1,4 +1,5 @@
 {% extends 'host_base.html' %}
+{% load dict_extras %}
 {% block heading %}Leaderboard for {{ game.name }}{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
@@ -6,7 +7,8 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <td>team ⬇️ / round ➡️</td>
+        <td>team</td>
+        <td>members</td>
         {% for round in rounds %}
         <td>{{ round }}</td>
         {% endfor %}
@@ -17,6 +19,7 @@
         {% for entry in line %}
         {% if forloop.first %}
         <th scope="row">{% if entry in gold_medals %}🥇 {% endif %}{{ entry }}</th>
+        <td>{{ teams|dict_value:entry }}</td>
         {% else %}
         <td>{{ entry }}</td>
         {% endif %}
