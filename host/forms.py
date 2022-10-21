@@ -31,7 +31,7 @@ class PageForm(forms.ModelForm):
         }
         labels = {
             'title': 'Page title',
-            'description': 'Long description',
+            'description': 'Long description (Markdown allowed)',
         }
 
 

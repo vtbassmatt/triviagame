@@ -11,6 +11,8 @@
     (✅ done)
     {% endif %}
   </dt>
-  <dd class="col-sm-9"><p>{{ page.description|linebreaksbr }}</p></dd>
+  <dd class="col-sm-9 markdown-needed">
+    {{ page.description|linebreaksbr }}
+  </dd>
   {% endif %}
 {% endfor %}
