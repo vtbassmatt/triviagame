@@ -2,7 +2,7 @@
   <div class="card mb-3">
     <div class="card-header">Question {{ question.order }}</div>
     <div class="card-body">
-      <p class="card-text">{{ question.question }}</p>
+      <p class="card-text markdown-needed">{{ question.question }}</p>
 
       {% comment %}
       assured by the view:
@@ -50,7 +50,7 @@
 
       {# page not accepting answers #}
       {% if question.page.is_scoring %}
-      <p class="card-text">Correct answer: <span class="text-info">{{ question.answer }}</span></p>
+      <p class="card-text">Correct answer: <span class="text-info markdown-needed">{{ question.answer }}</span></p>
       <p class="card-text">
         {% if response %}
           Your answer:

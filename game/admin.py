@@ -46,6 +46,9 @@ class QuestionAdmin(admin.ModelAdmin):
         'question',
         'page_title',
     )
+    list_display_links = (
+        'question',
+    )
     list_filter = ('page__game__name',)
 
 

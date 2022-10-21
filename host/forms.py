@@ -31,7 +31,7 @@ class PageForm(forms.ModelForm):
         }
         labels = {
             'title': 'Page title',
-            'description': 'Long description',
+            'description': 'Long description (Markdown allowed)',
         }
 
 
@@ -45,4 +45,8 @@ class QuestionForm(forms.ModelForm):
         widgets = {
             'question': Bs5Textarea,
             'answer': Bs5Textarea,
+        }
+        labels = {
+            'question': 'Question (Markdown allowed)',
+            'answer': 'Answer (Markdown allowed)',
         }

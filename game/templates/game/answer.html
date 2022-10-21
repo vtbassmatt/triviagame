@@ -7,7 +7,7 @@
   <p>Playing as <em>{{ team.name }}</em>.</p>
   <p><span class="badge bg-success">New!</span> Answers are saved as you type, no need to submit anything.<p>
   <h2>{{ page.order }}. {{ page.title }}</h2>
-  {% if page.description %}<p>{{ page.description|linebreaksbr }}</p>{% endif %}
+  {% if page.description %}<p class="markdown-needed">{{ page.description|linebreaksbr }}</p>{% endif %}
 </div>
 <div class="row">
   {% for question in page.question_set.all %}
@@ -19,7 +19,7 @@
     <div class="card mb-3">
       <div class="card-header">Question {{ question.order }}</div>
       <div class="card-body">
-        <p class="card-text">{{ question.question }}</p>
+        <p class="card-text markdown-needed">{{ question.question }}</p>
         <p class="card-text placeholder-glow">
           <span class="placeholder col-2 placeholder-lg"></span>
           <span class="placeholder col-6 placeholder-lg"></span>
