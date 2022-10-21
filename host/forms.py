@@ -46,3 +46,7 @@ class QuestionForm(forms.ModelForm):
             'question': Bs5Textarea,
             'answer': Bs5Textarea,
         }
+        labels = {
+            'question': 'Question (Markdown allowed)',
+            'answer': 'Answer (Markdown allowed)',
+        }
