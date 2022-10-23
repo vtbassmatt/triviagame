@@ -13,8 +13,5 @@ urlpatterns = [
     path('play/', views.play, name='play'),
     path('play/<int:page_order>/', views.answer_sheet, name='answer_sheet'),
     path('play/q/<int:question_id>/', views.question_hx, name='question_hx'),
-    # path('old/play/<int:page_order>/', views.answer_sheet_old, name='answer_sheet_old'),
-    # path('old/play/<int:page_order>/answer/', views.accept_answers, name='accept_answers'),
-    # path('old/erase/<int:response_id>/', views.delete_answer, name='delete_answer'),
     path('leaderboard/', views.leaderboard, name='leaderboard'),
 ]
