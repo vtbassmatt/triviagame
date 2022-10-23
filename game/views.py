@@ -44,7 +44,6 @@ def home(request):
     return render(request, 'home.html', {
         'game': game,
         'team': team,
-        'form': JoinGameForm(),
     })
 
 

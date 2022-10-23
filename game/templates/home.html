@@ -1,21 +1,81 @@
 {% extends 'base.html' %}
-{% block heading %}Welcome to Tr¿via{% endblock %}
+{% load static %}
+{% block heading %} {% endblock %}
+{% block morehead %}
+<style>
+  body {
+    background-color: #E4CABE;
+  }
+</style>    
+{% endblock %}
 {% block contents %}
-<div class="row justify-content-center">
-  <div class="col-12">
-    {% if game %}
-      <p>You're playing <strong>{{ game.name }}</strong>.{% if team %} <a href="{% url 'play' %}">Go to the game 👉</a>.</p>
-      <p>Your team is <em>{{ team.name }}</em>.</p>
+<div class="container col-xxl-8 px-4 py-5">
+  <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+    <div class="col-10 col-sm-8 col-lg-6">
+      <div id="carouselScreenshots" class="carousel carousel-dark slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="{% static 'images/blank-answer-sheet.png' %}"
+              class="d-block w-100 mx-lg-auto img-fluid"
+              alt="Blank answer sheet"
+              loading="lazy" width="756" height="483">
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'images/filled-answer-sheet.png' %}"
+              class="d-block w-100 mx-lg-auto img-fluid"
+              alt="Partially-filled answer sheet"
+              loading="lazy" width="756" height="483">
+          </div>
+          <div class="carousel-item">
+            <img src="{% static 'images/page-list.png' %}"
+              class="d-block w-100 mx-lg-auto img-fluid"
+              alt="Quiz pages"
+              loading="lazy" width="756" height="483">
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselScreenshots" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselScreenshots" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      {% if game and team %}
+      <h1 class="display-5 fw-bold lh-1 mb-3">Welcome back to Tr¿via!</h1>
+      <p class="lead">
+        It looks like you're already playing <q>{{ game.name }}</q> as <q>{{ team.name }}</q>.
+      </p>
+      <div class="d-grid gap-2 d-md-flex mb-3 justify-content-md-start">
+        <a href="{% url 'play' %}" class="btn btn-primary btn-lg px-4 me-md-2">Return to game</a>
+      </div>
+      {% elif game %}
+      <h1 class="display-5 fw-bold lh-1 mb-3">Welcome back to Tr¿via!</h1>
+      <p class="lead">
+        It looks like you started to join <q>{{ game }}</q> but don't have a team.
+      </p>
+      <div class="d-grid gap-2 d-md-flex mb-3 justify-content-md-start">
+        <a href="{% url 'create_team' %}" class="btn btn-primary btn-lg px-4 me-md-2">Create your team</a>
+      </div>
       {% else %}
-      </p><p><a href="{% url 'create_team' %}">Create a team</a></p>
+      <h1 class="display-5 fw-bold lh-1 mb-3">Welcome to Tr¿via!</h1>
+      <p class="lead">
+        To play trivia, you'll need someone to send you a game link (or have a join code).
+        Or perhaps you have an account and are hosting trivia?
+      </p>
+      <div class="d-grid gap-2 d-md-flex mb-3 justify-content-md-start">
+        <a href="{% url 'join_game' %}" class="btn btn-primary btn-lg px-4 me-md-2">Join game with code</a>
+        {# HACK: layer violation, since host_home is defined in the host app #}
+        <a href="{% url 'host_home' %}" class="btn btn-outline-secondary btn-lg px-4">I'm hosting</a>
+      </div>
       {% endif %}
-    {% endif %}
+      <p class="lead">
+        Visit <a href="https://github.com/vtbassmatt/triviagame">our GitHub page</a> to learn more.
+      </p>
+    </div>
   </div>
-  {% if not game %}
-  <div class="col-12">
-    <p>You aren't connected to a game. You'll need its ID and code to join.</p>
-    <div>{% include 'join_form.html' %}</div>
-  </div>
-  {% endif %}
 </div>
 {% endblock %}
