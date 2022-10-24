@@ -1,22 +1,20 @@
 from http import HTTPStatus
 
-
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import F, Max
+from django.db.models import F
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django_htmx.http import trigger_client_event
-
+from guardian.shortcuts import assign_perm, get_objects_for_user
 
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
 from .forms import GameForm, PageForm, QuestionForm
-from .models import GameHostPermissions
 
 
 class HttpResponseConflict(HttpResponse):
@@ -29,20 +27,17 @@ class HttpResponseNoContent(HttpResponse):
 
 @login_required
 def host_home(request):
-    games = Game.objects.filter(
-        gamehostpermissions__user=request.user,
-        gamehostpermissions__can_view=True,
-    ).order_by(
-        '-last_edit_time',
-    ).annotate(
-        # HACK: code smell. can we always count on Max of
-        # a boolean returning something sensible? and can
-        # we count on True being greater than False?
-        # BUG: also I'm not too sure if this applies here:
-        # https://docs.djangoproject.com/en/4.1/topics/db/aggregation/#combining-multiple-aggregations
-        # TODO: switch to https://docs.djangoproject.com/en/4.1/topics/auth/default/#permissions-and-authorization
-        can_edit=Max('gamehostpermissions__can_edit'),
-        can_host=Max('gamehostpermissions__can_host'),
+    all_games = Game.objects.order_by('-last_edit_time')
+    
+    # TODO: might need these if perf suffers
+    # (from guardian.core import ObjectPermissionChecker)
+    # checker = ObjectPermissionChecker(request.user)
+    # checker.prefetch_perms(all_games)
+
+    games = get_objects_for_user(
+        request.user,
+        'game.view_game',
+        all_games,
     )
 
     template = 'host/home.html'
@@ -51,6 +46,7 @@ def host_home(request):
         template = 'host/_games_list.html'
 
     return render(request, template, {
+        'user': request.user,
         'games': games,
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
     })
@@ -64,7 +60,7 @@ def toggle_game(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
+    if not request.user.has_perm('host_game', hosting):
         messages.error(request, "You don't have permission to toggle game state.")
         return HttpResponseForbidden()
 
@@ -76,6 +72,7 @@ def toggle_game(request, game_id):
         messages.success(request, "You closed the game.")
     
     response = render(request, 'host/_toggle_game.html', {
+        'user': request.user,
         'hosting': hosting,
     })
     # tell the page that game state has updated
@@ -91,8 +88,8 @@ def toggle_game(request, game_id):
 @login_required
 def pages(request, game_id):
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
-        messages.error(request, "You don't have permission to view those pages.")
+    if not request.user.has_perm('view_game', hosting):
+        messages.error(request, "You don't have permission to view that game.")
         return HttpResponseForbidden()
 
     player_join_url = request.build_absolute_uri(
@@ -104,6 +101,7 @@ def pages(request, game_id):
         template = 'host/_pages_list.html'
 
     return render(request, template, {
+        'user': request.user,
         'hosting': hosting,
         'player_join_url': player_join_url,
     })
@@ -117,7 +115,7 @@ def set_page_state(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
+    if not request.user.has_perm('host_game', hosting):
         messages.error(request, "You don't have permission to change that page's state.")
         return HttpResponseForbidden()
     
@@ -146,7 +144,7 @@ def set_page_state(request, game_id):
 @login_required
 def score_page(request, game_id, page_id):
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
+    if not request.user.has_perm('host_game', hosting):
         messages.error(request, "You don't have permission to score that game.")
         return HttpResponseForbidden()
 
@@ -165,7 +163,7 @@ def assign_score(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
+    if not request.user.has_perm('host_game', hosting):
         messages.error(request, "You don't have permission to score that answer.")
         return HttpResponseForbidden()
     
@@ -191,7 +189,7 @@ def assign_score(request, game_id):
 @login_required
 def host_leaderboard(request, game_id):
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
+    if not request.user.has_perm('view_game', hosting):
         messages.error(request, "You don't have permission to see that leaderboard.")
         return HttpResponseForbidden()
 
@@ -209,7 +207,7 @@ def host_leaderboard(request, game_id):
 @login_required
 def team_page(request, game_id, team_id):
     hosting = Game.objects.get(pk=game_id)
-    if not _can_host_game(request.user, hosting):
+    if not request.user.has_perm('view_game', hosting):
         messages.error(request, "You don't have permission to see that team.")
         return HttpResponseForbidden()
 
@@ -223,14 +221,6 @@ def team_page(request, game_id, team_id):
     })
 
 
-def _can_host_game(user, game):
-    return GameHostPermissions.objects.filter(
-        game=game,
-        user=user,
-        can_host=True,
-    ).count() > 0
-
-
 # Editor views
 
 @login_required
@@ -240,14 +230,9 @@ def new_game(request):
         if form.is_valid():
             with transaction.atomic():
                 game = form.save()
-                perms = GameHostPermissions(
-                    game=game,
-                    user=request.user,
-                    can_view=True,
-                    can_host=True,
-                    can_edit=True,
-                )
-                perms.save()
+                assign_perm('host_game', request.user, game)
+                assign_perm('change_game', request.user, game)
+                assign_perm('view_game', request.user, game)
             return HttpResponseRedirect(reverse('edit_game', args=(game.id,)))
     
     else:
@@ -521,8 +506,4 @@ def question_move(request, question_id, delta):
 
 
 def _can_edit_game(user, game):
-    return GameHostPermissions.objects.filter(
-        game=game,
-        user=user,
-        can_edit=True,
-    ).count() > 0
+    return user.has_perm('change_game', game)
