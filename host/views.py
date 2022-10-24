@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
@@ -30,24 +29,23 @@ class HttpResponseNoContent(HttpResponse):
 
 @login_required
 def host_home(request):
-    hosting = None
-
+    # TODO: remove this entirely; `hosting` no longer set
     if 'hosting' in request.session:
-        hosting_cookie = int(request.session['hosting'])
-        try:
-            hosting = Game.objects.get(pk=hosting_cookie)
-        except Game.DoesNotExist:
-            pass
+        del request.session['hosting']
     
     editable = GameHostPermissions.objects.filter(
         user=request.user,
         can_edit=True,
+    ).order_by(
+        '-game__last_edit_time',
     )
 
     hostable = GameHostPermissions.objects.filter(
         user=request.user,
         can_host=True,
         can_edit=False,
+    ).order_by(
+        '-game__last_edit_time',
     )
 
     template = 'host/home.html'
@@ -56,7 +54,6 @@ def host_home(request):
         template = 'host/_games_list.html'
 
     return render(request, template, {
-        'hosting': hosting,
         'hostable': [h.game for h in hostable],
         'editable': [e.game for e in editable],
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
@@ -64,38 +61,16 @@ def host_home(request):
 
 
 @login_required
-def host_join(request, id):
-    try:
-        permission = GameHostPermissions.objects.get(
-            Q(user=request.user),
-            Q(game__id=id),
-            Q(can_host=True) | Q(can_edit=True),
-        )
-    except GameHostPermissions.DoesNotExist:
-        messages.error(request, "Can't host that game.")
-        return HttpResponseRedirect(reverse('host_home'))
-
-    if request.method == 'POST':
-        request.session['hosting'] = permission.game.id
-        return HttpResponseRedirect(reverse('pages'))
-
-    return render(request, 'host/host.html', {
-        'game': permission.game,
-    })
-
-
-@login_required
 @require_POST
-def toggle_game(request):
+def toggle_game(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseClientRedirect(reverse('host_home'))
-
-    hosting = Game.objects.get(pk=request.session['hosting'])
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to toggle game state.")
+        return HttpResponseForbidden()
 
     hosting.open = not hosting.open
     hosting.save()
@@ -104,7 +79,7 @@ def toggle_game(request):
     else:
         messages.success(request, "You closed the game.")
     
-    response = render(request, 'editor/_toggle_game.html', {
+    response = render(request, 'host/_toggle_game.html', {
         'hosting': hosting,
     })
     # tell the page that game state has updated
@@ -118,12 +93,12 @@ def toggle_game(request):
 
 
 @login_required
-def pages(request):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+def pages(request, game_id):
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to view those pages.")
+        return HttpResponseForbidden()
 
-    hosting = Game.objects.get(pk=request.session['hosting'])
     player_join_url = request.build_absolute_uri(
         reverse('join_game', args=(hosting.id, hosting.passcode)))
 
@@ -140,14 +115,15 @@ def pages(request):
 
 @login_required
 @require_POST
-def set_page_state(request):
+def set_page_state(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseClientRedirect(reverse('host_home'))
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to change that page's state.")
+        return HttpResponseForbidden()
     
     if 'page' not in request.POST:
         return HttpResponseBadRequest("expected page id")
@@ -172,13 +148,13 @@ def set_page_state(request):
 
 
 @login_required
-def score_page(request, page_id):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+def score_page(request, game_id, page_id):
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to score that game.")
+        return HttpResponseForbidden()
 
-    hosting = Game.objects.get(pk=request.session['hosting'])
-    page = Page.objects.get(pk=page_id, game=hosting)
+    page = hosting.page_set.get(pk=page_id)
 
     return render(request, 'host/scoring.html', {
         'hosting': hosting,
@@ -187,14 +163,15 @@ def score_page(request, page_id):
 
 @login_required
 @require_POST
-def assign_score(request):
+def assign_score(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseClientRedirect(reverse('host_home'))
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to score that answer.")
+        return HttpResponseForbidden()
     
     if 'response' not in request.POST:
         return HttpResponseBadRequest("expected response id")
@@ -210,17 +187,17 @@ def assign_score(request):
     response.save()
 
     return render(request, 'host/_question_score.html', {
+        'hosting': hosting,
         'question': response.question,
     })
 
 
 @login_required
-def host_leaderboard(request):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
-
-    hosting = Game.objects.get(pk=request.session['hosting'])
+def host_leaderboard(request, game_id):
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to see that leaderboard.")
+        return HttpResponseForbidden()
 
     rounds, ldr_board, gold_medals = compute_leaderboard_data(hosting)
 
@@ -234,20 +211,28 @@ def host_leaderboard(request):
 
 
 @login_required
-def team_page(request, team_id):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+def team_page(request, game_id, team_id):
+    hosting = Game.objects.get(pk=game_id)
+    if not _can_host_game(request.user, hosting):
+        messages.error(request, "You don't have permission to see that team.")
+        return HttpResponseForbidden()
 
-    hosting = Game.objects.get(pk=request.session['hosting'])
     team = Team.objects.get(pk=team_id)
 
     return render(request, 'host/team.html', {
         'hosting': hosting,
         'team': team,
         'rejoin_link': request.build_absolute_uri(
-            reverse('rejoin_team', args=(team.id,team.passcode))),
+            reverse('rejoin_team', args=(team.id, team.passcode))),
     })
+
+
+def _can_host_game(user, game):
+    return GameHostPermissions.objects.filter(
+        game=game,
+        user=user,
+        can_host=True,
+    ).count() > 0
 
 
 # Editor views
@@ -545,7 +530,3 @@ def _can_edit_game(user, game):
         user=user,
         can_edit=True,
     ).count() > 0
-
-
-def _flash_not_hosting(request):
-    messages.error(request, "You aren't hosting a game.")

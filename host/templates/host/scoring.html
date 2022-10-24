@@ -10,7 +10,7 @@
     {% empty %}
     <p>There don't seem to be any questions here.</p>
     {% endfor %}
-    <a href="{% url 'pages' %}" class="btn btn-outline-primary">Return to game</a>
+    <a href="{% url 'pages' hosting.id %}" class="btn btn-outline-primary">Return to game</a>
   </div>
 </div>
 {% endblock %}

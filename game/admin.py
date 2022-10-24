@@ -9,12 +9,13 @@ class PageInline(admin.StackedInline):
     show_change_link = True
 
 class GameAdmin(admin.ModelAdmin):
+    readonly_fields = ('last_edit_time',)
     inlines = (
         PageInline,
     )
     def view_on_site(self, obj):
         # HACK: layer violation, as this URL is defined in `host`
-        url = reverse('host_join', args=(obj.id,))
+        url = reverse('pages', args=(obj.id,))
         return url
 
 
