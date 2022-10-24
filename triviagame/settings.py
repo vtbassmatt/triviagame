@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
+    'guardian',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -128,6 +129,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_URL = '/host/accounts/login/'
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+
+# django-guardian
+ANONYMOUS_USER_NAME = None
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
