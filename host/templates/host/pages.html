@@ -5,7 +5,7 @@
   <div class="col-12 mb-2">
     <h2>Game status</h2>
     <p hx-post="{% url 'toggle_game' hosting.id %}">
-      {% include 'editor/_toggle_game.html' %}
+      {% include 'host/_toggle_game.html' %}
     </p>
     <h2>Pages</h2>
     {# when the game or page state is toggled, this section reloads #}

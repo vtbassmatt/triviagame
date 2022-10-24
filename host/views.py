@@ -104,7 +104,7 @@ def toggle_game(request, game_id):
     else:
         messages.success(request, "You closed the game.")
     
-    response = render(request, 'editor/_toggle_game.html', {
+    response = render(request, 'host/_toggle_game.html', {
         'hosting': hosting,
     })
     # tell the page that game state has updated
