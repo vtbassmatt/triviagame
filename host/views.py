@@ -96,6 +96,12 @@ def toggle_game(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to toggle game state.")
+        return HttpResponseForbidden()
 
     hosting.open = not hosting.open
     hosting.save()
