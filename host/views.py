@@ -235,12 +235,14 @@ def assign_score(request, game_id):
 
 
 @login_required
-def host_leaderboard(request):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
-
-    hosting = Game.objects.get(pk=request.session['hosting'])
+def host_leaderboard(request, game_id):
+    hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to see that leaderboard.")
+        return HttpResponseForbidden()
 
     rounds, ldr_board, gold_medals = compute_leaderboard_data(hosting)
 
@@ -254,19 +256,26 @@ def host_leaderboard(request):
 
 
 @login_required
-def team_page(request, team_id):
+def team_page(request, game_id, team_id):
     if 'hosting' not in request.session:
         _flash_not_hosting(request)
         return HttpResponseRedirect(reverse('host_home'))
 
-    hosting = Game.objects.get(pk=request.session['hosting'])
+    hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to see that team.")
+        return HttpResponseForbidden()
+
     team = Team.objects.get(pk=team_id)
 
     return render(request, 'host/team.html', {
         'hosting': hosting,
         'team': team,
         'rejoin_link': request.build_absolute_uri(
-            reverse('rejoin_team', args=(team.id,team.passcode))),
+            reverse('rejoin_team', args=(team.id, team.passcode))),
     })
 
 

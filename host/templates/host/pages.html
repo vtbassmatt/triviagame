@@ -18,7 +18,7 @@
   <div class="col-12 mb-2">
     <h2>Teams</h2>
     {% for team in hosting.team_set.all %}
-    <div><a href="{% url 'team_page' team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</div>
+    <div><a href="{% url 'team_page' hosting.id team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</div>
     {% endfor %}
   </div>
   <div class="col-12 mb-2">
@@ -28,7 +28,7 @@
       <th>Player link</th><td><code>{{ player_join_url }}</code></td>
     </tr>
     <tr>
-      <th>Leaderboard</th><td><a href="{% url 'host_leaderboard' %}">Leaderboard</a></td>
+      <th>Leaderboard</th><td><a href="{% url 'host_leaderboard' hosting.id %}">Leaderboard</a></td>
     </tr>
     <tr>
       <th>Host home</th><td><a href="{% url 'host_home' %}">Host home</a></td>
