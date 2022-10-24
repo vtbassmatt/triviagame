@@ -6,7 +6,7 @@
     {% if hosting %}
       <p>
         You're hosting <strong>{{ hosting.name }}</strong>.
-        <a href="{% url 'pages' %}">Manage or preview it here.</a>
+        <a href="{% url 'pages' hosting.id %}">Manage or preview it here.</a>
       </p>
       <p hx-post="{% url 'toggle_game' hosting.id %}">
         {% include 'host/_toggle_game.html' %}

@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
@@ -81,7 +80,7 @@ def host_join(request, game_id):
 
     if request.method == 'POST':
         request.session['hosting'] = permission.game.id
-        return HttpResponseRedirect(reverse('pages'))
+        return HttpResponseRedirect(reverse('pages', args=(game_id,)))
 
     return render(request, 'host/host.html', {
         'game': permission.game,
@@ -124,12 +123,15 @@ def toggle_game(request, game_id):
 
 
 @login_required
-def pages(request):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+def pages(request, game_id):
+    hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to view those pages.")
+        return HttpResponseForbidden()
 
-    hosting = Game.objects.get(pk=request.session['hosting'])
     player_join_url = request.build_absolute_uri(
         reverse('join_game', args=(hosting.id, hosting.passcode)))
 

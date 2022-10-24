@@ -9,7 +9,7 @@
     </p>
     <h2>Pages</h2>
     {# when the game or page state is toggled, this section reloads #}
-    <div hx-get="{% url 'pages' %}"
+    <div hx-get="{% url 'pages' hosting.id %}"
          hx-trigger="hostedGameStateUpdated from:body, pageStateUpdated from:body"
          name="pagesList">
     {% include 'host/_pages_list.html' %}
