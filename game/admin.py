@@ -2,13 +2,14 @@ from django.contrib import admin
 from django.urls import reverse
 
 from game import models
+from guardian.admin import GuardedModelAdmin
 
 
 class PageInline(admin.StackedInline):
     model = models.Page
     show_change_link = True
 
-class GameAdmin(admin.ModelAdmin):
+class GameAdmin(GuardedModelAdmin):
     readonly_fields = ('last_edit_time',)
     inlines = (
         PageInline,
