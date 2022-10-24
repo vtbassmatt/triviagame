@@ -29,14 +29,9 @@ class HttpResponseNoContent(HttpResponse):
 
 @login_required
 def host_home(request):
-    hosting = None
-
+    # TODO: remove this entirely; `hosting` no longer set
     if 'hosting' in request.session:
-        hosting_cookie = int(request.session['hosting'])
-        try:
-            hosting = Game.objects.get(pk=hosting_cookie)
-        except Game.DoesNotExist:
-            pass
+        del request.session['hosting']
     
     editable = GameHostPermissions.objects.filter(
         user=request.user,
@@ -59,31 +54,9 @@ def host_home(request):
         template = 'host/_games_list.html'
 
     return render(request, template, {
-        'hosting': hosting,
         'hostable': [h.game for h in hostable],
         'editable': [e.game for e in editable],
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
-    })
-
-
-@login_required
-def host_join(request, game_id):
-    try:
-        permission = GameHostPermissions.objects.get(
-            Q(user=request.user),
-            Q(game__id=game_id),
-            Q(can_host=True) | Q(can_edit=True),
-        )
-    except GameHostPermissions.DoesNotExist:
-        messages.error(request, "Can't host that game.")
-        return HttpResponseRedirect(reverse('host_home'))
-
-    if request.method == 'POST':
-        request.session['hosting'] = permission.game.id
-        return HttpResponseRedirect(reverse('pages', args=(game_id,)))
-
-    return render(request, 'host/host.html', {
-        'game': permission.game,
     })
 
 
@@ -257,10 +230,6 @@ def host_leaderboard(request, game_id):
 
 @login_required
 def team_page(request, game_id, team_id):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
-
     hosting = Game.objects.get(pk=game_id)
     if hosting.gamehostpermissions_set.filter(
         user=request.user,
@@ -574,7 +543,3 @@ def _can_edit_game(user, game):
         user=user,
         can_edit=True,
     ).count() > 0
-
-
-def _flash_not_hosting(request):
-    messages.error(request, "You aren't hosting a game.")

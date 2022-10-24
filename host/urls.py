@@ -4,7 +4,6 @@ from . import views
 
 urlpatterns = [
     path('', views.host_home, name='host_home'),
-    path('<int:game_id>/join/', views.host_join, name='host_join'),
     path('<int:game_id>/toggle/', views.toggle_game, name='toggle_game'),
     path('<int:game_id>/pages/', views.pages, name='pages'),
     path('<int:game_id>/pages/state/', views.set_page_state, name='set_page_state'),

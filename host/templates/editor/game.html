@@ -9,7 +9,7 @@
       <div class="card-body">
         {% if game.open %}
         <p class="card-text">Name: {{ game.name }}</p>
-        <p class="card-text"><em>Can't edit an open game.</em> You must <a href="{% url 'host_join' game.id %}">host it and close it first</a>.</p>
+        <p class="card-text"><em>Can't edit an open game.</em> You must <a href="{% url 'pages' game.id %}">close it first</a>.</p>
         {% else %}
         <form method="post" autocomplete="off">
           <p class="card-text">

@@ -1,25 +1,13 @@
 {% extends 'host_base.html' %}
-{% block heading %}Hosting trivia{% endblock %}
+{% block heading %}Tr¿via hosting{% endblock %}
 {% block contents %}
-<div class="row justify-content-center">
+<div class="row">
   <div class="col-12">
-    {% if hosting %}
-      <p>
-        You're hosting <strong>{{ hosting.name }}</strong>.
-        <a href="{% url 'pages' hosting.id %}">Manage or preview it here.</a>
-      </p>
-      <p hx-post="{% url 'toggle_game' hosting.id %}">
-        {% include 'host/_toggle_game.html' %}
-      </p>
-      <p>If a player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
-      <hr>
-    {% endif %}
+    <p><span class="badge bg-warning">Reminder</span> If any player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
+    <hr>
     <h2>Games</h2>
     <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary">Create a new game</a></p>
-    {# refresh when the game is opened/closed #}
-    <div hx-get="{% url 'host_home' %}"
-         hx-trigger="hostedGameStateUpdated from:body"
-         name="gamesList">
+    <div>
     {% include 'host/_games_list.html' %}
     </div>
   </div>
