@@ -4,13 +4,13 @@ from http import HTTPStatus
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import F
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
+from django_htmx.http import trigger_client_event
 
 
 from game.models import Game, Page, Response, Team, Question
@@ -29,10 +29,6 @@ class HttpResponseNoContent(HttpResponse):
 
 @login_required
 def host_home(request):
-    # TODO: remove this entirely; `hosting` no longer set
-    if 'hosting' in request.session:
-        del request.session['hosting']
-    
     editable = GameHostPermissions.objects.filter(
         user=request.user,
         can_edit=True,
