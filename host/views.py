@@ -180,13 +180,16 @@ def set_page_state(request):
 
 
 @login_required
-def score_page(request, page_id):
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseRedirect(reverse('host_home'))
+def score_page(request, game_id, page_id):
+    hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to score that game.")
+        return HttpResponseForbidden()
 
-    hosting = Game.objects.get(pk=request.session['hosting'])
-    page = Page.objects.get(pk=page_id, game=hosting)
+    page = hosting.page_set.get(pk=page_id)
 
     return render(request, 'host/scoring.html', {
         'hosting': hosting,
@@ -195,14 +198,18 @@ def score_page(request, page_id):
 
 @login_required
 @require_POST
-def assign_score(request):
+def assign_score(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseClientRedirect(reverse('host_home'))
+    hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to score that answer.")
+        return HttpResponseForbidden()
     
     if 'response' not in request.POST:
         return HttpResponseBadRequest("expected response id")
@@ -218,6 +225,7 @@ def assign_score(request):
     response.save()
 
     return render(request, 'host/_question_score.html', {
+        'hosting': hosting,
         'question': response.question,
     })
 
