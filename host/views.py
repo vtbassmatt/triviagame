@@ -148,14 +148,18 @@ def pages(request, game_id):
 
 @login_required
 @require_POST
-def set_page_state(request):
+def set_page_state(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseClientRedirect(reverse('host_home'))
+    hosting = Game.objects.get(pk=game_id)
+    if hosting.gamehostpermissions_set.filter(
+        user=request.user,
+        can_host=True,
+    ).count() == 0:
+        messages.error(request, "You don't have permission to change that page's state.")
+        return HttpResponseForbidden()
     
     if 'page' not in request.POST:
         return HttpResponseBadRequest("expected page id")
