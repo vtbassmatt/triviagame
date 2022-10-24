@@ -8,7 +8,7 @@
         You're hosting <strong>{{ hosting.name }}</strong>.
         <a href="{% url 'pages' %}">Manage or preview it here.</a>
       </p>
-      <p hx-post="{% url 'toggle_game' %}">
+      <p hx-post="{% url 'toggle_game' hosting.id %}">
         {% include 'editor/_toggle_game.html' %}
       </p>
       <p>If a player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>

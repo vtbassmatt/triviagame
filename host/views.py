@@ -68,11 +68,11 @@ def host_home(request):
 
 
 @login_required
-def host_join(request, id):
+def host_join(request, game_id):
     try:
         permission = GameHostPermissions.objects.get(
             Q(user=request.user),
-            Q(game__id=id),
+            Q(game__id=game_id),
             Q(can_host=True) | Q(can_edit=True),
         )
     except GameHostPermissions.DoesNotExist:
@@ -90,16 +90,12 @@ def host_join(request, id):
 
 @login_required
 @require_POST
-def toggle_game(request):
+def toggle_game(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    if 'hosting' not in request.session:
-        _flash_not_hosting(request)
-        return HttpResponseClientRedirect(reverse('host_home'))
-
-    hosting = Game.objects.get(pk=request.session['hosting'])
+    hosting = Game.objects.get(pk=game_id)
 
     hosting.open = not hosting.open
     hosting.save()

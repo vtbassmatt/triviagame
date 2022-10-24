@@ -4,7 +4,7 @@
 <div class="row justify-content-center">
   <div class="col-12 mb-2">
     <h2>Game status</h2>
-    <p hx-post="{% url 'toggle_game' %}">
+    <p hx-post="{% url 'toggle_game' hosting.id %}">
       {% include 'editor/_toggle_game.html' %}
     </p>
     <h2>Pages</h2>
