@@ -10,6 +10,14 @@ class Game(models.Model):
     name = models.CharField(max_length=60)
     passcode = models.CharField(max_length=20, default=generate_passcode)
     open = models.BooleanField(default=False)
+    last_edit_time = models.DateTimeField(
+        auto_now=True,
+        blank=True,
+        editable=False,
+    )
+
+    class Meta:
+        ordering = ['-last_edit_time']
 
     def __str__(self):
         return self.name

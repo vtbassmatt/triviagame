@@ -42,12 +42,16 @@ def host_home(request):
     editable = GameHostPermissions.objects.filter(
         user=request.user,
         can_edit=True,
+    ).order_by(
+        '-game__last_edit_time',
     )
 
     hostable = GameHostPermissions.objects.filter(
         user=request.user,
         can_host=True,
         can_edit=False,
+    ).order_by(
+        '-game__last_edit_time',
     )
 
     template = 'host/home.html'

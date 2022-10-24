@@ -9,6 +9,7 @@ class PageInline(admin.StackedInline):
     show_change_link = True
 
 class GameAdmin(admin.ModelAdmin):
+    readonly_fields = ('last_edit_time',)
     inlines = (
         PageInline,
     )
