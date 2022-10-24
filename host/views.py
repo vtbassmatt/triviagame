@@ -4,13 +4,13 @@ from http import HTTPStatus
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import F, Max
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
+from django_htmx.http import trigger_client_event
 
 
 from game.models import Game, Page, Response, Team, Question
@@ -29,23 +29,20 @@ class HttpResponseNoContent(HttpResponse):
 
 @login_required
 def host_home(request):
-    # TODO: remove this entirely; `hosting` no longer set
-    if 'hosting' in request.session:
-        del request.session['hosting']
-    
-    editable = GameHostPermissions.objects.filter(
-        user=request.user,
-        can_edit=True,
+    games = Game.objects.filter(
+        gamehostpermissions__user=request.user,
+        gamehostpermissions__can_view=True,
     ).order_by(
-        '-game__last_edit_time',
-    )
-
-    hostable = GameHostPermissions.objects.filter(
-        user=request.user,
-        can_host=True,
-        can_edit=False,
-    ).order_by(
-        '-game__last_edit_time',
+        '-last_edit_time',
+    ).annotate(
+        # HACK: code smell. can we always count on Max of
+        # a boolean returning something sensible? and can
+        # we count on True being greater than False?
+        # BUG: also I'm not too sure if this applies here:
+        # https://docs.djangoproject.com/en/4.1/topics/db/aggregation/#combining-multiple-aggregations
+        # TODO: switch to https://docs.djangoproject.com/en/4.1/topics/auth/default/#permissions-and-authorization
+        can_edit=Max('gamehostpermissions__can_edit'),
+        can_host=Max('gamehostpermissions__can_host'),
     )
 
     template = 'host/home.html'
@@ -54,8 +51,7 @@ def host_home(request):
         template = 'host/_games_list.html'
 
     return render(request, template, {
-        'hostable': [h.game for h in hostable],
-        'editable': [e.game for e in editable],
+        'games': games,
         'uncurse_url': request.build_absolute_uri(reverse('uncurse')),
     })
 
