@@ -68,10 +68,7 @@ def toggle_game(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to toggle game state.")
         return HttpResponseForbidden()
 
@@ -98,10 +95,7 @@ def toggle_game(request, game_id):
 @login_required
 def pages(request, game_id):
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to view those pages.")
         return HttpResponseForbidden()
 
@@ -127,10 +121,7 @@ def set_page_state(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to change that page's state.")
         return HttpResponseForbidden()
     
@@ -159,10 +150,7 @@ def set_page_state(request, game_id):
 @login_required
 def score_page(request, game_id, page_id):
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to score that game.")
         return HttpResponseForbidden()
 
@@ -181,10 +169,7 @@ def assign_score(request, game_id):
         return HttpResponseBadRequest("expected HTMX request")
 
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to score that answer.")
         return HttpResponseForbidden()
     
@@ -210,10 +195,7 @@ def assign_score(request, game_id):
 @login_required
 def host_leaderboard(request, game_id):
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to see that leaderboard.")
         return HttpResponseForbidden()
 
@@ -231,10 +213,7 @@ def host_leaderboard(request, game_id):
 @login_required
 def team_page(request, game_id, team_id):
     hosting = Game.objects.get(pk=game_id)
-    if hosting.gamehostpermissions_set.filter(
-        user=request.user,
-        can_host=True,
-    ).count() == 0:
+    if not _can_host_game(request.user, hosting):
         messages.error(request, "You don't have permission to see that team.")
         return HttpResponseForbidden()
 
@@ -246,6 +225,14 @@ def team_page(request, game_id, team_id):
         'rejoin_link': request.build_absolute_uri(
             reverse('rejoin_team', args=(team.id, team.passcode))),
     })
+
+
+def _can_host_game(user, game):
+    return GameHostPermissions.objects.filter(
+        game=game,
+        user=user,
+        can_host=True,
+    ).count() > 0
 
 
 # Editor views
