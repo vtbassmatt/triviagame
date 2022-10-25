@@ -1,5 +1,5 @@
 {% extends 'host_base.html' %}
-{% block heading %}Hosting {{ hosting.name }}{% endblock %}
+{% block heading %}Hosting {{ game.name }}{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
@@ -10,7 +10,7 @@
     {% empty %}
     <p>There don't seem to be any questions here.</p>
     {% endfor %}
-    <a href="{% url 'pages' hosting.id %}" class="btn btn-outline-primary">Return to game</a>
+    <a href="{% url 'pages' game.id %}" class="btn btn-outline-primary">Return to game</a>
   </div>
 </div>
 {% endblock %}
