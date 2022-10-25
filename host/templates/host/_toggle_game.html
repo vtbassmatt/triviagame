@@ -1,7 +1,7 @@
 {% load guardian_tags %}
-{% get_obj_perms user for hosting as "perms" %}
+{% get_obj_perms user for game as "perms" %}
 {% if 'host_game' in perms %}
-<button class="btn btn-{% if hosting.open %}outline-danger{% else %}primary{% endif %}">{% if hosting.open %}Close{% else %}Open{% endif %} the game</button>
+<button class="btn btn-{% if game.open %}outline-danger{% else %}primary{% endif %}">{% if game.open %}Close{% else %}Open{% endif %} the game</button>
 {% else %}
-<button class="btn btn-outline-secondary" disabled>{% if hosting.open %}Close{% else %}Open{% endif %} the game</button>
+<button class="btn btn-outline-secondary" disabled>{% if game.open %}Close{% else %}Open{% endif %} the game</button>
 {% endif %}

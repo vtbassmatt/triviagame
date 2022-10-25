@@ -1,15 +1,15 @@
 {% extends 'host_base.html' %}
-{% block heading %}Host view: {{ hosting.name }}{% endblock %}
+{% block heading %}Host view: {{ game.name }}{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12 mb-2">
     <h2>Game status</h2>
-    <p hx-post="{% url 'toggle_game' hosting.id %}">
+    <p hx-post="{% url 'toggle_game' game.id %}">
       {% include 'host/_toggle_game.html' %}
     </p>
     <h2>Pages</h2>
     {# when the game or page state is toggled, this section reloads #}
-    <div hx-get="{% url 'pages' hosting.id %}"
+    <div hx-get="{% url 'pages' game.id %}"
          hx-trigger="hostedGameStateUpdated from:body, pageStateUpdated from:body"
          name="pagesList">
     {% include 'host/_pages_list.html' %}
@@ -17,8 +17,8 @@
   </div>
   <div class="col-12 mb-2">
     <h2>Teams</h2>
-    {% for team in hosting.team_set.all %}
-    <div><a href="{% url 'team_page' hosting.id team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</div>
+    {% for team in game.team_set.all %}
+    <div><a href="{% url 'team_page' game.id team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</div>
     {% endfor %}
   </div>
   <div class="col-12 mb-2">
@@ -28,7 +28,7 @@
       <th>Player link</th><td><code>{{ player_join_url }}</code></td>
     </tr>
     <tr>
-      <th>Leaderboard</th><td><a href="{% url 'host_leaderboard' hosting.id %}">Leaderboard</a></td>
+      <th>Leaderboard</th><td><a href="{% url 'host_leaderboard' game.id %}">Leaderboard</a></td>
     </tr>
     <tr>
       <th>Host home</th><td><a href="{% url 'host_home' %}">Host home</a></td>

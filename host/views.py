@@ -59,21 +59,21 @@ def toggle_game(request, game_id):
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', hosting):
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('host_game', game):
         messages.error(request, "You don't have permission to toggle game state.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to toggle game state.")
 
-    hosting.open = not hosting.open
-    hosting.save()
-    if hosting.open:
+    game.open = not game.open
+    game.save()
+    if game.open:
         messages.success(request, "You opened the game.")
     else:
         messages.success(request, "You closed the game.")
     
     response = render(request, 'host/_toggle_game.html', {
         'user': request.user,
-        'hosting': hosting,
+        'game': game,
     })
     # tell the page that game state has updated
     trigger_client_event(
@@ -87,13 +87,14 @@ def toggle_game(request, game_id):
 
 @login_required
 def pages(request, game_id):
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('view_game', hosting):
-        messages.error(request, "You don't have permission to view that game.")
-        return HttpResponseForbidden()
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('view_game', game):
+        if request.htmx:
+            messages.error(request, "You don't have permission to view that game.")
+        return HttpResponseForbidden("You don't have permission to view that game.")
 
     player_join_url = request.build_absolute_uri(
-        reverse('join_game', args=(hosting.id, hosting.passcode)))
+        reverse('join_game', args=(game.id, game.passcode)))
 
     template = 'host/pages.html'
 
@@ -102,7 +103,7 @@ def pages(request, game_id):
 
     return render(request, template, {
         'user': request.user,
-        'hosting': hosting,
+        'game': game,
         'player_join_url': player_join_url,
     })
 
@@ -114,10 +115,10 @@ def set_page_state(request, game_id):
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', hosting):
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('host_game', game):
         messages.error(request, "You don't have permission to change that page's state.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to change that page's state.")
     
     if 'page' not in request.POST:
         return HttpResponseBadRequest("expected page id")
@@ -143,15 +144,14 @@ def set_page_state(request, game_id):
 
 @login_required
 def score_page(request, game_id, page_id):
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', hosting):
-        messages.error(request, "You don't have permission to score that game.")
-        return HttpResponseForbidden()
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('host_game', game):
+        return HttpResponseForbidden("You don't have permission to score that game.")
 
-    page = hosting.page_set.get(pk=page_id)
+    page = game.page_set.get(pk=page_id)
 
     return render(request, 'host/scoring.html', {
-        'hosting': hosting,
+        'game': game,
         'page': page,
     })
 
@@ -162,8 +162,8 @@ def assign_score(request, game_id):
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', hosting):
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('host_game', game):
         messages.error(request, "You don't have permission to score that answer.")
         return HttpResponseForbidden()
     
@@ -181,24 +181,23 @@ def assign_score(request, game_id):
     response.save()
 
     return render(request, 'host/_question_score.html', {
-        'hosting': hosting,
+        'game': game,
         'question': response.question,
     })
 
 
 @login_required
 def host_leaderboard(request, game_id):
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('view_game', hosting):
-        messages.error(request, "You don't have permission to see that leaderboard.")
-        return HttpResponseForbidden()
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('view_game', game):
+        return HttpResponseForbidden("You don't have permission to see that leaderboard.")
 
-    rounds, ldr_board, gold_medals = compute_leaderboard_data(hosting)
+    rounds, ldr_board, gold_medals = compute_leaderboard_data(game)
 
     return render(request, 'host/leaderboard.html', {
-        'game': hosting,
+        'game': game,
         'rounds': rounds,
-        'teams': { t.name: t.members for t in hosting.team_set.all() },
+        'teams': { t.name: t.members for t in game.team_set.all() },
         'leaderboard': ldr_board,
         'gold_medals': gold_medals,
     })
@@ -206,15 +205,14 @@ def host_leaderboard(request, game_id):
 
 @login_required
 def team_page(request, game_id, team_id):
-    hosting = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('view_game', hosting):
-        messages.error(request, "You don't have permission to see that team.")
-        return HttpResponseForbidden()
+    game = Game.objects.get(pk=game_id)
+    if not request.user.has_perm('view_game', game):
+        return HttpResponseForbidden("You don't have permission to see that team.")
 
     team = Team.objects.get(pk=team_id)
 
     return render(request, 'host/team.html', {
-        'hosting': hosting,
+        'game': game,
         'team': team,
         'rejoin_link': request.build_absolute_uri(
             reverse('rejoin_team', args=(team.id, team.passcode))),
@@ -225,6 +223,9 @@ def team_page(request, game_id, team_id):
 
 @login_required
 def new_game(request):
+    if not request.user.has_perm('game.add_game'):
+        return HttpResponseForbidden("Not authorized to create games.")
+
     if request.method == 'POST':
         form = GameForm(request.POST)
         if form.is_valid():
