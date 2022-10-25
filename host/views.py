@@ -62,7 +62,7 @@ def toggle_game(request, game_id):
     hosting = Game.objects.get(pk=game_id)
     if not request.user.has_perm('host_game', hosting):
         messages.error(request, "You don't have permission to toggle game state.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to toggle game state.")
 
     hosting.open = not hosting.open
     hosting.save()
@@ -89,8 +89,9 @@ def toggle_game(request, game_id):
 def pages(request, game_id):
     hosting = Game.objects.get(pk=game_id)
     if not request.user.has_perm('view_game', hosting):
-        messages.error(request, "You don't have permission to view that game.")
-        return HttpResponseForbidden()
+        if request.htmx:
+            messages.error(request, "You don't have permission to view that game.")
+        return HttpResponseForbidden("You don't have permission to view that game.")
 
     player_join_url = request.build_absolute_uri(
         reverse('join_game', args=(hosting.id, hosting.passcode)))
@@ -117,7 +118,7 @@ def set_page_state(request, game_id):
     hosting = Game.objects.get(pk=game_id)
     if not request.user.has_perm('host_game', hosting):
         messages.error(request, "You don't have permission to change that page's state.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to change that page's state.")
     
     if 'page' not in request.POST:
         return HttpResponseBadRequest("expected page id")
@@ -145,8 +146,7 @@ def set_page_state(request, game_id):
 def score_page(request, game_id, page_id):
     hosting = Game.objects.get(pk=game_id)
     if not request.user.has_perm('host_game', hosting):
-        messages.error(request, "You don't have permission to score that game.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to score that game.")
 
     page = hosting.page_set.get(pk=page_id)
 
@@ -190,8 +190,7 @@ def assign_score(request, game_id):
 def host_leaderboard(request, game_id):
     hosting = Game.objects.get(pk=game_id)
     if not request.user.has_perm('view_game', hosting):
-        messages.error(request, "You don't have permission to see that leaderboard.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to see that leaderboard.")
 
     rounds, ldr_board, gold_medals = compute_leaderboard_data(hosting)
 
@@ -208,8 +207,7 @@ def host_leaderboard(request, game_id):
 def team_page(request, game_id, team_id):
     hosting = Game.objects.get(pk=game_id)
     if not request.user.has_perm('view_game', hosting):
-        messages.error(request, "You don't have permission to see that team.")
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("You don't have permission to see that team.")
 
     team = Team.objects.get(pk=team_id)
 
