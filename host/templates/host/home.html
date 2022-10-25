@@ -6,7 +6,7 @@
     <p><span class="badge bg-warning">Reminder</span> If any player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
     <hr>
     <h2>Games</h2>
-    <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary">Create a new game</a></p>
+    <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary{% if not perms.game.add_game %} disabled{% endif %}">Create a new game</a></p>
     <div>
     {% include 'host/_games_list.html' %}
     </div>

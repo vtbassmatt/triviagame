@@ -225,6 +225,9 @@ def team_page(request, game_id, team_id):
 
 @login_required
 def new_game(request):
+    if not request.user.has_perm('game.add_game'):
+        return HttpResponseForbidden("Not authorized to create games.")
+
     if request.method == 'POST':
         form = GameForm(request.POST)
         if form.is_valid():
