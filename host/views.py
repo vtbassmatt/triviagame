@@ -15,7 +15,10 @@ from guardian.shortcuts import assign_perm, get_objects_for_user
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
 from .forms import GameForm, PageForm, QuestionForm
-from .view_utils import can_host_game, can_view_game
+from .view_utils import (
+    can_host_game, can_view_game,
+    can_edit_game, can_edit_page, can_edit_question
+)
 
 
 class HttpResponseConflict(HttpResponse):
@@ -225,10 +228,9 @@ def new_game(request):
 
 
 @login_required
+@can_edit_game
 def edit_game(request, game_id):
-    game = get_object_or_404(Game, pk=game_id)
-    if not _can_edit_game(request.user, game):
-        return HttpResponseForbidden()
+    game = request.game
 
     if request.method == 'POST':
         game_form = GameForm(request.POST, instance=game)
@@ -248,10 +250,9 @@ def edit_game(request, game_id):
 
 
 @login_required
+@can_edit_game
 def new_page(request, game_id):
-    game = get_object_or_404(Game, pk=game_id)
-    if not _can_edit_game(request.user, game):
-        return HttpResponseForbidden()
+    game = request.game
 
     if request.method == 'POST':
         form = PageForm(request.POST)
@@ -281,10 +282,9 @@ def new_page(request, game_id):
 
 
 @login_required
+@can_edit_page
 def edit_page(request, page_id):
-    page = get_object_or_404(Page, pk=page_id)
-    if not _can_edit_game(request.user, page.game):
-        return HttpResponseForbidden()
+    page = request.page
 
     if request.method == 'POST':
         page_form = PageForm(request.POST, instance=page)
@@ -304,10 +304,9 @@ def edit_page(request, page_id):
 
 
 @login_required
+@can_edit_page
 def delete_page(request, page_id):
-    page = get_object_or_404(Page, pk=page_id)
-    if not _can_edit_game(request.user, page.game):
-        return HttpResponseForbidden()
+    page = request.page
 
     if request.method in ('POST', 'DELETE'):
         game = page.game
@@ -327,14 +326,13 @@ def delete_page(request, page_id):
 
 
 @login_required
+@can_edit_page
 @require_POST
 def page_move(request, page_id, delta):
     # this assertion comes from urls.py
     assert delta == 1 or delta == -1
 
-    page = get_object_or_404(Page, pk=page_id)
-    if not _can_edit_game(request.user, page.game):
-        return HttpResponseForbidden()
+    page = request.page
     if page.game.open:
         return HttpResponseConflict('Cannot edit an open game')
 
@@ -368,10 +366,9 @@ def page_move(request, page_id, delta):
 
 
 @login_required
+@can_edit_page
 def new_question(request, page_id):
-    page = get_object_or_404(Page, pk=page_id)
-    if not _can_edit_game(request.user, page.game):
-        return HttpResponseForbidden()
+    page = request.page
 
     if request.method == 'POST':
         form = QuestionForm(request.POST)
@@ -401,10 +398,9 @@ def new_question(request, page_id):
 
 
 @login_required
+@can_edit_question
 def edit_question(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    if not _can_edit_game(request.user, question.page.game):
-        return HttpResponseForbidden()
+    question = request.question
 
     if request.method == 'POST':
         question_form = QuestionForm(request.POST, instance=question)
@@ -424,10 +420,9 @@ def edit_question(request, question_id):
 
 
 @login_required
+@can_edit_question
 def delete_question(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    if not _can_edit_game(request.user, question.page.game):
-        return HttpResponseForbidden()
+    question = request.question
 
     if request.method in ('POST', 'DELETE'):
         page = question.page
@@ -446,14 +441,13 @@ def delete_question(request, question_id):
 
 
 @login_required
+@can_edit_question
 @require_POST
 def question_move(request, question_id, delta):
     # this assertion comes from urls.py
     assert delta == 1 or delta == -1
 
-    question = get_object_or_404(Question, pk=question_id)
-    if not _can_edit_game(request.user, question.page.game):
-        return HttpResponseForbidden()
+    question = request.question
     if question.page.game.open:
         return HttpResponseConflict('Cannot edit an open game')
 
@@ -484,7 +478,3 @@ def question_move(request, question_id, delta):
         })
 
     return HttpResponseRedirect(reverse('edit_page', args=(question.page.id,)))
-
-
-def _can_edit_game(user, game):
-    return user.has_perm('change_game', game)
