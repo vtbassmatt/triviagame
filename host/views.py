@@ -15,6 +15,7 @@ from guardian.shortcuts import assign_perm, get_objects_for_user
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
 from .forms import GameForm, PageForm, QuestionForm
+from .view_utils import can_host_game, can_view_game
 
 
 class HttpResponseConflict(HttpResponse):
@@ -53,16 +54,14 @@ def host_home(request):
 
 
 @login_required
+@can_host_game
 @require_POST
 def toggle_game(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', game):
-        messages.error(request, "You don't have permission to toggle game state.")
-        return HttpResponseForbidden("You don't have permission to toggle game state.")
+    game = request.game
 
     game.open = not game.open
     game.save()
@@ -86,15 +85,10 @@ def toggle_game(request, game_id):
 
 
 @login_required
+@can_view_game
 def pages(request, game_id):
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('view_game', game):
-        if request.htmx:
-            messages.error(request, "You don't have permission to view that game.")
-        return HttpResponseForbidden("You don't have permission to view that game.")
-
     player_join_url = request.build_absolute_uri(
-        reverse('join_game', args=(game.id, game.passcode)))
+        reverse('join_game', args=(request.game.id, request.game.passcode)))
 
     template = 'host/pages.html'
 
@@ -103,23 +97,19 @@ def pages(request, game_id):
 
     return render(request, template, {
         'user': request.user,
-        'game': game,
+        'game': request.game,
         'player_join_url': player_join_url,
     })
 
 
 @login_required
+@can_host_game
 @require_POST
 def set_page_state(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', game):
-        messages.error(request, "You don't have permission to change that page's state.")
-        return HttpResponseForbidden("You don't have permission to change that page's state.")
-    
     if 'page' not in request.POST:
         return HttpResponseBadRequest("expected page id")
     
@@ -143,30 +133,24 @@ def set_page_state(request, game_id):
 
 
 @login_required
+@can_host_game
 def score_page(request, game_id, page_id):
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', game):
-        return HttpResponseForbidden("You don't have permission to score that game.")
-
-    page = game.page_set.get(pk=page_id)
+    # TODO: viewers can see this page but can't interact
+    page = request.game.page_set.get(pk=page_id)
 
     return render(request, 'host/scoring.html', {
-        'game': game,
+        'game': request.game,
         'page': page,
     })
 
 @login_required
+@can_host_game
 @require_POST
 def assign_score(request, game_id):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('host_game', game):
-        messages.error(request, "You don't have permission to score that answer.")
-        return HttpResponseForbidden()
-    
     if 'response' not in request.POST:
         return HttpResponseBadRequest("expected response id")
     
@@ -181,16 +165,15 @@ def assign_score(request, game_id):
     response.save()
 
     return render(request, 'host/_question_score.html', {
-        'game': game,
+        'game': request.game,
         'question': response.question,
     })
 
 
 @login_required
+@can_view_game
 def host_leaderboard(request, game_id):
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('view_game', game):
-        return HttpResponseForbidden("You don't have permission to see that leaderboard.")
+    game = request.game
 
     rounds, ldr_board, gold_medals = compute_leaderboard_data(game)
 
@@ -204,15 +187,12 @@ def host_leaderboard(request, game_id):
 
 
 @login_required
+@can_view_game
 def team_page(request, game_id, team_id):
-    game = Game.objects.get(pk=game_id)
-    if not request.user.has_perm('view_game', game):
-        return HttpResponseForbidden("You don't have permission to see that team.")
-
     team = Team.objects.get(pk=team_id)
 
     return render(request, 'host/team.html', {
-        'game': game,
+        'game': request.game,
         'team': team,
         'rejoin_link': request.build_absolute_uri(
             reverse('rejoin_team', args=(team.id, team.passcode))),
