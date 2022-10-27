@@ -5,32 +5,34 @@ from functools import wraps
 from game.models import Game, Page, Question
 
 
-def can_edit_question(view):
-    @wraps(view)
-    def inner(request, *args, **kwargs):
-        question_id = kwargs['question_id']
-        question = Question.objects.get(pk=question_id)
-        if not request.user.has_perm('game.change_game', question.page.game):
-            if request.htmx:
-                messages.error(request, "You don't have permission to do that.")
-            return HttpResponseForbidden("You don't have permission to do that.")
-        request.question = question
-        return view(request, *args, **kwargs)
-    return inner
+def _can_edit_obj(klass, pk_name, path_to_game):
+    "Example: klass = Question, pk_name = question_id, path_to_game = page.game"
+    def decorator(view):
+        @wraps(view)
+        def inner(request, *args, **kwargs):
+            obj_id = kwargs[pk_name]
+            obj = klass.objects.get(pk=obj_id)
+
+            game = obj
+            for part in path_to_game.split('.'):
+                game = getattr(game, part)
+
+            if not request.user.has_perm('game.change_game', game):
+                if request.htmx:
+                    messages.error(request, "You don't have permission to do that.")
+                return HttpResponseForbidden("You don't have permission to do that.")
+            
+            setattr(request, klass.__name__.lower(), obj)
+            return view(request, *args, **kwargs)
+        return inner
+    return decorator
 
 
-def can_edit_page(view):
-    @wraps(view)
-    def inner(request, *args, **kwargs):
-        page_id = kwargs['page_id']
-        page = Page.objects.get(pk=page_id)
-        if not request.user.has_perm('game.change_game', page.game):
-            if request.htmx:
-                messages.error(request, "You don't have permission to do that.")
-            return HttpResponseForbidden("You don't have permission to do that.")
-        request.page = page
-        return view(request, *args, **kwargs)
-    return inner
+can_edit_question = _can_edit_obj(Question, 'question_id', 'page.game')
+can_edit_question.__doc__ = "Decorator to require edit_game permissions on a question (assumes question_id in the view args)"
+
+can_edit_page = _can_edit_obj(Page, 'page_id', 'game')
+can_edit_page.__doc__ = "Decorator to require edit_game permissions on a page (assumes question_id in the view args)"
 
 
 def _has_any_perm(perms_list):
