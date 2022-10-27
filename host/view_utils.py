@@ -29,10 +29,14 @@ def _can_edit_obj(klass, pk_name, path_to_game):
 
 
 can_edit_question = _can_edit_obj(Question, 'question_id', 'page.game')
-can_edit_question.__doc__ = "Decorator to require edit_game permissions on a question (assumes question_id in the view args)"
+can_edit_question.__doc__ = """Decorator to require `edit_game` permissions on an associated question.
+
+Assumes `question_id` is in the view args, and puts a `question` attribute on the request."""
 
 can_edit_page = _can_edit_obj(Page, 'page_id', 'game')
-can_edit_page.__doc__ = "Decorator to require edit_game permissions on a page (assumes question_id in the view args)"
+can_edit_page.__doc__ = """Decorator to require `edit_game` permissions on an associated page.
+
+Assumes `page_id` is in the view args, and puts a `page` attribute on the request."""
 
 
 def _has_any_perm(perms_list):
@@ -52,10 +56,16 @@ def _has_any_perm(perms_list):
 
 
 can_edit_game = _has_any_perm(['game.change_game'])
-can_edit_game.__doc__ = "Decorator to require edit_game permissions (assumes game_id in the view args)"
+can_edit_game.__doc__ = """Decorator to require `edit_game` permissions.
+
+Assumes `game_id` is in the view args, and puts a `game` attribute on the request."""
 
 can_host_game = _has_any_perm(['game.host_game'])
-can_host_game.__doc__ = "Decorator to require host_game permissions (assumes game_id in the view args)"
+can_host_game.__doc__ = """Decorator to require `host_game` permissions.
+
+Assumes `game_id` is in the view args, and puts a `game` attribute on the request."""
 
 can_view_game = _has_any_perm(['game.view_game', 'game.host_game', 'game.edit_game'])
-can_view_game.__doc__ = "Decorator to require view_game, host_game, or edit_game permissions (assumes game_id in the view args)"
+can_view_game.__doc__ = """Decorator to require `view_game`, `host_game`, or `edit_game` permissions.
+
+Assumes `game_id` is in the view args, and puts a `game` attribute on the request."""
