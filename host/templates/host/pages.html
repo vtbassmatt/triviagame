@@ -4,9 +4,7 @@
 <div class="row justify-content-center">
   <div class="col-12 mb-2">
     <h2>Game status</h2>
-    <p hx-post="{% url 'toggle_game' game.id %}">
-      {% include 'host/_toggle_game.html' %}
-    </p>
+    {% include 'host/_toggle_game.html' %}
     <h2>Pages</h2>
     {# when the game or page state is toggled, this section reloads #}
     <div hx-get="{% url 'pages' game.id %}"

@@ -1,3 +1,5 @@
+{% load guardian_tags %}
+{% get_obj_perms user for game as "perms" %}
 {% for page in game.page_set.all %}
 <div class="card mb-3{% if page.is_open and game.open %} border-success{% elif page.is_open %} border-warning{% endif %}">
   <div class="card-header{% if page.is_open and game.open %} text-white bg-success{% elif page.is_open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>
@@ -5,19 +7,31 @@
     <div class="card-title markdown-needed">{{ page.description|linebreaksbr }}</div>
     <div class="card-text"><a href="{% url 'score_page' game.id page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
     <div class="card-text">
+      {% if 'host_game' in perms %}
       <a class="btn {{ page.bootstrap_locked_button_styles }}"
         hx-post="{% url 'set_page_state' game.id %}"
         hx-vals='{"page":{{ page.id }},"state":"LOCKED"}'>
+      {% else %}
+      <a class="btn btn-outline-secondary disabled">
+      {% endif %}
         Lock this page 🔒
       </a>
+      {% if 'host_game' in perms %}
       <a class="btn {{ page.bootstrap_open_button_styles }}"
         hx-post="{% url 'set_page_state' game.id %}"
         hx-vals='{"page":{{ page.id }},"state":"OPEN"}'>
+      {% else %}
+      <a class="btn btn-outline-secondary disabled">
+      {% endif %}
         Open this page ✏️
       </a>
+      {% if 'host_game' in perms %}
       <a class="btn {{ page.bootstrap_scoring_button_styles }}"
         hx-post="{% url 'set_page_state' game.id %}"
         hx-vals='{"page":{{ page.id }},"state":"SCORING"}'>
+      {% else %}
+      <a class="btn btn-outline-secondary disabled">
+      {% endif %}
         Close this page to begin scoring ✋
       </a>
     </div>
