@@ -1,24 +1,24 @@
-# fly.toml file generated for divine-mountain-3508 on 2022-10-14T10:17:57-04:00
+# fly.toml app configuration file generated for divine-mountain-3508 on 2023-05-24T04:43:08-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "divine-mountain-3508"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
-[env]
-  DJANGO_SETTINGS_MODULE = "triviagame.settings"
-
 [deploy]
   release_command = "poetry run python manage.py migrate"
 
-[[statics]]
-  guest_path = "/app/static"
-  url_prefix = "/static"
-  cache_key = "app_cache_key"
+[env]
+  DJANGO_SETTINGS_MODULE = "triviagame.settings"
 
 [experimental]
-  allowed_public_ports = []
   auto_rollback = true
+  cmd = []
+  entrypoint = []
+  exec = []
 
 [[services]]
   http_checks = []
@@ -45,3 +45,9 @@ processes = []
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
+
+[[statics]]
+  cache_key = "app_cache_key"
+  guest_path = "/app/static"
+  processes = []
+  url_prefix = "/static"
