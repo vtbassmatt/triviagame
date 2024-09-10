@@ -14,4 +14,5 @@ urlpatterns = [
     path('play/<int:page_order>/', views.answer_sheet, name='answer_sheet'),
     path('play/q/<int:question_id>/', views.question_hx, name='question_hx'),
     path('leaderboard/', views.leaderboard, name='leaderboard'),
+    path('healthcheck/', views.healthcheck, name='healthcheck'),
 ]
