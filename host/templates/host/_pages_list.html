@@ -5,7 +5,6 @@
   <div class="card-header{% if page.is_open and game.open %} text-white bg-success{% elif page.is_open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} questions</span></div>
   <div class="card-body">
     <div class="card-title markdown-needed">{{ page.description|linebreaksbr }}</div>
-    <div class="card-text"><a href="{% url 'score_page' game.id page.id %}" class="btn btn-outline-primary mb-2">Score this page ✅</a></div>
     <div class="card-text">
       {% if 'host_game' in perms %}
       <a class="btn {{ page.bootstrap_locked_button_styles }}"
@@ -32,8 +31,11 @@
       {% else %}
       <a class="btn btn-outline-secondary disabled">
       {% endif %}
-        Close this page to begin scoring ✋
+        Stop accepting answers ✋
       </a>
+    </div>
+    <div class="card-text mt-2">
+      <a href="{% url 'score_page' game.id page.id %}" class="btn btn-{% if page.state != 2 %}outline-{% endif %}primary mb-2">Score this page ✅</a>
     </div>
   </div>
 </div>
