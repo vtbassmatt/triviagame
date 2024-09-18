@@ -5,7 +5,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <p>Playing as <em>{{ team.name }}</em>.</p>
-  <p><span class="badge bg-success">New!</span> Answers are saved as you type, no need to submit anything.<p>
+  <p><span class="badge bg-success">Note!</span> Answers are saved as you type, no need to submit anything.<p>
   <h2>{{ page.order }}. {{ page.title }}</h2>
   {% if page.description %}<p class="markdown-needed">{{ page.description|linebreaksbr }}</p>{% endif %}
 </div>
@@ -19,6 +19,7 @@
     <div class="card mb-3">
       <div class="card-header">Question {{ question.order }}</div>
       <div class="card-body">
+        {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
         <p class="card-text markdown-needed">{{ question.question }}</p>
         <p class="card-text placeholder-glow">
           <span class="placeholder col-2 placeholder-lg"></span>

@@ -2,6 +2,7 @@
   <div class="card mb-3">
     <div class="card-header">Question {{ question.order }}</div>
     <div class="card-body">
+      {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
       <p class="card-text markdown-needed">{{ question.question }}</p>
 
       {% comment %}
@@ -60,10 +61,14 @@
             {% else %}{# score <= 0 #}
             <span class="text-danger">
             {% endif %}
-          {{ response.value }}
-          {% if response.score > 0 %}✅{% else %}❌{% endif %}
+          <q>{{ response.value }}</q>
+          {% if response.score > 0 %}
+            ✅{% if response.score > 1 %} {{ response.score }} points{% endif %}
+          {% else %}
+            ❌ no points
+          {% endif %}
           {% else %}{# not graded #}
-            {{ response.value }} not marked right or wrong
+            <q>{{ response.value }}</q> (not graded)
           {% endif %}
           </span>
         {% else %}{# no response #}
