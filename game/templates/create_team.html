@@ -4,7 +4,12 @@
 <div class="row justify-content-center">
   <div class="col-12">
     <p>Creating a team for {{ game.name }}.</p>
-    <p>Stuck for team name ideas? How about: <code>{{ sample_team_name }}</code></p>
+    <p>Stuck for team name ideas? How about:</p>
+    <p class="ps-3">
+      <code>{{ sample_team_name }}</code>
+      <button class="btn btn-sm btn-success ms-2" onclick="document.querySelector('#id_name').value = '{{ sample_team_name|escapejs }}'">I love it, use it</button>
+    </p>
+    <p>Reload the page for another suggestion, or type your own!</p>
     <div>
     <form action="{% url 'create_team' %}" method="post" autocomplete="off">
     {% csrf_token %}
