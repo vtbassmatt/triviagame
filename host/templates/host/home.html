@@ -10,6 +10,50 @@
     <div>
     {% include 'host/_games_list.html' %}
     </div>
+    <h2>Notes for hosts</h2>
+    <p>
+      The game tries to keep things stable and understandable for the players.
+      The interface can be a little inscrutable for the host, though.
+      This documentation should be helpful in understanding what's what.
+    </p>
+    <h3>Game states</h3>
+    <p>
+      A <b>game</b> is either open or closed.
+    </p>
+    <ul>
+      <li>
+        Closed - no players can join or see anything.
+        As a host, you may use the editor interface.
+      </li>
+      <li>
+        Open - players will be able to interact with the game.
+        See below for how pages work within the game.
+        As a host, the editor is disabled so that you can't accidentally break the game for players.
+      </li>
+    </ul>
+    </p>
+    <h3>Page states</h3>
+    <p>
+      Games contain <b>pages</b>.
+      Think of a page like a <q>round</q> in bar trivia.
+      A page can be:
+    </p>
+    <ul>
+      <li>Locked 🔒 - players may not interact at all, even the page title is hidden.</li>
+      <li>Open ✏️ - players may answer and re-answer questions.</li>
+      <li>Scoring ✋ - players may see what they answered, but may not change their answers. Scores will begin to become visible to players as you enter them.</li>
+    </ul>
+
+    <h3>Suggested flow</h3>
+    <ol>
+      <li>Open the game.</li>
+      <li>Open the first page.</li>
+      <li>When players are done or time is open, move the page to scoring.</li>
+      <li>You can score immediately while players wait and show them the leaderboard, or you can announce and open the next round.</li>
+      <li>At intervals (every round or two), show off the leaderboard. Pages should all be "locked" or "scoring", no page should be open while you do this.</li>
+      <li>At the end, show off the final leaderboard.</li>
+      <li>Close the game after everyone is done.</li>
+    </ol>
   </div>
 </div>
 {% endblock %}

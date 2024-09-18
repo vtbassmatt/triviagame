@@ -41,6 +41,7 @@ class QuestionForm(forms.ModelForm):
         fields = [
             'question',
             'answer',
+            'possible_points',
         ]
         widgets = {
             'question': Bs5Textarea,

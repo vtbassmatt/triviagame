@@ -10,7 +10,7 @@
     <table class="table table-sm">
     <thead>
       <tr>
-        <td>❓</td>
+        <td>Points</td>
         <td>Response</td>
         <td>Team</td>
       </tr>
@@ -19,28 +19,26 @@
     <tr{% if not response.graded %} class="table-warning"{% endif %}>
       <td>
         <div class="btn-group" role="group">
+          {% for points in question.points_range %}
           <button
-            {% if response.graded and response.score > 0 %}
-            class="btn btn-sm btn-success"
+            {% if response.graded and response.score == points %}
+              {% if points == 0 %}
+              class="btn btn-sm btn-danger"
+              {% else %}
+              class="btn btn-sm btn-success"
+              {% endif %}
             disabled
             {% else %}
-            class="btn btn-sm btn-outline-success"
+            class="btn btn-sm btn-outline-primary"
             {% endif %}
             hx-post="{% url 'assign_score' game.id %}"
-            hx-vals='{"response":{{ response.id }},"score":1}'
+            hx-vals='{"response":{{ response.id }},"score":{{points}} }'
             hx-target="#question-card-{{ response.question.id }}"
-            hx-swap="outerHTML">✅</button>
-          <button
-            {% if response.graded and response.score <= 0 %}
-            class="btn btn-sm btn-danger"
-            disabled
-            {% else %}
-            class="btn btn-sm btn-outline-danger"
-            {% endif %}
-            hx-post="{% url 'assign_score' game.id  %}"
-            hx-vals='{"response":{{ response.id }},"score":0}'
-            hx-target="#question-card-{{ response.question.id }}"
-            hx-swap="outerHTML">❌</button>
+            hx-swap="outerHTML"><span class="px-1">{{ points }}</span></button>
+          {% if not forloop.last %}
+          {% cycle '' '' '' '' '</div><br><div class="btn-group mt-1" role="group">' %}
+          {% endif %}
+          {% endfor %}
           </div>
       </td>
       <td>{% if not response.graded %}⚠️ {% endif %}{{ response.value }}</td>

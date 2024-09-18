@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from django.utils.crypto import get_random_string
 
 
@@ -137,6 +138,10 @@ class Question(models.Model):
     order = models.SmallIntegerField()
     question = models.TextField()
     answer = models.TextField(blank=True)
+    possible_points = models.SmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(limit_value=1)],
+    )
 
     def __str__(self):
         return f"{self.order}. {self.question}"
@@ -149,6 +154,9 @@ class Question(models.Model):
                 name='ensure_question_order',
             ),
         ]
+    
+    def points_range(self):
+        return range(0, self.possible_points + 1)
 
 
 class Response(models.Model):
