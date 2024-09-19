@@ -4,7 +4,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
-    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span> (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <div class="card mb-3">
       <div class="card-header bg-danger text-white">Deleting page <q><a href="{% url 'edit_page' page.id %}" class="link-light">{{ page.title }}</a></q> in game <q><a href="{% url 'edit_game' page.game.id %}" class="link-light">{{ page.game.name }}</a></q></div>
       <div class="card-body">

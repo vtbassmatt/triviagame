@@ -3,7 +3,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12 mb-2">
-    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span> (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <h2>Game status</h2>
     {% include 'host/_toggle_game.html' %}
     <h2>Pages</h2>

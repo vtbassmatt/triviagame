@@ -3,7 +3,7 @@
 {% block heading %}New tr¿via game{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
-  <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span> (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+  <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
   <div class="col-12 mb-3">
     <form method="post" autocomplete="off">
       {% csrf_token %}
