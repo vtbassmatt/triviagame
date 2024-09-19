@@ -1,28 +1,34 @@
 from http import HTTPStatus
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django_htmx.http import trigger_client_event
+from guardian.ctypes import get_content_type
 from guardian.shortcuts import (
     assign_perm,
     get_objects_for_user,
     get_users_with_perms,
 )
+from guardian.utils import get_group_obj_perms_model, get_user_obj_perms_model
 
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
-from .forms import GameForm, PageForm, QuestionForm
+from .forms import GameForm, GameHostForm, PageForm, QuestionForm
 from .view_utils import (
     can_host_game, can_view_game,
     can_edit_game, can_edit_page, can_edit_question
 )
+
+User = get_user_model()
 
 
 class HttpResponseConflict(HttpResponse):
@@ -273,6 +279,93 @@ def edit_game(request, game_id):
         'game': game,
         'game_hosts': game_hosts,
         'game_form': game_form,
+    })
+
+
+def _get_available_new_game_hosts(game: Game):
+    # The code looks weird because this was copied from Django Guardian's
+    # source and I wanted to minimize changes. This inverts the meaning of
+    # get_users_with_perms to get users WITHOUT perm (`exlude` rather than
+    # `filter`).
+    # original: https://github.com/django-guardian/django-guardian/blob/55beb9893310b243cbd6f578f9665c3e7c76bf96/guardian/shortcuts.py#L241
+    with_superusers = True
+    with_group_users = True
+    only_with_perms_in = ['view_game', 'host_game', 'edit_game']
+
+    ctype = get_content_type(game)
+    user_model = get_user_obj_perms_model(game)
+    related_name = user_model.user.field.related_query_name()
+    if user_model.objects.is_generic():
+        user_filters = {
+            '%s__content_type' % related_name: ctype,
+            '%s__object_pk' % related_name: game.pk,
+        }
+    else:
+        user_filters = {'%s__content_object' % related_name: game}
+    qset = Q(**user_filters)
+
+    if only_with_perms_in is not None:
+        permission_ids = Permission.objects.filter(content_type=ctype, codename__in=only_with_perms_in).values_list('id', flat=True)
+        qset &= Q(**{
+            '%s__permission_id__in' % related_name: permission_ids,
+            })
+        
+    if with_group_users:
+        group_model = get_group_obj_perms_model(game)
+        if group_model.objects.is_generic():
+            group_obj_perm_filters = {
+                'content_type': ctype,
+                'object_pk': game.pk,
+            }
+        else:
+            group_obj_perm_filters = {
+                'content_object': game,
+            }
+        if only_with_perms_in is not None:
+            group_obj_perm_filters.update({
+                'permission_id__in': permission_ids,
+                })
+        group_ids = set(group_model.objects.filter(**group_obj_perm_filters).values_list('group_id', flat=True).distinct())
+        qset = qset | Q(groups__in=group_ids)
+
+    if with_superusers:
+        qset = qset | Q(is_superuser=True)
+
+    return get_user_model().objects.exclude(qset).distinct()
+
+
+@login_required
+@can_edit_game
+def edit_game_hosts(request, game_id):
+    game = request.game
+    game_hosts = get_users_with_perms(
+        game,
+        with_superusers=True,
+        with_group_users=True,
+        only_with_perms_in=['view_game', 'host_game', 'edit_game'],
+    )
+    possible_new_game_hosts = _get_available_new_game_hosts(game)
+
+    if request.method == 'POST':
+        game_host_form = GameHostForm(request.POST, queryset=possible_new_game_hosts)
+        if game.open:
+            game_host_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif game_host_form.is_valid():
+            new_host = game_host_form.cleaned_data['host']
+            with transaction.atomic():
+                assign_perm('host_game', new_host, game)
+                assign_perm('change_game', new_host, game)
+                assign_perm('view_game', new_host, game)
+            messages.success(request, f"Added host '{new_host}'.")
+            return HttpResponseRedirect(reverse('edit_game_hosts', args=(game.id,)))
+    else:
+        game_host_form = GameHostForm(queryset=possible_new_game_hosts)
+
+    return render(request, 'editor/hosts.html', {
+        'game': game,
+        'game_hosts': game_hosts,
+        'game_host_form': game_host_form,
+        'any_hosts_to_add': len(possible_new_game_hosts) > 0,
     })
 
 

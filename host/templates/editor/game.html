@@ -20,12 +20,13 @@
           <button type="submit" class="btn btn-outline-primary">Update name</button>
         </form>
         {% endif %}
-        <div class="card-body">
+        <p class="card-text mt-2">
           Hosts with access:
           {% for host in game_hosts %}
           {% if host == request.user %}you{% else %}{% firstof host.get_full_name host %}{% endif %}{% if not forloop.last %}, {% endif %}
           {% endfor %}
-        </div>
+          (<a href="{% url 'edit_game_hosts' game.id %}">edit hosts</a>)
+        </p>
       </div>
     </div>
 
