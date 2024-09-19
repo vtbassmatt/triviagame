@@ -13,6 +13,8 @@ urlpatterns = [
     path('<int:game_id>/team/<int:team_id>', views.team_page, name='team_page'),
     path('editor/new/', views.new_game, name='new_game'),
     path('editor/<int:game_id>/', views.edit_game, name='edit_game'),
+    path('editor/<int:game_id>/hosts', views.edit_game_hosts, name='edit_game_hosts'),
+    path('editor/<int:game_id>/hosts/<int:user_id>', views.hx_remove_game_host, name='remove_game_host'),
     path('editor/page/<int:page_id>/', views.edit_page, name='edit_page'),
     path('editor/page/<int:page_id>/up/', views.page_move, { 'delta': -1 }, name='page_up'),
     path('editor/page/<int:page_id>/down/', views.page_move, { 'delta': 1 }, name='page_down'),
@@ -23,5 +25,6 @@ urlpatterns = [
     path('editor/question/<int:question_id>/down/', views.question_move, { 'delta': 1 }, name='question_down'),
     path('editor/question/new/<int:page_id>/', views.new_question, name='new_question'),
     path('editor/question/<int:question_id>/delete/', views.delete_question, name='delete_question'),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('auth/prelogout', views.host_confirm_logout, name='confirm_logout'),
+    path('auth/', include('django.contrib.auth.urls')),
 ]

@@ -4,6 +4,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <div class="card mb-3">
       <div class="card-header bg-primary text-white">Game metadata</div>
       <div class="card-body">
@@ -16,9 +17,16 @@
             {% csrf_token %}
             {{ game_form }}
           </p>
-          <button type="submit" class="btn btn-outline-primary">Update game</button>
-        </form>    
+          <button type="submit" class="btn btn-outline-primary">Update name</button>
+        </form>
         {% endif %}
+        <p class="card-text mt-2">
+          Hosts with access:
+          {% for host in game_hosts %}
+          {% if host == request.user %}you{% else %}{% firstof host.get_full_name host %}{% endif %}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+          (<a href="{% url 'edit_game_hosts' game.id %}">edit hosts</a>)
+        </p>
       </div>
     </div>
 

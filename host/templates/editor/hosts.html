@@ -1,0 +1,56 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Tr¿via editor{% endblock %}
+{% block heading %}Editing hosts for <q>{{ game.name }}</q>{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Edit hosts</div>
+      <div class="card-body">
+        <p class="card-text">Game: {{ game.name }}</p>
+
+        <p class="card-text">Hosts (you can't remove admins or yourself):</p>
+        <ul class="list-group list-group-flush">
+          {% for host in game_hosts %}
+          {% if host == request.user %}
+          <li class="list-group-item">
+            {% firstof host.get_full_name host %}
+            <span class="badge rounded-pill bg-primary">you</span>
+          </li>
+          {% elif host.is_superuser %}
+          <li class="list-group-item">
+            {% firstof host.get_full_name host %}
+            <span class="badge rounded-pill bg-secondary">admin</span>
+          </li>
+          {% else %}
+          <li class="list-group-item" id="host-{{ host.id }}">
+            {% firstof host.get_full_name host %}
+            <button class="btn btn-danger btn-sm ms-2"
+              hx-delete="{% url 'remove_game_host' game.id host.id %}"
+              hx-target="#host-{{ host.id }}"
+              >Remove host</button>
+          </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+
+        {% if any_hosts_to_add %}
+        <form method="post" autocomplete="off">
+          <p class="card-text">
+            {% csrf_token %}
+            {{ game_host_form }}
+          </p>
+          <button type="submit" class="btn btn-outline-primary">Add host</button>
+        </form>
+        {% else %}
+        <p class="card-text mt-3 fst-italic">Everyone who could be a host of this game is already a host!</p>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <a href="{% url 'edit_game' game.id %}">Return to game editor</a>
+  </div>
+</div>
+{% endblock %}

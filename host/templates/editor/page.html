@@ -4,6 +4,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <div class="card mb-3">
       <div class="card-header bg-primary text-white">Page metadata</div>
       <div class="card-body">

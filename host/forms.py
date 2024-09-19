@@ -1,7 +1,16 @@
 from django import forms
-from game.models import Game, Page, Question
-from game.widgets import Bs5TextInput, Bs5Textarea
+from django.contrib.auth import get_user_model
 
+from game.models import Game, Page, Question
+from game.widgets import (
+    Bs5TextInput,
+    Bs5NumberInput,
+    Bs5Textarea,
+    Bs5Select,
+)
+
+
+User = get_user_model()
 
 
 class GameForm(forms.ModelForm):
@@ -16,6 +25,19 @@ class GameForm(forms.ModelForm):
         labels = {
             'name': 'Game name',
         }
+
+
+class GameHostForm(forms.Form):
+    host = forms.ModelChoiceField(
+        None,
+        required=True,
+        label="Add additional host",
+        widget=Bs5Select,
+    )
+
+    def __init__(self, data=None, queryset=None, *args, **kwargs):
+        super().__init__(data, *args, **kwargs)
+        self.fields['host'].queryset = queryset
 
 
 class PageForm(forms.ModelForm):
@@ -46,6 +68,7 @@ class QuestionForm(forms.ModelForm):
         widgets = {
             'question': Bs5Textarea,
             'answer': Bs5Textarea,
+            'possible_points': Bs5NumberInput,
         }
         labels = {
             'question': 'Question (Markdown allowed)',
