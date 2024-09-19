@@ -17,8 +17,16 @@
   <div class="col-12 mb-2">
     <h2>Teams</h2>
     {% for team in game.team_set.all %}
-    <div><a href="{% url 'team_page' game.id team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</div>
+    <p><a href="{% url 'team_page' game.id team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</p>
     {% endfor %}
+  </div>
+  <div class="col-12 mb-2">
+    <h2>Hosts</h2>
+    <p>
+    {% for host in game_hosts %}
+    {% if host == request.user %}you{% else %}{% firstof host.get_full_name host %}{% endif %}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    </p>
   </div>
   <div class="col-12 mb-2">
     <h2>Utilities</h2>

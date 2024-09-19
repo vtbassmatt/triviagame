@@ -10,7 +10,11 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django_htmx.http import trigger_client_event
-from guardian.shortcuts import assign_perm, get_objects_for_user
+from guardian.shortcuts import (
+    assign_perm,
+    get_objects_for_user,
+    get_users_with_perms,
+)
 
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
@@ -101,6 +105,12 @@ def toggle_game(request, game_id):
 def pages(request, game_id):
     player_join_url = request.build_absolute_uri(
         reverse('join_game', args=(request.game.id, request.game.passcode)))
+    game_hosts = get_users_with_perms(
+        request.game,
+        with_superusers=True,
+        with_group_users=True,
+        only_with_perms_in=['view_game', 'host_game', 'edit_game'],
+    )
 
     template = 'host/pages.html'
 
@@ -110,6 +120,7 @@ def pages(request, game_id):
     return render(request, template, {
         'user': request.user,
         'game': request.game,
+        'game_hosts': game_hosts,
         'player_join_url': player_join_url,
     })
 
@@ -240,6 +251,12 @@ def new_game(request):
 @can_edit_game
 def edit_game(request, game_id):
     game = request.game
+    game_hosts = get_users_with_perms(
+        game,
+        with_superusers=True,
+        with_group_users=True,
+        only_with_perms_in=['view_game', 'host_game', 'edit_game'],
+    )
 
     if request.method == 'POST':
         game_form = GameForm(request.POST, instance=game)
@@ -254,6 +271,7 @@ def edit_game(request, game_id):
 
     return render(request, 'editor/game.html', {
         'game': game,
+        'game_hosts': game_hosts,
         'game_form': game_form,
     })
 

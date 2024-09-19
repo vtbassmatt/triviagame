@@ -17,9 +17,15 @@
             {% csrf_token %}
             {{ game_form }}
           </p>
-          <button type="submit" class="btn btn-outline-primary">Update game</button>
-        </form>    
+          <button type="submit" class="btn btn-outline-primary">Update name</button>
+        </form>
         {% endif %}
+        <div class="card-body">
+          Hosts with access:
+          {% for host in game_hosts %}
+          {% if host == request.user %}you{% else %}{% firstof host.get_full_name host %}{% endif %}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </div>
       </div>
     </div>
 
