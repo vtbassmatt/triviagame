@@ -10,11 +10,12 @@ from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.views.decorators.http import require_POST
-from django_htmx.http import trigger_client_event
+from django.views.decorators.http import require_POST, require_http_methods
+from django_htmx.http import trigger_client_event, HttpResponseClientRedirect
 from guardian.ctypes import get_content_type
 from guardian.shortcuts import (
     assign_perm,
+    remove_perm,
     get_objects_for_user,
     get_users_with_perms,
 )
@@ -286,10 +287,11 @@ def _get_available_new_game_hosts(game: Game):
     # The code looks weird because this was copied from Django Guardian's
     # source and I wanted to minimize changes. This inverts the meaning of
     # get_users_with_perms to get users WITHOUT perm (`exlude` rather than
-    # `filter`).
+    # `filter`). I later realized you can't remove permissions easily
+    # from a superuser or someone in a group, so a few more changes
+    # snuck in.
     # original: https://github.com/django-guardian/django-guardian/blob/55beb9893310b243cbd6f578f9665c3e7c76bf96/guardian/shortcuts.py#L241
-    with_superusers = True
-    with_group_users = True
+    with_group_users = False
     only_with_perms_in = ['view_game', 'host_game', 'edit_game']
 
     ctype = get_content_type(game)
@@ -328,10 +330,8 @@ def _get_available_new_game_hosts(game: Game):
         group_ids = set(group_model.objects.filter(**group_obj_perm_filters).values_list('group_id', flat=True).distinct())
         qset = qset | Q(groups__in=group_ids)
 
-    if with_superusers:
-        qset = qset | Q(is_superuser=True)
-
-    return get_user_model().objects.exclude(qset).distinct()
+    # exclude superusers
+    return get_user_model().objects.exclude(is_superuser=True).exclude(qset).distinct()
 
 
 @login_required
@@ -341,23 +341,27 @@ def edit_game_hosts(request, game_id):
     game_hosts = get_users_with_perms(
         game,
         with_superusers=True,
-        with_group_users=True,
         only_with_perms_in=['view_game', 'host_game', 'edit_game'],
     )
     possible_new_game_hosts = _get_available_new_game_hosts(game)
 
     if request.method == 'POST':
         game_host_form = GameHostForm(request.POST, queryset=possible_new_game_hosts)
-        if game.open:
-            game_host_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
-        elif game_host_form.is_valid():
+        if game_host_form.is_valid():
+            # we allow adding hosts to an open game
             new_host = game_host_form.cleaned_data['host']
             with transaction.atomic():
                 assign_perm('host_game', new_host, game)
                 assign_perm('change_game', new_host, game)
                 assign_perm('view_game', new_host, game)
-            messages.success(request, f"Added host '{new_host}'.")
-            return HttpResponseRedirect(reverse('edit_game_hosts', args=(game.id,)))
+
+            if request.htmx:
+                Redirect = HttpResponseClientRedirect
+            else:
+                Redirect = HttpResponseRedirect
+                messages.success(request, f"Added host '{new_host}'.")       
+
+            return Redirect(reverse('edit_game_hosts', args=(game.id,)))
     else:
         game_host_form = GameHostForm(queryset=possible_new_game_hosts)
 
@@ -367,6 +371,39 @@ def edit_game_hosts(request, game_id):
         'game_host_form': game_host_form,
         'any_hosts_to_add': len(possible_new_game_hosts) > 0,
     })
+
+
+@login_required
+@can_edit_game
+@require_http_methods(["DELETE"])
+def hx_remove_game_host(request, game_id, user_id):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
+    game = request.game
+    user_to_remove = get_object_or_404(User, pk=user_id)
+    removable_host = get_users_with_perms(
+        game,
+        only_with_perms_in=['view_game', 'host_game', 'edit_game'],
+    ).filter(id=user_to_remove.id).first()
+    friendly_name = user_to_remove.get_full_name() or user_to_remove.username
+
+    if game.open:
+        return HttpResponse(f'Cannot remove {friendly_name} as a host while the game is open.')
+
+    if removable_host:
+        with transaction.atomic():
+            remove_perm('host_game', removable_host, game)
+            remove_perm('change_game', removable_host, game)
+            remove_perm('view_game', removable_host, game)
+        redo_link = reverse('edit_game_hosts', args=(game.id,))
+        hx_vals = f'{{"host":{user_to_remove.id}}}'
+        return HttpResponse(f'{friendly_name} was removed as host. <a class="btn btn-sm btn-outline-primary" hx-post="{redo_link}" hx-vals=\'{hx_vals}\'>Undo</a> to add them back.')
+    else:
+        return HttpResponse(f'Tried but failed to remove {friendly_name}.')
+    
+    
 
 
 @login_required

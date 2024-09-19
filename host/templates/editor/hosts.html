@@ -10,14 +10,26 @@
       <div class="card-body">
         <p class="card-text">Game: {{ game.name }}</p>
 
-        <p class="card-text">Hosts:</p>
+        <p class="card-text">Hosts (you can't remove admins or yourself):</p>
         <ul class="list-group list-group-flush">
           {% for host in game_hosts %}
           {% if host == request.user %}
-          <li class="list-group-item">you (can't remove yourself)</li>
-          {% else %}
           <li class="list-group-item">
             {% firstof host.get_full_name host %}
+            <span class="badge rounded-pill bg-primary">you</span>
+          </li>
+          {% elif host.is_superuser %}
+          <li class="list-group-item">
+            {% firstof host.get_full_name host %}
+            <span class="badge rounded-pill bg-secondary">admin</span>
+          </li>
+          {% else %}
+          <li class="list-group-item" id="host-{{ host.id }}">
+            {% firstof host.get_full_name host %}
+            <button class="btn btn-danger btn-sm ms-2"
+              hx-delete="{% url 'remove_game_host' game.id host.id %}"
+              hx-target="#host-{{ host.id }}"
+              >Remove host</button>
           </li>
           {% endif %}
           {% endfor %}
