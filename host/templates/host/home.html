@@ -4,6 +4,7 @@
 <div class="row">
   <div class="col-12">
     <p><span class="badge bg-warning">Reminder</span> If any player is having browser trouble, give them this link: <code>{{ uncurse_url }}</code></p>
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span></p>
     <hr>
     <h2>Games</h2>
     <p><a href="{% url 'new_game' %}" class="btn btn-outline-secondary{% if not perms.game.add_game %} disabled{% endif %}">Create a new game</a></p>

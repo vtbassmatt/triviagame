@@ -3,6 +3,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span></p>
     <h2>Scoring &ldquo;{{ page.title }}&rdquo;</h2>
 
     {% for question in page.question_set.all %}

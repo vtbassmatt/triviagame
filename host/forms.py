@@ -1,6 +1,6 @@
 from django import forms
 from game.models import Game, Page, Question
-from game.widgets import Bs5TextInput, Bs5Textarea
+from game.widgets import Bs5TextInput, Bs5NumberInput, Bs5Textarea
 
 
 
@@ -46,6 +46,7 @@ class QuestionForm(forms.ModelForm):
         widgets = {
             'question': Bs5Textarea,
             'answer': Bs5Textarea,
+            'possible_points': Bs5NumberInput,
         }
         labels = {
             'question': 'Question (Markdown allowed)',
