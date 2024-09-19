@@ -3,7 +3,7 @@
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
-    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span></p>
+    <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span> (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <h2>Scoring &ldquo;{{ page.title }}&rdquo;</h2>
 
     {% for question in page.question_set.all %}
@@ -11,7 +11,7 @@
     {% empty %}
     <p>There don't seem to be any questions here.</p>
     {% endfor %}
-    <a href="{% url 'pages' game.id %}" class="btn btn-outline-primary">Return to game</a>
+    <a href="{% url 'pages' game.id %}" class="btn btn-outline-primary mb-3">Return to game</a>
   </div>
 </div>
 {% endblock %}

@@ -1,0 +1,16 @@
+{% extends "host_base.html" %}
+
+{% block contents %}
+
+<form method="post" action="{% url 'logout' %}">
+{% csrf_token %}
+<div class="mb3">
+  <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>.</p>
+  <p>Are you sure you want to log out?</p>
+</div>
+
+<button type="submit" class="btn btn-danger">Log out</button>
+{% comment %} <input type="hidden" name="next_page" value="{% url 'home' %}"> {% endcomment %}
+</form>
+
+{% endblock %}

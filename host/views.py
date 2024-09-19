@@ -57,6 +57,15 @@ def host_home(request):
 
 
 @login_required
+def host_confirm_logout(request):
+    return render(
+        request,
+        'registration/confirm_logout.html',
+        {}
+    )
+
+
+@login_required
 @can_host_game
 @require_POST
 def toggle_game(request, game_id):

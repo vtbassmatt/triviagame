@@ -23,5 +23,6 @@ urlpatterns = [
     path('editor/question/<int:question_id>/down/', views.question_move, { 'delta': 1 }, name='question_down'),
     path('editor/question/new/<int:page_id>/', views.new_question, name='new_question'),
     path('editor/question/<int:question_id>/delete/', views.delete_question, name='delete_question'),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('auth/prelogout', views.host_confirm_logout, name='confirm_logout'),
+    path('auth/', include('django.contrib.auth.urls')),
 ]
