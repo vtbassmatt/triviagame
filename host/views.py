@@ -330,8 +330,16 @@ def _get_available_new_game_hosts(game: Game):
         group_ids = set(group_model.objects.filter(**group_obj_perm_filters).values_list('group_id', flat=True).distinct())
         qset = qset | Q(groups__in=group_ids)
 
-    # exclude superusers
-    return get_user_model().objects.exclude(is_superuser=True).exclude(qset).distinct()
+    return (
+        get_user_model().objects
+        # only active users
+        .filter(is_active=True)
+        # exclude superusers
+        .exclude(is_superuser=True)
+        # all the above stuff
+        .exclude(qset)
+        .distinct()
+    )
 
 
 @login_required
