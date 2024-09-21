@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from game.models import Game, Page, Question
+from game.models import Game, Page, Question, Team
 from game.widgets import (
     Bs5TextInput,
     Bs5NumberInput,
@@ -74,3 +74,22 @@ class QuestionForm(forms.ModelForm):
             'question': 'Question (Markdown allowed)',
             'answer': 'Answer (Markdown allowed)',
         }
+
+
+class TeamForm(forms.Form):
+    name = forms.CharField(
+        label='Team name',
+        max_length=200,
+        widget=Bs5TextInput(attrs={
+            'autocomplete': 'off',
+            'data-1p-ignore': True,
+        }),
+    )
+    members = forms.CharField(
+        label='Team members (display only, no required format)',
+        max_length=200,
+        required=False,
+        widget=Bs5TextInput(attrs={
+            'autocomplete': 'off',
+        }),
+    )

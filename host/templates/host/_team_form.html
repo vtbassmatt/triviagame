@@ -1,0 +1,8 @@
+<form hx-target="this" hx-swap="outerHTML" hx-put="{{ put_url }}">
+  <p>Team name: {{ form.name }}</p>
+  <p>Members: {{ form.members }}</p>
+  <p>
+    <button class="btn btn-primary">Update info</button>
+    <button class="btn btn-outline-secondary" hx-get="{{ get_url }}">Cancel</button>
+  </p>
+</form>

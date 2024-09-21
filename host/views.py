@@ -1,17 +1,29 @@
 from http import HTTPStatus
+from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Permission
 from django.contrib import messages
+from django.core.exceptions import BadRequest
 from django.db import transaction
 from django.db.models import F, Q
 from django.forms import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import (
+    HttpResponse,
+    HttpResponseRedirect,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    QueryDict,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
-from django_htmx.http import trigger_client_event, HttpResponseClientRedirect
+from django_htmx.http import (
+    trigger_client_event,
+    HttpResponseClientRedirect,
+    HttpResponseClientRefresh,
+)
 from guardian.ctypes import get_content_type
 from guardian.shortcuts import (
     assign_perm,
@@ -23,7 +35,7 @@ from guardian.utils import get_group_obj_perms_model, get_user_obj_perms_model
 
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
-from .forms import GameForm, GameHostForm, PageForm, QuestionForm
+from .forms import GameForm, GameHostForm, PageForm, QuestionForm, TeamForm
 from .view_utils import (
     can_host_game, can_view_game,
     can_edit_game, can_edit_page, can_edit_question
@@ -221,11 +233,80 @@ def host_leaderboard(request, game_id):
 def team_page(request, game_id, team_id):
     team = Team.objects.get(pk=team_id)
 
-    return render(request, 'host/team.html', {
+    template = 'host/team.html'
+    if request.htmx:
+        template = 'host/_team_fragment.html'
+
+    return render(request, template, {
         'game': request.game,
         'team': team,
         'rejoin_link': request.build_absolute_uri(
             reverse('rejoin_team', args=(team.id, team.passcode))),
+    })
+
+
+def _get_PUT_data(request):
+    # modeled after https://github.com/django/django/blob/901ec7a217d174b25ac008c9c385928a36f870d1/django/http/request.py#L355
+    if request.method != "PUT":
+        return QueryDict(encoding=request._encoding)
+    
+    if request.content_type == "multipart/form-data":
+        if hasattr(request, "_body"):
+            # Use already read data
+            data = BytesIO(request._body)
+        else:
+            data = request
+
+        # no try/catch here since we don't do any local error handling
+        put_, _ = request.parse_file_upload(request.META, data)
+        return put_
+
+    elif request.content_type == "application/x-www-form-urlencoded":
+        # According to RFC 1866, the "application/x-www-form-urlencoded"
+        # content type does not have a charset and should be always treated
+        # as UTF-8.
+        if request._encoding is not None and request._encoding.lower() != "utf-8":
+            raise BadRequest(
+                "HTTP requests with the 'application/x-www-form-urlencoded' "
+                "content type must be UTF-8 encoded."
+            )
+        return QueryDict(request.body, encoding="utf-8")
+        
+    else:
+        return QueryDict(encoding=request._encoding)
+
+
+@login_required
+@can_view_game
+def hx_edit_team(request, game_id, team_id):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
+    team = get_object_or_404(Team, pk=team_id, game=request.game)
+    initial = {
+        key: getattr(team, key, '') for key in ['name', 'members']
+    }
+
+    if request.method == 'PUT':
+        data = _get_PUT_data(request)
+        form = TeamForm(data, initial=initial)
+        if form.is_valid():
+            team.name = form.cleaned_data['name']
+            team.members = form.cleaned_data['members']
+            team.save()
+            return render(request, 'host/_team_fragment.html', {
+                'game': request.game,
+                'team': team,
+            })
+    
+    else:
+        form = TeamForm(initial=initial)
+
+    return render(request, 'host/_team_form.html', {
+        'form': form,
+        'put_url': reverse('edit_team', args=(game_id, team_id)),
+        'get_url': reverse('team_page', args=(game_id, team_id)),
     })
 
 
