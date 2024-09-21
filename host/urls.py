@@ -11,6 +11,7 @@ urlpatterns = [
     path('<int:game_id>/score/', views.assign_score, name='assign_score'),
     path('<int:game_id>/leaderboard/', views.host_leaderboard, name='host_leaderboard'),
     path('<int:game_id>/team/<int:team_id>', views.team_page, name='team_page'),
+    path('<int:game_id>/team/<int:team_id>/edit', views.hx_edit_team, name='edit_team'),
     path('editor/new/', views.new_game, name='new_game'),
     path('editor/<int:game_id>/', views.edit_game, name='edit_game'),
     path('editor/<int:game_id>/hosts', views.edit_game_hosts, name='edit_game_hosts'),

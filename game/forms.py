@@ -34,8 +34,15 @@ class CreateTeamForm(forms.ModelForm):
         model = Team
         fields = ('name', 'members')
         widgets = {
-            'name': Bs5TextInput,
-            'members': Bs5TextInput,
+            'name': Bs5TextInput(attrs={
+                'data-1p-ignore': True,
+                'autocomplete': 'off',
+            }),
+            'members': Bs5TextInput(
+                attrs={
+                    'autocomplete': 'off',
+                }
+            ),
         }
         labels = {
             'name': 'Team name',
