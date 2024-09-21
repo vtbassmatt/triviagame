@@ -20,7 +20,10 @@ class GameForm(forms.ModelForm):
             'name',
         ]
         widgets = {
-            'name': Bs5TextInput,
+            'name': Bs5TextInput(attrs={
+                'data-1p-ignore': True,
+                'autocomplete': 'off',
+            }),
         }
         labels = {
             'name': 'Game name',
@@ -48,7 +51,9 @@ class PageForm(forms.ModelForm):
             'description',
         ]
         widgets = {
-            'title': Bs5TextInput,
+            'title': Bs5TextInput(attrs={
+                'autocomplete': 'off',
+            }),
             'description': Bs5Textarea,
         }
         labels = {
