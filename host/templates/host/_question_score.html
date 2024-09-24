@@ -39,6 +39,7 @@
           {% cycle '' '' '' '' '</div><br><div class="btn-group mt-1" role="group">' %}
           {% endif %}
           {% endfor %}
+          {% resetcycle %}
           </div>
       </td>
       <td>{% if not response.graded %}⚠️ {% endif %}{{ response.value }}</td>

@@ -11,10 +11,10 @@ class JoinGameForm(forms.Form):
 
 class CreateTeamForm(forms.ModelForm):
     TEAM_NAME_IDEAS = (
-        "Win, Booze, or Draw",
+        # "Win, Booze, or Draw",
         "Red Hot Trivia Peppers",
-        "The Smartinis",
-        "The Scranton Stranglers",
+        # "The Smartinis",
+        # "The Scranton Stranglers",
         "Harry, You're a Quizard",
         "I Can't Feel My Mace When I'm Windu",
         "Walt Quizney World",
@@ -28,6 +28,11 @@ class CreateTeamForm(forms.ModelForm):
         "Trivia Newton John",
         "Quizteama Aguilera",
         "Just Google It",
+        "Walt Quizney",
+        "Quiz Pro Quo",
+        "The Quizard of Oz",
+        "Don Quizote",
+        "Get Down to Quizness",
     )
 
     class Meta:
