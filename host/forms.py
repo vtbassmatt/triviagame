@@ -49,6 +49,7 @@ class PageForm(forms.ModelForm):
         fields = [
             'title',
             'description',
+            'is_hidden',
         ]
         widgets = {
             'title': Bs5TextInput(attrs={
@@ -59,6 +60,7 @@ class PageForm(forms.ModelForm):
         labels = {
             'title': 'Page title',
             'description': 'Long description (Markdown allowed)',
+            'is_hidden': 'Hide this page while it\'s not open?',
         }
 
 

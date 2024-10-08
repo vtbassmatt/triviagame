@@ -1,9 +1,11 @@
 {% for page in game.page_set.all %}
   {% if page.is_locked %}
-  <dt class="col-sm-3 text-muted">{{ page.order }}. ????????????? 🔒</dt>
-  <dd class="col-sm-9 text-muted"><em>{{ page.mystery_description }}</em></dd>
+  {% if not page.is_hidden %}
+  <dt class="col-sm-4 text-muted">{{ page.order }}. ????????????? 🔒</dt>
+  <dd class="col-sm-8 text-muted"><em>{{ page.mystery_description }}</em></dd>
+  {% endif %}
   {% else %}
-  <dt class="col-sm-3">
+  <dt class="col-sm-4">
     {{ page.order }}. <a href="{% url 'answer_sheet' page.order %}">{{ page.title }}</a>
     {% if page.is_open %}
     (✏️ open)
@@ -11,7 +13,7 @@
     (✅ done)
     {% endif %}
   </dt>
-  <dd class="col-sm-9 markdown-needed">
+  <dd class="col-sm-8 markdown-needed">
     {{ page.description|linebreaksbr }}
   </dd>
   {% endif %}
