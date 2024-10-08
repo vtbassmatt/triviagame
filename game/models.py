@@ -56,9 +56,9 @@ class Page(models.Model):
     ]
 
     class PageState(models.IntegerChoices):
-        LOCKED = 0      # players cannot see the page at all
-        OPEN = 1        # players can see and answer the page
-        SCORING = 2     # players can see, but not answer, the page
+        LOCKED = 0      # players cannot open the page at all
+        OPEN = 1        # players can open and answer the page
+        SCORING = 2     # players can open, but not answer, the page
 
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     order = models.SmallIntegerField()
@@ -68,6 +68,7 @@ class Page(models.Model):
     )
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    is_hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.game} :: {self.order}. {self.title}"
