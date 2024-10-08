@@ -1,7 +1,7 @@
 <div id="page-list">
 {% for page in game.page_set.all %}
 <li class="list-group-item">
-  {{ page.order }}. <a href="{% url 'edit_page' page.id %}">{{ page.title }}</a>
+  {{ page.order }}. {% if page.is_hidden %}<i>{% endif %}<a href="{% url 'edit_page' page.id %}">{{ page.title }}</a>{% if page.is_hidden %}</i> (hidden 🙈){% endif %}
   <a hx-post="{% url 'page_up' page.id %}" hx-target="#page-list" class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</a>
   <a hx-post="{% url 'page_down' page.id %}" hx-target="#page-list" class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</a>
   <a href="{% url 'delete_page' page.id %}" class="btn btn-outline-danger">Delete</a>
