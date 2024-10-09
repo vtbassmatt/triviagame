@@ -3,7 +3,7 @@
     <div class="card-header">Question {{ question.order }}</div>
     <div class="card-body">
       {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
-      <p class="card-text markdown-needed">{{ question.question }}</p>
+      <p class="card-text markdown-needed">{{ question.question|linebreaksbr }}</p>
 
       {% comment %}
       assured by the view:
@@ -51,7 +51,7 @@
 
       {# page not accepting answers #}
       {% if question.page.is_scoring %}
-      <p class="card-text">Correct answer: <span class="text-info markdown-needed">{{ question.answer }}</span></p>
+      <p class="card-text">Correct answer: <span class="text-info markdown-needed">{{ question.answer|linebreaksbr }}</span></p>
       <p class="card-text">
         {% if response %}
           Your answer:
