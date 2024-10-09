@@ -59,7 +59,7 @@ class PageForm(forms.ModelForm):
         }
         labels = {
             'title': 'Page title',
-            'description': 'Long description (Markdown allowed)',
+            'description': 'Long description (inline Markdown allowed)',
             'is_hidden': 'Hide this page while it\'s not open?',
         }
 
@@ -78,8 +78,8 @@ class QuestionForm(forms.ModelForm):
             'possible_points': Bs5NumberInput,
         }
         labels = {
-            'question': 'Question (Markdown allowed)',
-            'answer': 'Answer (Markdown allowed)',
+            'question': 'Question (inline Markdown allowed)',
+            'answer': 'Answer (inline Markdown allowed)',
         }
 
 
