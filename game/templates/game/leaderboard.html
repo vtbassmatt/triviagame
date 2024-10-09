@@ -21,7 +21,7 @@
       <tr>
         {% for entry in line %}
         {% if forloop.first %}
-        <th scope="row">{% if entry == team.name %}👉 {% endif %}{% if entry in gold_medals %}🥇 {% endif %}{{ entry }}</th>
+        <td>{% if entry == team.name %}👉 <u>{% endif %}{% if entry in gold_medals %}🥇 {% endif %}{{ entry }}{% if entry == team.name %}</u> 👈{% endif %}</td>
         <td>{{ teams|dict_value:entry }}</td>
         {% else %}
         <td>{{ entry }}</td>
