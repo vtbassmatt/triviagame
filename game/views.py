@@ -349,12 +349,12 @@ def compute_leaderboard_data(game):
         for round in (
             game.page_set
             .exclude(is_hidden=True, state=models.Page.PageState.LOCKED)
-        )] + ['final']
+        )] + ['total']
     l_board = { t.name: {r: 0 for r in rounds} for t in game.team_set.all() }
     for r in responses:
         try:
             l_board[r.team.name][r.question.page.order] += r.score
-            l_board[r.team.name]['final'] += r.score
+            l_board[r.team.name]['total'] += r.score
         except KeyError:
             if r.question.page.order not in l_board[r.team.name]:
                 # this is an answer on a hidden page that was re-locked
@@ -364,7 +364,7 @@ def compute_leaderboard_data(game):
                 # something else might be going on, and we should fail
                 raise
     
-    # now we want a list of lists, sorted by final score
+    # now we want a list of lists, sorted by total score
     final_board = [[team_name] + list(rest.values()) for team_name, rest in l_board.items()]
     final_board.sort(key=lambda line: line[-1], reverse=True)
 
