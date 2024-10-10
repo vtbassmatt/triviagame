@@ -139,10 +139,13 @@ def create_team(request):
 
 def rejoin_team(request, id=0, code=None):
     team_name = None
+    team_members = None
+
     if id > 0:
         try:
             preview_team = models.Team.objects.get(pk=id, passcode=code)
             team_name = preview_team.name
+            team_members = preview_team.members
         except models.Team.DoesNotExist:
             pass
 
@@ -158,7 +161,7 @@ def rejoin_team(request, id=0, code=None):
                 messages.success(request, f"You reconnected to {desired_team.name}.")
                 return HttpResponseRedirect(reverse('play'))
             except models.Team.DoesNotExist:
-                form.add_error(None, ValidationError('Could not reconnect that team', code='notfound'))
+                form.add_error(None, ValidationError('Could not reconnect that team. Check that you have the right ID and code.', code='notfound'))
     else:
         initial = {}
         if id > 0:
@@ -174,6 +177,7 @@ def rejoin_team(request, id=0, code=None):
     return render(request, 'rejoin.html', {
         'form': form,
         'team_name': team_name,
+        'team_members': team_members,
     })
 
 
