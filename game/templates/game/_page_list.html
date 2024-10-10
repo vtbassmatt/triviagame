@@ -1,22 +1,36 @@
+<div class="col-12">
 {% for page in game.page_set.all %}
   {% if page.is_locked %}
     {% if not page.is_hidden %}
-    <dt class="col-sm-4 text-muted">{{ page.order }}. ????????????? 🔒</dt>
-    <dd class="col-sm-8 text-muted mb-3"><em>{{ page.mystery_description }}</em></dd>
-    <hr>
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="text-muted">{{ page.order }}. ????????????? </span><span class="badge bg-secondary">round not started</span>
+      </div>
+      <div class="card-body">
+        <p class="card-text text-muted"><em>{{ page.mystery_description }}</em></p>
+      </div>
+    </div>
     {% endif %}
   {% else %}
-  <dt class="col-sm-4">
-    {{ page.order }}. <a href="{% url 'answer_sheet' page.order %}">{{ page.title }}</a>
+  <div class="card mb-3{% if page.is_open %} border-success{% endif %}">
+    <div class="card-header{% if page.is_open %} border-success{% endif %}">
+      {{ page.order }}. <a href="{% url 'answer_sheet' page.order %}">{{ page.title }}</a>
+      {% if page.is_open %}
+      <span class="badge bg-success">open for answers</span>
+      {% elif page.is_scoring %}
+      <span class="badge bg-info">round complete</span>
+      {% endif %}
+    </div>
     {% if page.is_open %}
-    (✏️ open)
-    {% elif page.is_scoring %}
-    (✅ done)
+    <div class="card-body markdown-needed">
+      {% firstof page.description|linebreaksbr '&nbsp;' %}
+    </div>
+    {% else %}
+    <div class="card-body">
+      <p class="card-text text-muted">This round is complete! You can still view the description and questions, but you can no longer submit answers.</p>
+    </div>
     {% endif %}
-  </dt>
-  <dd class="col-sm-8 mb-3 markdown-needed">
-    {% firstof page.description|linebreaksbr '&nbsp;' %}
-  </dd>
-  <hr>
+  </div>
   {% endif %}
 {% endfor %}
+</div>
