@@ -6,7 +6,7 @@
 <div class="row justify-content-center">
   <p>Team: <em>{{ team.name }}</em>.</p>
   <p><span class="badge bg-success">Note!</span> Answers are saved as you type, no need to submit anything.</p>
-  <p>When you're done, you can go <a href="{% url 'play' %}">back to the list of pages</a>.</p>
+  <p>When you're done, you can go <a href="{% url 'play' %}">back to the list of rounds</a>.</p>
   <h2>{{ page.order }}. {{ page.title }}</h2>
   {% if page.description %}<p class="markdown-needed">{{ page.description|linebreaksbr }}</p>{% endif %}
 </div>
@@ -34,6 +34,6 @@
   <p>There aren't any questions here.</p>
   {% endfor %}
   
-  <p><a href="{% url 'play' %}">Back to the list of pages</a>.</p>
+  <p><a href="{% url 'play' %}">Back to the list of rounds</a>.</p>
 </div>
 {% endblock %}
