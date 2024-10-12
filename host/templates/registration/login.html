@@ -3,7 +3,7 @@
 {% block contents %}
 
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+<p class="text-danger">Your username and password didn't match. Please try again.</p>
 {% endif %}
 
 {% if next %}
@@ -15,22 +15,29 @@
     {% endif %}
 {% endif %}
 
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-<div class="mb3">
-  <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}{{ form.label_suffix }}</label>
-  {# TODO: figure out how to get a class="form-control" on this #}
-  {{ form.username }}
-</div>
-<div class="mb3">
-  <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}{{ form.label_suffix }}</label>
-  {# TODO: figure out how to get a class="form-control" on this #}
-  {{ form.password }}
-</div>
+<div class="col-md-6">
+  <form method="post" action="{% url 'login' %}">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}{{ form.label_suffix }}</label>
+    {{ form.username }}
+  </div>
+  <div class="mb-3">
+    <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}{{ form.label_suffix }}</label>
+    {{ form.password }}
+  </div>
 
-<button type="submit" class="btn btn-primary">Log in</button>
-<input type="hidden" name="next" value="{{ next }}">
-</form>
+  {# ugly hack! but it gets the job done #}
+  <script>
+    document.querySelectorAll("input#id_username,input#id_password").forEach(el => {
+      el.classList.add("form-control");
+    })
+  </script>
+
+  <button type="submit" class="btn btn-primary">Log in</button>
+  <input type="hidden" name="next" value="{{ next }}">
+  </form>
+</div>
 
 {# Assumes you set up the password_reset view in your URLconf #}
 {#<p><a href="{% url 'password_reset' %}">Lost password?</a></p>#}
