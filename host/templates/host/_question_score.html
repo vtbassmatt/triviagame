@@ -19,6 +19,13 @@
     <tr{% if not response.graded %} class="table-warning"{% endif %}>
       <td>
         <div class="btn-group" role="group">
+          <button class="btn btn-sm btn-outline-secondary"
+            {% if not response.graded %}disabled{% endif %}
+            hx-post="{% url 'assign_score' game.id %}"
+            hx-vals='{"response":{{ response.id }},"score":-1 }'
+            hx-target="#question-card-{{ response.question.id }}"
+            hx-swap="outerHTML"
+            hx-confirm="This will un-score this team's response, are you sure?">🚫</button>
           {% for points in question.points_range %}
           <button
             {% if response.graded and response.score == points %}

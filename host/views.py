@@ -214,8 +214,12 @@ def assign_score(request, game_id):
     response_id = int(request.POST['response'])
     response = get_object_or_404(Response, pk=response_id)
     score = int(request.POST['score'])
-    response.score = score
-    response.graded = True
+    if score >= 0:
+        response.score = score
+        response.graded = True
+    else:
+        response.score = 0
+        response.graded = False
     response.save()
 
     return render(request, 'host/_question_score.html', {
