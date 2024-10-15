@@ -17,6 +17,7 @@ urlpatterns = [
     path('editor/<int:game_id>/hosts', views.edit_game_hosts, name='edit_game_hosts'),
     path('editor/<int:game_id>/hosts/<int:user_id>', views.hx_remove_game_host, name='remove_game_host'),
     path('editor/page/<int:page_id>/', views.edit_page, name='edit_page'),
+    path('editor/page/<int:page_id>/metadata/', views.hx_edit_page_metadata, name='edit_page_metadata'),
     path('editor/page/<int:page_id>/up/', views.page_move, { 'delta': -1 }, name='page_up'),
     path('editor/page/<int:page_id>/down/', views.page_move, { 'delta': 1 }, name='page_down'),
     path('editor/page/new/<int:game_id>/', views.new_page, name='new_page'),

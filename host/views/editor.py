@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Permission
 from django.contrib import messages
+from django.core.exceptions import BadRequest
 from django.db import transaction
 from django.db.models import F, Q
 from django.forms import ValidationError
@@ -16,7 +17,7 @@ from django.http import (
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, HttpResponseClientRefresh
 from guardian.ctypes import get_content_type
 from guardian.shortcuts import (
     assign_perm,
@@ -41,6 +42,7 @@ __all__ = [
     'hx_remove_game_host',
     'new_page',
     'edit_page',
+    'hx_edit_page_metadata',
     'delete_page',
     'page_move',
     'new_question',
@@ -272,6 +274,17 @@ def new_page(request, game_id):
 @login_required
 @can_edit_page
 def edit_page(request, page_id):
+    return render(request, 'editor/page.html', {
+        'page': request.page,
+    })
+
+
+@login_required
+@can_edit_page
+def hx_edit_page_metadata(request, page_id):
+    if not request.htmx:
+        raise BadRequest()
+
     page = request.page
 
     if request.method == 'POST':
@@ -281,11 +294,11 @@ def edit_page(request, page_id):
         elif page_form.is_valid():
             updated_page = page_form.save()
             messages.success(request, "Page data saved.")
-            return HttpResponseRedirect(reverse('edit_page', args=(updated_page.id,)))
+            return HttpResponseClientRefresh()
     else:
         page_form = PageForm(instance=page)
 
-    return render(request, 'editor/page.html', {
+    return render(request, 'editor/_page_form.html', {
         'page': page,
         'page_form': page_form,
     })
