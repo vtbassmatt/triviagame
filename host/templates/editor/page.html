@@ -5,17 +5,37 @@
 <div class="row justify-content-center">
   <div class="col-12">
     <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+    <p>Go back to game editor: <q><a href="{% url 'edit_game' page.game.id %}">{{ page.game.name }}</a></q></p>
     <div class="card mb-3">
       <div class="card-header bg-primary text-white">Page metadata</div>
       <div class="card-body">
-        <p class="card-text">From game <q><a href="{% url 'edit_game' page.game.id %}">{{ page.game.name }}</a></q></p>
-        <form method="post" autocomplete="off">
-          <p class="card-text">
-            {% csrf_token %}
-            {{ page_form }}
-          </p>
-          <button type="submit" class="btn btn-outline-primary">Update page</button>
-        </form>    
+        <form>
+          <div>
+            <label for="id_title">Page title:</label>
+            <div class="mb-3">
+              <input type="text" readonly class="form-control-plaintext" id="id_title" value="{{ page.title }}">
+            </div>
+          </div>
+
+          <div>
+            <label for="id_desc">Long description:</label>
+            <div class="mb-3">
+              <div class="form-control mt-1 markdown-needed" id="id_desc">
+                {{ page.description|linebreaksbr }}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-3">Hidden: {% if page.is_hidden %}Yes{% else %}No{% endif %}</label>
+          </div>
+        </form>
+
+        <p class="card-text">
+          <a class="btn btn-outline-primary"
+            hx-get="{% url 'edit_page_metadata' page.id %}"
+            hx-target="closest div">Edit page metadata</a>
+        </p>
       </div>
     </div>
 
