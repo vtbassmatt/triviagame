@@ -35,8 +35,8 @@ from guardian.utils import get_group_obj_perms_model, get_user_obj_perms_model
 
 from game.models import Game, Page, Response, Team, Question
 from game.views import compute_leaderboard_data
-from .forms import GameForm, GameHostForm, PageForm, QuestionForm, TeamForm
-from .view_utils import (
+from host.forms import GameForm, GameHostForm, PageForm, QuestionForm, TeamForm
+from host.view_utils import (
     can_host_game, can_view_game,
     can_edit_game, can_edit_page, can_edit_question
 )
