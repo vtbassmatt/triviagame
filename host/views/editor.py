@@ -1,11 +1,9 @@
 from http import HTTPStatus
-from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Permission
 from django.contrib import messages
-from django.core.exceptions import BadRequest
 from django.db import transaction
 from django.db.models import F, Q
 from django.forms import ValidationError
@@ -14,30 +12,22 @@ from django.http import (
     HttpResponseRedirect,
     HttpResponseBadRequest,
     HttpResponseForbidden,
-    QueryDict,
 )
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
-from django_htmx.http import (
-    trigger_client_event,
-    HttpResponseClientRedirect,
-    HttpResponseClientRefresh,
-)
+from django_htmx.http import HttpResponseClientRedirect
 from guardian.ctypes import get_content_type
 from guardian.shortcuts import (
     assign_perm,
     remove_perm,
-    get_objects_for_user,
     get_users_with_perms,
 )
 from guardian.utils import get_group_obj_perms_model, get_user_obj_perms_model
 
-from game.models import Game, Page, Response, Team, Question
-from game.views import compute_leaderboard_data
-from host.forms import GameForm, GameHostForm, PageForm, QuestionForm, TeamForm
+from game.models import Game, Page, Question
+from host.forms import GameForm, GameHostForm, PageForm, QuestionForm
 from host.view_utils import (
-    can_host_game, can_view_game,
     can_edit_game, can_edit_page, can_edit_question
 )
 
