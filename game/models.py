@@ -88,6 +88,13 @@ class Page(models.Model):
 
     # these properties are convenient in templates    
     @property
+    def total_points(self):
+        return (
+            self.question_set
+            .aggregate(points=models.Sum('possible_points'))
+        ).get('points', None) or 0
+
+    @property
     def is_locked(self):
         return self.state == Page.PageState.LOCKED
     
