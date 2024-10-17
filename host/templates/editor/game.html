@@ -34,9 +34,11 @@
       <div class="card-header">
         Pages ({{ game_max_points }} normal points; {{ game_hidden_points }} hidden points)
       </div>
-      <ul class="list-group list-group-flush">
+      <div class="card-body">
+      <table class="table">
         {% include 'editor/_page_list.html' %}
-      </ul>
+      </table>
+      </div>
       <div class="card-footer">
         <a href="{% url 'new_page' game.id %}" class="btn btn-outline-primary">Add new page</a>
       </div>
