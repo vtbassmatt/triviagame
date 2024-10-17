@@ -10,6 +10,7 @@ from django.http import (
     HttpResponseBadRequest,
     QueryDict,
 )
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -138,6 +139,17 @@ def pages(request, game_id):
         only_with_perms_in=['view_game', 'host_game', 'edit_game'],
     )
 
+    game_max_points = (
+        request.game.page_set
+        .filter(is_hidden=False)
+        .aggregate(points=Sum('question__possible_points'))
+    ).get('points', None) or 0
+    game_hidden_points = (
+        request.game.page_set
+        .filter(is_hidden=True)
+        .aggregate(points=Sum('question__possible_points'))
+    ).get('points', None) or 0
+
     template = 'host/pages.html'
 
     if request.htmx and request.htmx.trigger_name == 'pagesList':
@@ -146,6 +158,8 @@ def pages(request, game_id):
     return render(request, template, {
         'user': request.user,
         'game': request.game,
+        'game_max_points': game_max_points,
+        'game_hidden_points': game_hidden_points,
         'game_hosts': game_hosts,
         'player_join_url': player_join_url,
     })
