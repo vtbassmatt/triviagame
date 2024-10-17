@@ -31,7 +31,9 @@
     </div>
 
     <div class="card mb-3">
-      <div class="card-header">Pages</div>
+      <div class="card-header">
+        Pages ({{ game_max_points }} normal points; {{ game_hidden_points }} hidden points)
+      </div>
       <ul class="list-group list-group-flush">
         {% include 'editor/_page_list.html' %}
       </ul>
