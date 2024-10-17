@@ -5,6 +5,10 @@
   <div class="col-12 mb-2">
     <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <h2>Game status</h2>
+    <p>
+      Visible points: {{ game_max_points }}<br>
+      Hidden points: {{ game_hidden_points }}
+    </p>
     {% include 'host/_toggle_game.html' %}
     <h2>Pages</h2>
     {# when the game or page state is toggled, this section reloads #}

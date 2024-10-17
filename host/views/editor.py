@@ -6,7 +6,7 @@ from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.core.exceptions import BadRequest
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import F, Q, Sum
 from django.forms import ValidationError
 from django.http import (
     HttpResponse,
@@ -89,6 +89,16 @@ def edit_game(request, game_id):
         with_group_users=True,
         only_with_perms_in=['view_game', 'host_game', 'edit_game'],
     )
+    game_max_points = (
+        game.page_set
+        .filter(is_hidden=False)
+        .aggregate(points=Sum('question__possible_points'))
+    ).get('points', None) or 0
+    game_hidden_points = (
+        game.page_set
+        .filter(is_hidden=True)
+        .aggregate(points=Sum('question__possible_points'))
+    ).get('points', None) or 0
 
     if request.method == 'POST':
         game_form = GameForm(request.POST, instance=game)
@@ -104,6 +114,8 @@ def edit_game(request, game_id):
     return render(request, 'editor/game.html', {
         'game': game,
         'game_hosts': game_hosts,
+        'game_max_points': game_max_points,
+        'game_hidden_points': game_hidden_points,
         'game_form': game_form,
     })
 
