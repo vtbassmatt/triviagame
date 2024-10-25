@@ -19,9 +19,11 @@
     </div>
   </div>
   <div class="col-12 mb-2">
-    <h2>Teams</h2>
+    <h2>Teams ({{ game.team_set.count }})</h2>
     {% for team in game.team_set.all %}
-    <p><a href="{% url 'team_page' game.id team.id %}"><em>{{ team.name }}</em></a>, which is «{{ team.members }}»</p>
+    <p><a href="{% url 'team_page' game.id team.id %}"><em>{{ team.name }}</em></a>, which is: {% firstof team.members '<em>no players listed</em>' %}</p>
+    {% empty %}
+    <p>No teams have registered yet.</p>
     {% endfor %}
   </div>
   <div class="col-12 mb-2">
