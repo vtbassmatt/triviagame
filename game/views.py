@@ -3,7 +3,7 @@ import random
 from django.contrib import messages
 from django.db import Error as DjangoDbError
 from django.forms import ValidationError, HiddenInput
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -202,6 +202,25 @@ def play(request):
         return render(request, 'game/closed.html', config)
 
     return render(request, 'game/pages.html', config)
+
+
+def play_poll_hx(request):
+    if not request.htmx:
+        raise Http404()
+
+    if 'game' not in request.session:
+        _flash_not_in_game(request)
+        return HttpResponseClientRedirect(reverse('home'))
+    if 'team' not in request.session:
+        _flash_no_team(request)
+        return HttpResponseClientRedirect(reverse('home'))
+    
+    game = models.Game.objects.get(pk=request.session['game'])
+    if game.open:
+        return HttpResponseClientRedirect(reverse('play'))
+    
+    # if closed, an empty response works
+    return HttpResponse()
 
 
 def page_list_hx(request):

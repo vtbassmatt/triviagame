@@ -7,10 +7,16 @@
     Team: <em>{{ team.name }}</em>.<br>
     Players: <em>{{ team.members }}</em>.
   </p>
-  <p class="col-sm-6">
+  <div class="col-sm-6">
+    <p>
     This is the lobby for a trivia game called <q>{{ game.name }}</q>.
     The host will start the game soon!
-    Once they do, <a href="{% url 'play' %}">click here to start playing</a>.
-  </p>
+    Once they do, you'll be taken into the game.
+    </p>
+    <p>
+    (Or <a href="{% url 'play' %}">click here to start playing</a>, if you aren't taken automatically.)
+    </p>
+  </div>
+  <span hx-get="{% url 'play_poll_hx' %}" hx-trigger="every 5s"></span>
 </div>
 {% endblock %}
