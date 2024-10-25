@@ -4,10 +4,10 @@
     {% if not page.is_hidden %}
     <div class="card mb-3">
       <div class="card-header">
-        <span class="text-muted">{{ page.order }}. ????????????? </span><span class="badge bg-secondary">round not started</span>
+        <span class="text-body-secondary">{{ page.order }}. ????????????? </span><span class="badge bg-secondary">round not started</span>
       </div>
       <div class="card-body">
-        <p class="card-text text-muted"><em>{{ page.mystery_description }}</em></p>
+        <p class="card-text text-body-secondary"><em>{{ page.mystery_description }}</em></p>
       </div>
     </div>
     {% endif %}
@@ -27,7 +27,7 @@
     </div>
     {% else %}
     <div class="card-body">
-      <p class="card-text text-muted">This round is complete! You can still view the description and questions, but you can no longer submit answers.</p>
+      <p class="card-text text-body-secondary">This round is complete! You can still view the description and questions, but you can no longer submit answers.</p>
     </div>
     {% endif %}
   </div>
