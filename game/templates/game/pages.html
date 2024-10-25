@@ -6,7 +6,7 @@
   <p>Team: <em>{{ team.name }}</em>.<br>Members: <em>{{ team.members }}</em>.</p>
   <h2>Rounds</h2>
 </div>
-<dl class="row" hx-get="{% url 'play' %}" hx-trigger="every 3s">
+<dl class="row" hx-get="{% url 'page_list_hx' %}" hx-trigger="every 3s">
   {% include 'game/_page_list.html' %}
 </dl>
 <div class="row mb-3">

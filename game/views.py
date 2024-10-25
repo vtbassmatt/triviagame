@@ -3,6 +3,7 @@ import random
 from django.contrib import messages
 from django.db import Error as DjangoDbError
 from django.forms import ValidationError, HiddenInput
+from django.http import Http404, HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -183,34 +184,66 @@ def rejoin_team(request, id=0, code=None):
 
 def play(request):
     if request.htmx:
-        Redirect = HttpResponseClientRedirect
-    else:
-        Redirect = HttpResponseRedirect
+        raise Http404("code bug - did not expect an htmx request to play endpoint")
 
     if 'game' not in request.session:
         _flash_not_in_game(request)
-        return Redirect(reverse('home'))
+        return HttpResponseRedirect(reverse('home'))
     if 'team' not in request.session:
         _flash_no_team(request)
-        return Redirect(reverse('home'))
+        return HttpResponseRedirect(reverse('home'))
 
     config = {
         'game': models.Game.objects.get(pk=request.session['game']),
         'team': models.Team.objects.get(pk=request.session['team']),
     }
 
-    if request.htmx:
-        if not config['game'].open:
-            # redirects to self, which will render the closed page next time
-            return Redirect(reverse('play'))
-        
-        return render(request, 'game/_page_list.html', config)
+    if not config['game'].open:
+        return render(request, 'game/closed.html', config)
 
-    else:
-        if not config['game'].open:
-            return render(request, 'game/closed.html', config)
+    return render(request, 'game/pages.html', config)
 
-        return render(request, 'game/pages.html', config)
+
+def play_poll_hx(request):
+    if not request.htmx:
+        raise Http404()
+
+    if 'game' not in request.session:
+        _flash_not_in_game(request)
+        return HttpResponseClientRedirect(reverse('home'))
+    if 'team' not in request.session:
+        _flash_no_team(request)
+        return HttpResponseClientRedirect(reverse('home'))
+    
+    game = models.Game.objects.get(pk=request.session['game'])
+    if game.open:
+        return HttpResponseClientRedirect(reverse('play'))
+    
+    # if closed, an empty response works
+    return HttpResponse()
+
+
+def page_list_hx(request):
+    if not request.htmx:
+        raise Http404()
+
+    if 'game' not in request.session:
+        _flash_not_in_game(request)
+        return HttpResponseClientRedirect(reverse('home'))
+    if 'team' not in request.session:
+        _flash_no_team(request)
+        return HttpResponseClientRedirect(reverse('home'))
+
+    config = {
+        'game': models.Game.objects.get(pk=request.session['game']),
+        'team': models.Team.objects.get(pk=request.session['team']),
+    }
+
+    if not config['game'].open:
+        # redirects to self, which will render the closed page next time
+        return HttpResponseClientRedirect(reverse('play'))
+    
+    return render(request, 'game/_page_list.html', config)
 
 
 def _get_game_team(request, Redirect=HttpResponseRedirect):

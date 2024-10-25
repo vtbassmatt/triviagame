@@ -31,6 +31,7 @@ const renderer = {
 marked.use({ renderer });
 
 function renderMarkdown(root) {
+  // BUG: findAll with a root doesn't seem to work reliably
   htmx.findAll(root || document, ".markdown-needed").forEach(elm => {
     elm.innerHTML = DOMPurify.sanitize(
       marked.parseInline(elm.innerHTML),
@@ -42,7 +43,7 @@ function renderMarkdown(root) {
 
 // htmx stuff
 htmx.on("htmx:afterSwap", (e) => {
-  renderMarkdown(e.detail.target);
+  renderMarkdown(/*e.detail.target*/);
 })
 
 // pageload
