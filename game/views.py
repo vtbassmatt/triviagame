@@ -104,6 +104,8 @@ def join_game(request, id=0, code=None):
     })
 
 
+_REJOIN_MESSAGE = "If you're trying to rejoin a team you created, ask the host for your rejoin code."
+
 def create_team(request):
     if 'game' not in request.session:
         _flash_not_in_game(request)
@@ -116,17 +118,15 @@ def create_team(request):
         form = CreateTeamForm(request.POST, instance=partial_team)
         if form.is_valid():
             try:
-                # because the CreateTeamForm doesn't include every field, `team`
-                # gets excluded from validation checks - we must explicitly
-                # validate uniques on the instance and only exclude the id
-                form.instance.validate_unique(exclude=['id',])
+                form.instance.validate_constraints()
                 team = form.save()
                 request.session['team'] = team.id
                 return HttpResponseRedirect(reverse('play'))
             except ValidationError as e:
-                form.add_error(None, e)
+                err_code = getattr(e, 'code', None)
+                form.add_error(None, ValidationError([e, _REJOIN_MESSAGE], code=err_code),)
             except DjangoDbError as e:
-                form.add_error('', ValidationError(e, code='database'))
+                form.add_error(None, ValidationError(e, code='database'))
 
     else:
         form = CreateTeamForm()
