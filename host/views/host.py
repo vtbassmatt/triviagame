@@ -24,7 +24,7 @@ from game.models import Game, Page, Response, Team
 from game.views import compute_leaderboard_data
 from host.forms import TeamForm
 from host.view_utils import (
-    can_host_game, can_view_game,
+    can_host_game, can_view_game, build_absolute_uri,
 )
 
 User = get_user_model()
@@ -68,10 +68,9 @@ def host_home(request):
     if request.htmx and request.htmx.trigger_name == 'gamesList':
         template = 'host/_games_list.html'
     
-    uncurse_url = (
-        request.build_absolute_uri(
-            reverse('uncurse')
-        ).replace('http://', 'https://')
+    uncurse_url = build_absolute_uri(
+        request,
+        reverse('uncurse'),
     )
 
     return render(request, template, {
@@ -124,12 +123,9 @@ def toggle_game(request, game_id):
 @login_required
 @can_view_game
 def pages(request, game_id):
-    # on fly.io, we see the request proxied in over HTTP. but, we want to
-    # generate HTTPS links.
-    player_join_url = (
-        request.build_absolute_uri(
-            reverse('join_game', args=(request.game.id, request.game.passcode))
-        ).replace('http://', 'https://')
+    player_join_url = build_absolute_uri(
+        request,
+        reverse('join_game', args=(request.game.id, request.game.passcode))
     )
 
     game_hosts = get_users_with_perms(
@@ -262,10 +258,9 @@ def team_page(request, game_id, team_id):
     if request.htmx:
         template = 'host/_team_fragment.html'
     
-    rejoin_link = (
-        request.build_absolute_uri(
-            reverse('rejoin_team', args=(team.id, team.passcode))
-        ).replace('http://', 'https://')
+    rejoin_link = build_absolute_uri(
+        request,
+        reverse('rejoin_team', args=(team.id, team.passcode)),
     )
 
     return render(request, template, {

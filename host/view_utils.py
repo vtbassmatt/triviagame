@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from functools import wraps
@@ -69,3 +70,14 @@ can_view_game = _has_any_perm(['game.view_game', 'game.host_game', 'game.edit_ga
 can_view_game.__doc__ = """Decorator to require `view_game`, `host_game`, or `edit_game` permissions.
 
 Assumes `game_id` is in the view args, and puts a `game` attribute on the request."""
+
+
+def build_absolute_uri(request, relative_url):
+    # on fly.io, we see the request proxied in over HTTP, but we want to
+    # generate HTTPS links. but if we do that blindly, then in debug
+    # mode, we generate https links that don't work. this is a decent
+    # hack.
+    full_url = request.build_absolute_uri(relative_url)
+    if not settings.DEBUG:
+        full_url = full_url.replace('http://', 'https://')
+    return full_url
