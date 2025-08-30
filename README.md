@@ -8,10 +8,10 @@ It was recently named "Tr¿via" because I couldn't think of a better name.
 Tested locally with Python 3.10 on macOS.
 
 ```
-poetry install
-poetry run ./manage.py migrate
-poetry run ./manage.py createsuperuser
-poetry run ./manage.py runserver
+uv install
+uv run ./manage.py migrate
+uv run ./manage.py createsuperuser
+uv run ./manage.py runserver
 ```
 
 - Open your browser and head to https://127.0.0.1:8000/backstage

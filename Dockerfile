@@ -4,16 +4,16 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-COPY poetry.lock pyproject.toml /app/
+COPY uv.lock pyproject.toml /app/
 
-RUN pip3 install poetry
-RUN poetry install --no-root
+RUN pip3 install uv
+RUN uv sync
 
 COPY . .
 
 ENV DJANGO_SETTINGS_MODULE "triviagame.settings"
 ENV DJANGO_SECRET_KEY "this is a secret key for building purposes"
 
-RUN poetry run python manage.py collectstatic --noinput
+RUN uv run python manage.py collectstatic --noinput
 
-CMD poetry run daphne -b 0.0.0.0 -p 8080 triviagame.asgi:application
+CMD uv run daphne -b 0.0.0.0 -p 8080 triviagame.asgi:application
