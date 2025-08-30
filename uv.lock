@@ -126,15 +126,14 @@ wheels = [
 
 [[package]]
 name = "dj-database-url"
-version = "2.3.0"
+version = "3.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
-    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/98/9f/fc9905758256af4f68a55da94ab78a13e7775074edfdcaddd757d4921686/dj_database_url-2.3.0.tar.gz", hash = "sha256:ae52e8e634186b57e5a45e445da5dc407a819c2ceed8a53d1fac004cc5288787", size = 10980, upload-time = "2024-10-23T10:05:19.953Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/75/05/2ec51009f4ce424877dbd8ad95868faec0c3494ed0ff1635f9ab53d9e0ee/dj_database_url-3.0.1.tar.gz", hash = "sha256:8994961efb888fc6bf8c41550870c91f6f7691ca751888ebaa71442b7f84eff8", size = 12556, upload-time = "2025-07-02T09:40:11.424Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/91/641a4e5c8903ed59f6cbcce571003bba9c5d2f731759c31db0ba83bb0bdb/dj_database_url-2.3.0-py3-none-any.whl", hash = "sha256:bb0d414ba0ac5cd62773ec7f86f8cc378a9dbb00a80884c2fc08cc570452521e", size = 7793, upload-time = "2024-10-23T10:05:41.254Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/5e/86a43c6fdaa41c12d58e4ff3ebbfd6b71a7cb0360a08614e3754ef2e9afb/dj_database_url-3.0.1-py3-none-any.whl", hash = "sha256:43950018e1eeea486bf11136384aec0fe55b29fe6fd8a44553231b85661d9383", size = 8808, upload-time = "2025-07-02T09:40:26.326Z" },
 ]
 
 [[package]]
@@ -153,14 +152,14 @@ wheels = [
 
 [[package]]
 name = "django-guardian"
-version = "2.4.0"
+version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/4c/d1f6923a0ad7f16c403a54c09e94acb76ac6c3765e02523fb09b2b03e1a8/django-guardian-2.4.0.tar.gz", hash = "sha256:c58a68ae76922d33e6bdc0e69af1892097838de56e93e78a8361090bcd9f89a0", size = 159008, upload-time = "2021-05-23T22:11:26.23Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/75/39875736b3937e867444d7594a98db67a6c30ee7df819a17396e37be017a/django_guardian-3.1.0.tar.gz", hash = "sha256:5ada52485c2deeb8247980cf8090f7375508df12ddb1644ac0f8ffb373a57164", size = 92985, upload-time = "2025-08-29T15:32:57.554Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/25/869df12e544b51f583254aadbba6c1a95e11d2d08edeb9e58dd715112db5/django_guardian-2.4.0-py3-none-any.whl", hash = "sha256:440ca61358427e575323648b25f8384739e54c38b3d655c81d75e0cd0d61b697", size = 106107, upload-time = "2021-05-23T22:11:22.75Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/24/712831a5c80795bd849fc6ac7c6d3c464fd1bf184ef4617f9ba6f2d4cd99/django_guardian-3.1.0-py3-none-any.whl", hash = "sha256:91dd3f5edd97c179f49f9532c4e98007ebe65de12c790a34f5ce9a36a9b21766", size = 126930, upload-time = "2025-08-29T15:32:55.913Z" },
 ]
 
 [[package]]
@@ -335,9 +334,9 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "daphne", specifier = "~=4.1" },
-    { name = "dj-database-url", specifier = "~=2.3" },
+    { name = "dj-database-url", specifier = "~=3.0" },
     { name = "django", specifier = "~=5.2.0" },
-    { name = "django-guardian", specifier = "~=2.4" },
+    { name = "django-guardian", specifier = "~=3.0" },
     { name = "django-htmx", specifier = "~=1.19" },
     { name = "psycopg", extras = ["binary"], specifier = "~=3.2" },
 ]
