@@ -1,21 +1,18 @@
-[tool.poetry]
+[project]
 name = "triviagame"
 version = "1.0.0"
 description = "Host live trivia over video chat"
-authors = ["Matt Cooper <vtbassmatt@gmail.com>"]
+authors = [
+  { name = "Matt Cooper", email = "vtbassmatt@gmail.com" },
+]
 license = "MIT"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "~3.13"
-Django = "~5.1"
-dj-database-url = "^2.3.0"
-daphne = "^4.1.2"
-django-htmx = "^1.19.0"
-django-guardian = "^2.4.0"
-psycopg = {extras = ["binary"], version = "^3.2.3"}
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.13"
+dependencies = [
+    "daphne~=4.1",
+    "dj-database-url~=2.3",
+    "django~=5.2.0",
+    "django-guardian~=2.4",
+    "django-htmx~=1.19",
+    "psycopg[binary]~=3.2",
+]
