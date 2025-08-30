@@ -12,6 +12,11 @@
 
     {% htmx_script %}
     <script src="{% static 'htmx/idiomorph-ext.min.js' %}" defer></script>
+    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" defer></script>
+    <script src="{% static 'htmx/messages.js' %}" defer></script>
+    <script src="{% static 'markdown/marked.min.js' %}" defer></script>
+    <script src="{% static 'markdown/purify.min.js' %}"> defer</script>
+    <script src="{% static 'markdown/render-markdown.js' %}" defer></script>
 
     <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet">
     {% block morehead %}
@@ -50,12 +55,5 @@
       </div>
 {% block contents %}check your 🧠 - something's gone wrong{% endblock %}
     </div>
-
-    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'htmx/messages.js' %}"></script>
-    <script src="{% static 'markdown/marked.min.js' %}"></script>
-    <script src="{% static 'markdown/purify.min.js' %}"></script>
-    <script src="{% static 'markdown/render-markdown.js' %}"></script>
-    {% django_htmx_script %}
   </body>
 </html>
