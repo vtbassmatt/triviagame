@@ -10,6 +10,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'icons/site.webmanifest' %}">
 
+    {% htmx_script %}
+    <script src="{% static 'htmx/idiomorph-ext.min.js' %}" defer></script>
+
     <link href="{% static 'bootstrap/bootstrap.min.css' %}" rel="stylesheet">
     {% block morehead %}
     <style>
@@ -49,9 +52,7 @@
     </div>
 
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'htmx/htmx.min.js' %}"></script>
     <script src="{% static 'htmx/messages.js' %}"></script>
-    <script src="{% static 'htmx/idiomorph-ext.min.js' %}"></script>
     <script src="{% static 'markdown/marked.min.js' %}"></script>
     <script src="{% static 'markdown/purify.min.js' %}"></script>
     <script src="{% static 'markdown/render-markdown.js' %}"></script>
