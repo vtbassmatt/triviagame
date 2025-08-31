@@ -23,7 +23,6 @@
   <div class="col-12" id="question-{{ question.id }}"
         hx-get="{% url 'question_hx' question.id %}"
         hx-trigger="load"
-        hx-ext="morph"
         hx-swap="morph:outerHTML">
     <div class="card mb-3">
       <div class="card-header">Question {{ question.order }}</div>
