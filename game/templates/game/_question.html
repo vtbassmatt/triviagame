@@ -31,7 +31,7 @@
                 hx-post="{% url 'question_hx' question.id %}"
                 hx-target="#question-{{ question.id }}"
                 hx-swap="morph:outerHTML"
-                hx-trigger="keyup changed delay:500ms"> {# try "focusout, keyup changed delay:2s" next #}
+                hx-trigger="input changed delay:500ms">
               <div class="valid-feedback">Saved {% if response.value %}"{{ response.value }}"{% else %}a blank answer{% endif %}.</div>
               <div class="invalid-feedback">Something went wrong saving. {% if response and response.value %}"{{ response.value }}"{% elif not response %}No answer{% else %}A blank answer{% endif %} was recorded.</div>
             </div>
