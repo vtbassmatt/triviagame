@@ -14,7 +14,7 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django_htmx.http import trigger_client_event
+from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 from guardian.shortcuts import (
     get_objects_for_user,
     get_users_with_perms,
@@ -218,14 +218,18 @@ def assign_score(request, game_id):
 
     response_id = int(request.POST['response'])
     response = get_object_or_404(Response, pk=response_id)
-    score = int(request.POST['score'])
-    if score >= 0:
-        response.score = score
-        response.graded = True
+
+    if response.question.page.is_scoring:
+        score = int(request.POST['score'])
+        if score >= 0:
+            response.score = score
+            response.graded = True
+        else:
+            response.score = 0
+            response.graded = False
+        response.save()
     else:
-        response.score = 0
-        response.graded = False
-    response.save()
+        return HttpResponseClientRefresh()
 
     return render(request, 'host/_question_score.html', {
         'game': request.game,
