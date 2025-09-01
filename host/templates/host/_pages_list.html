@@ -35,7 +35,9 @@
       </a>
     </div>
     <div class="card-text mt-2">
-      <a href="{% url 'score_page' game.id page.id %}" class="btn btn-{% if page.state != 2 %}outline-{% endif %}primary mb-2">Score this page ✅</a>
+      <a href="{% url 'score_page' game.id page.id %}" class="btn btn-{% if page.state != 2 %}outline-{% endif %}primary mb-2">
+        {% if page.is_scoring %}Score this page ✅{% else %}Review this page 🧐{% endif %}
+      </a>
     </div>
   </div>
 </div>

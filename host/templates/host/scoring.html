@@ -4,10 +4,19 @@
 <div class="row justify-content-center">
   <div class="col-12">
     <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+    {% if page.is_scoring %}
     <h2>Scoring &ldquo;{{ page.title }}&rdquo;</h2>
+    {% else %}
+    <h2>Reviewing &ldquo;{{ page.title }}&rdquo;</h2>
+    <p>(You can't score a round while it's still open.)</p>
+    {% endif %}
 
     {% for question in page.question_set.all %}
+      {% if page.is_scoring %}
       {% include 'host/_question_score.html' %}
+      {% else %}
+      {% include 'host/_question_review.html' %}
+      {% endif %}
     {% empty %}
     <p>There don't seem to be any questions here.</p>
     {% endfor %}
