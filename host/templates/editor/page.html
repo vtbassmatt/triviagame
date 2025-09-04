@@ -39,6 +39,10 @@
       </div>
     </div>
 
+    {% if page.question_set.count > 0 %}
+    <p><a href="{% url 'new_question' page.id %}" class="btn btn-primary">Add new question (at bottom)</a></p>
+    {% endif %}
+
     {% include 'editor/_question_list.html' %}
 
     <p><a href="{% url 'new_question' page.id %}" class="btn btn-primary">Add new question</a></p>
