@@ -6,11 +6,11 @@
     Question {{ question.order }} <span class="badge bg-info">{{ question.possible_points }} point{{ question.possible_points|pluralize }}</span>
   </div>
   <div class="card-body">
-    <p class="card-text markdown-needed">{{ question.question|linebreaksbr }}</p>
+    <p class="card-text markdown-needed">{{ question.question }}</p>
     <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-success-subtle">
-      <div class="">Correct answer</div>
+      <div>Correct answer</div>
       <div class="vr"></div>
-      <div class="markdown-needed">{{ question.answer|linebreaksbr }}</div>
+      <div class="markdown-needed">{{ question.answer }}</div>
     </div>
     <table class="table table-sm">
     <thead>

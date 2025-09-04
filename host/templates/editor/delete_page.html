@@ -9,7 +9,7 @@
       <div class="card-header bg-danger text-white">Deleting page <q><a href="{% url 'edit_page' page.id %}" class="link-light">{{ page.title }}</a></q> in game <q><a href="{% url 'edit_game' page.game.id %}" class="link-light">{{ page.game.name }}</a></q></div>
       <div class="card-body">
           <h5 class="card-title">{{ page.order }}. {{ page.title }}</h5>
-          <p class="card-text markdown-needed">{{ page.description|linebreaksbr }}</p>
+          <p class="card-text markdown-needed">{{ page.description }}</p>
           {% if page.question_set.count %}
           <p><em>This will delete {{ page.question_set.count }} questions!!</em></p>
           {% endif %}

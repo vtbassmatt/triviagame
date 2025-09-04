@@ -11,13 +11,13 @@
           <div class="hstack gap-2 mb-3 p-1">
             <div class="">Question</div>
             <div class="vr"></div>
-            <div class="markdown-needed">{{ question.question|linebreaksbr }}</div>
+            <div class="markdown-needed">{{ question.question }}</div>
           </div>
 
           <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-secondary-subtle">
             <div class="">Answer</div>
             <div class="vr"></div>
-            <div class="markdown-needed">{{ question.answer|linebreaksbr }}</div>
+            <div class="markdown-needed">{{ question.answer }}</div>
           </div>
           <form method="post">
             {% csrf_token %}
