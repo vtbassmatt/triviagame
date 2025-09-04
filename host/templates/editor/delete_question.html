@@ -1,6 +1,6 @@
 {% extends 'host_base.html' %}
 {% block title %}👑 Tr¿via editor{% endblock %}
-{% block heading %}Really delete question <q>{{ question.question }}</q>?{% endblock %}
+{% block heading %}Really delete question {{ question.order }} from page {{ question.page.order }}?{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
