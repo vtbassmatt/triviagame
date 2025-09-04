@@ -4,8 +4,10 @@
   </div>
   <div class="card-body">
     <p class="card-text markdown-needed">{{ question.question|linebreaksbr }}</p>
-    <hr>
-    <div class="card-title">Correct answer: <span class="text-success markdown-needed">{{ question.answer|linebreaksbr }}</span></div>
+    <div class="input-group mb-3">
+      <div class="input-group-text">Answer:</div>
+      <input type="text" readonly class="form-control bg-success text-light markdown-needed" value="{{ question.answer|linebreaksbr }}">
+    </div>
     <table class="table table-sm">
     <thead>
       <tr>
