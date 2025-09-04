@@ -1,10 +1,15 @@
 <div id="question-list">
 {% for question in page.question_set.all %}
 <div class="card mb-3">
-  <div class="card-header">{{ question.order }}. <span class="markdown-needed">{{ question.question|linebreaksbr }}</span></div>
+  <div class="card-header">Question {{ question.order }}</div>
   <div class="card-body">
     {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
-    <p class="card-text markdown-needed">{{ question.answer|linebreaksbr }}</p>
+    <p class="card-text markdown-needed">{{ question.question }}</p>
+    <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-secondary-subtle">
+      <div class="">Answer</div>
+      <div class="vr"></div>
+      <div class="markdown-needed">{{ question.answer }}</div>
+    </div>
     <a href="{% url 'edit_question' question.id %}" class="btn btn-outline-primary">Edit</a>
     <a hx-post="{% url 'question_up' question.id %}" hx-target="#question-list" class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</a>
     <a hx-post="{% url 'question_down' question.id %}" hx-target="#question-list" class="btn btn-outline-success{% if forloop.last %} disabled{% endif %}">Move down 👇</a>

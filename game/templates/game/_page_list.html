@@ -23,7 +23,7 @@
     </div>
     {% if page.is_open %}
     <div class="card-body markdown-needed">
-      {% firstof page.description|linebreaksbr '&nbsp;' %}
+      {% firstof page.description '&nbsp;' %}
     </div>
     {% else %}
     <div class="card-body">

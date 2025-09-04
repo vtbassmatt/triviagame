@@ -31,10 +31,22 @@ const renderer = {
 marked.use({ renderer });
 
 function renderMarkdown(root) {
+  // closing </p> tag which we'll hunt for in the Markdown output
+  const slashP = /<\/p>/;
+
   // BUG: findAll with a root doesn't seem to work reliably
   htmx.findAll(root || document, ".markdown-needed").forEach(elm => {
+    // marked seems to add a trailing newline, which makes the math below less obvious
+    const initialHtml = marked.parse(elm.innerHTML).trimEnd();
+
+    // if the final </p> is the only </p>, drop the leading <p> and trailing </p>
+    const finalHtml =
+      initialHtml.search(slashP) == initialHtml.length - 4
+      ? initialHtml.slice(3, -4)
+      : initialHtml;
+
     elm.innerHTML = DOMPurify.sanitize(
-      marked.parseInline(elm.innerHTML),
+      finalHtml,
       {ADD_ATTR: ['target']}
     );
     elm.classList.remove("markdown-needed");

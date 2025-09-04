@@ -1,6 +1,6 @@
 {% extends 'host_base.html' %}
 {% block title %}👑 Tr¿via editor{% endblock %}
-{% block heading %}Really delete question <q>{{ question.question }}</q>?{% endblock %}
+{% block heading %}Really delete question {{ question.order }} from page {{ question.page.order }}?{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
@@ -8,8 +8,17 @@
     <div class="card mb-3">
       <div class="card-header bg-danger text-white">Deleting question {{ question.order }} from page <q><a href="{% url 'edit_page' question.page.id %}" class="link-light">{{ question.page.title }}</a></q> in game <q><a href="{% url 'edit_game' question.page.game.id %}" class="link-light">{{ question.page.game.name }}</a></q></div>
       <div class="card-body">
-          <h5 class="card-title">Question: <span class="markdown-needed">{{ question.question|linebreaksbr }}</span></h5>
-          <p class="card-text">Answer: <span class="markdown-needed">{{ question.answer|linebreaksbr }}</span></p>
+          <div class="hstack gap-2 mb-3 p-1">
+            <div class="">Question</div>
+            <div class="vr"></div>
+            <div class="markdown-needed">{{ question.question }}</div>
+          </div>
+
+          <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-secondary-subtle">
+            <div class="">Answer</div>
+            <div class="vr"></div>
+            <div class="markdown-needed">{{ question.answer }}</div>
+          </div>
           <form method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline-danger">Yes, delete the question</button>

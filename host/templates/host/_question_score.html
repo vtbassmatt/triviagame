@@ -3,10 +3,15 @@
 {# included in scoring.html #}
 <div class="card mb-3" id="question-card-{{ question.id }}">
   <div class="card-header">
-  {{ question.order }}. <span class="markdown-needed">{{ question.question|linebreaksbr }}</span>  <span class="badge bg-info">{{ question.possible_points }} point{{ question.possible_points|pluralize }}</span>
+    Question {{ question.order }} <span class="badge bg-info">{{ question.possible_points }} point{{ question.possible_points|pluralize }}</span>
   </div>
   <div class="card-body">
-    <div class="card-title">Correct answer: <span class="text-success markdown-needed">{{ question.answer|linebreaksbr }}</span></div>
+    <p class="card-text markdown-needed">{{ question.question }}</p>
+    <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-success-subtle">
+      <div>Correct answer</div>
+      <div class="vr"></div>
+      <div class="markdown-needed">{{ question.answer }}</div>
+    </div>
     <table class="table table-sm">
     <thead>
       <tr>

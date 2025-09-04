@@ -4,7 +4,7 @@
 <div class="card mb-3{% if page.is_open and game.open %} border-success{% elif page.is_open %} border-warning{% endif %}">
   <div class="card-header{% if page.is_open and game.open %} text-white bg-success{% elif page.is_open %} text-white bg-warning{% endif %}">{{ page.order }}. {{ page.title }} <span class="badge bg-secondary">{{ page.question_set.count }} question{{ page.question_set.count|pluralize }}</span>{% if page.is_hidden %}{% if page.is_locked %} <span class="badge bg-primary">hidden page</span>{% else %} <span class="badge bg-secondary">revealed page</span>{% endif %}{% endif %} <span class="badge bg-info">{{ page.total_points }} point{{ page.total_points|pluralize }}</span></div>
   <div class="card-body">
-    <div class="card-title markdown-needed">{{ page.description|linebreaksbr }}</div>
+    <div class="card-title markdown-needed">{{ page.description }}</div>
     <div class="card-text">
       {% if 'host_game' in perms %}
       <a class="btn {{ page.bootstrap_locked_button_styles }}"
