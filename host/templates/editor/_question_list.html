@@ -5,9 +5,10 @@
   <div class="card-body">
     {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
     <p class="card-text markdown-needed">{{ question.question|linebreaksbr }}</p>
-    <div class="input-group mb-3">
-      <div class="input-group-text">Answer:</div>
-      <input type="text" readonly class="form-control markdown-needed" value="{{ question.answer|linebreaksbr }}">
+    <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-secondary-subtle">
+      <div class="">Answer</div>
+      <div class="vr"></div>
+      <div class="markdown-needed">{{ question.answer|linebreaksbr }}</div>
     </div>
     <a href="{% url 'edit_question' question.id %}" class="btn btn-outline-primary">Edit</a>
     <a hx-post="{% url 'question_up' question.id %}" hx-target="#question-list" class="btn btn-outline-success{% if forloop.first %} disabled{% endif %}">Move up 👆</a>

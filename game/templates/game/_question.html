@@ -51,10 +51,12 @@
 
       {# page not accepting answers #}
       {% if question.page.is_scoring %}
-      <div class="input-group mb-3">
-        <div class="input-group-text">Correct answer:</div>
-        <input type="text" readonly class="form-control markdown-needed" value="{{ question.answer|linebreaksbr }}">
+      <div class="hstack gap-2 mb-3 p-1 border rounded-start bg-secondary-subtle">
+        <div class="">Correct answer</div>
+        <div class="vr"></div>
+        <div class="markdown-needed">{{ question.answer|linebreaksbr }}</div>
       </div>
+
       <p class="card-text">
         {% if response %}
           Your answer:
