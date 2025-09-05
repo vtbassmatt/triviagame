@@ -112,6 +112,11 @@ def create_team(request):
         return HttpResponseRedirect(reverse('home'))
 
     game = models.Game.objects.get(pk=request.session['game'])
+    if game.is_open_but_not_accepting_teams:
+        return render(request, 'not_accepting_teams.html', {
+            'game': game,
+            'rejoin_message': _REJOIN_MESSAGE,
+        })
 
     if request.method == 'POST':
         partial_team = models.Team(game=game, passcode=get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789'))
