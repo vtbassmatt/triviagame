@@ -7,10 +7,18 @@ def generate_passcode():
     return get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789')
 
 
-class Game(models.Model):    
+class Game(models.Model):
+    class GameState(models.IntegerChoices):
+        CLOSED = 0          # game can't be accessed
+        ACCEPTING_TEAMS = 1 # game is open, new teams can register
+        NO_NEW_TEAMS = 2    # game is open, only existing teams can access
+
     name = models.CharField(max_length=60)
     passcode = models.CharField(max_length=20, default=generate_passcode)
-    open = models.BooleanField(default=False)
+    state = models.IntegerField(
+        choices=GameState.choices,
+        default=GameState.CLOSED,
+    )
     last_edit_time = models.DateTimeField(
         auto_now=True,
         blank=True,
@@ -25,6 +33,23 @@ class Game(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def is_closed(self):
+        return self.state == Game.GameState.CLOSED
+    
+    @property
+    def is_accepting_teams(self):
+        return self.state == Game.GameState.ACCEPTING_TEAMS
+
+    @property
+    def is_open_but_not_accepting_teams(self):
+        return self.state == Game.GameState.NO_NEW_TEAMS
+
+    @property
+    def is_open(self):
+        "Any kind of open, whether accepting new teams or not"
+        return self.state != Game.GameState.CLOSED
 
 
 class Team(models.Model):

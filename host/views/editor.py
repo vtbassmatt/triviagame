@@ -102,7 +102,7 @@ def edit_game(request, game_id):
 
     if request.method == 'POST':
         game_form = GameForm(request.POST, instance=game)
-        if game.open:
+        if game.is_open:
             game_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif game_form.is_valid():
             updated_game = game_form.save()
@@ -234,7 +234,7 @@ def hx_remove_game_host(request, game_id, user_id):
     ).filter(id=user_to_remove.id).first()
     friendly_name = user_to_remove.get_full_name() or user_to_remove.username
 
-    if game.open:
+    if game.is_open:
         return HttpResponse(f'Cannot remove {friendly_name} as a host while the game is open.')
 
     if removable_host:
@@ -258,7 +258,7 @@ def new_page(request, game_id):
 
     if request.method == 'POST':
         form = PageForm(request.POST)
-        if game.open:
+        if game.is_open:
             form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif form.is_valid():
             page = form.save(commit=False)
@@ -301,7 +301,7 @@ def hx_edit_page_metadata(request, page_id):
 
     if request.method == 'POST':
         page_form = PageForm(request.POST, instance=page)
-        if page.game.open:
+        if page.game.is_open:
             page_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif page_form.is_valid():
             updated_page = page_form.save()
@@ -323,7 +323,7 @@ def delete_page(request, page_id):
 
     if request.method in ('POST', 'DELETE'):
         game = page.game
-        if game.open:
+        if game.is_open:
             return HttpResponseConflict('Cannot edit an open game')
         order = page.order
         with transaction.atomic():
@@ -346,7 +346,7 @@ def page_move(request, page_id, delta):
     assert delta == 1 or delta == -1
 
     page = request.page
-    if page.game.open:
+    if page.game.is_open:
         return HttpResponseConflict('Cannot edit an open game')
 
     max_page = page.game.page_set.last()
@@ -385,7 +385,7 @@ def new_question(request, page_id):
 
     if request.method == 'POST':
         form = QuestionForm(request.POST)
-        if page.game.open:
+        if page.game.is_open:
             form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif form.is_valid():
             question = form.save(commit=False)
@@ -417,7 +417,7 @@ def edit_question(request, question_id):
 
     if request.method == 'POST':
         question_form = QuestionForm(request.POST, instance=question)
-        if question.page.game.open:
+        if question.page.game.is_open:
             question_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
         elif question_form.is_valid():
             updated_question = question_form.save()
@@ -439,7 +439,7 @@ def delete_question(request, question_id):
 
     if request.method in ('POST', 'DELETE'):
         page = question.page
-        if page.game.open:
+        if page.game.is_open:
             return HttpResponseConflict('Cannot edit an open game')
         order = question.order
         with transaction.atomic():
@@ -461,7 +461,7 @@ def question_move(request, question_id, delta):
     assert delta == 1 or delta == -1
 
     question = request.question
-    if question.page.game.open:
+    if question.page.game.is_open:
         return HttpResponseConflict('Cannot edit an open game')
 
     max_question = question.page.question_set.last()

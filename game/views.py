@@ -112,6 +112,11 @@ def create_team(request):
         return HttpResponseRedirect(reverse('home'))
 
     game = models.Game.objects.get(pk=request.session['game'])
+    if game.is_open_but_not_accepting_teams:
+        return render(request, 'not_accepting_teams.html', {
+            'game': game,
+            'rejoin_message': _REJOIN_MESSAGE,
+        })
 
     if request.method == 'POST':
         partial_team = models.Team(game=game, passcode=get_random_string(10, 'ABCDEFGHJKLMNPQRTUVWXYZ2346789'))
@@ -198,7 +203,7 @@ def play(request):
         'team': models.Team.objects.get(pk=request.session['team']),
     }
 
-    if not config['game'].open:
+    if not config['game'].is_open:
         return render(request, 'game/closed.html', config)
 
     return render(request, 'game/pages.html', config)
@@ -216,7 +221,7 @@ def play_poll_hx(request):
         return HttpResponseClientRedirect(reverse('home'))
     
     game = models.Game.objects.get(pk=request.session['game'])
-    if game.open:
+    if game.is_open:
         return HttpResponseClientRedirect(reverse('play'))
     
     # if closed, an empty response works
@@ -239,7 +244,7 @@ def page_list_hx(request):
         'team': models.Team.objects.get(pk=request.session['team']),
     }
 
-    if not config['game'].open:
+    if not config['game'].is_open:
         # redirects to self, which will render the closed page next time
         return HttpResponseClientRedirect(reverse('play'))
     
@@ -260,7 +265,7 @@ def _get_game_team(request, Redirect=HttpResponseRedirect):
     except models.Game.DoesNotExist:
         game = None
 
-    if not game.open:
+    if not game.is_open:
         _flash_game_not_open(request)
         return game, None, Redirect(reverse('play'))
 

@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.host_home, name='host_home'),
-    path('<int:game_id>/toggle/', views.toggle_game, name='toggle_game'),
+    path('<int:game_id>/toggle/<int:new_state>', views.update_game_state, name='update_game_state'),
     path('<int:game_id>/pages/', views.pages, name='pages'),
     path('<int:game_id>/pages/state/', views.set_page_state, name='set_page_state'),
     path('<int:game_id>/pages/<int:page_id>', views.score_page, name='score_page'),

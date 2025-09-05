@@ -9,7 +9,7 @@
       Visible points: {{ game_max_points }}<br>
       Hidden points: {{ game_hidden_points }}
     </p>
-    {% include 'host/_toggle_game.html' %}
+    {% include 'host/_update_game_state.html' %}
     <h2>Pages</h2>
     {# when the game or page state is toggled, this section reloads #}
     <div hx-get="{% url 'pages' game.id %}"

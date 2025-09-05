@@ -8,7 +8,7 @@
     <div class="card mb-3">
       <div class="card-header bg-primary text-white">Game metadata</div>
       <div class="card-body">
-        {% if game.open %}
+        {% if game.is_open %}
         <p class="card-text">Name: {{ game.name }}</p>
         <p class="card-text"><em>Can't edit an open game.</em> You must <a href="{% url 'pages' game.id %}">close it first</a>.</p>
         {% else %}
