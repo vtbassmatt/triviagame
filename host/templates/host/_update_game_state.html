@@ -1,0 +1,22 @@
+{% load guardian_tags %}
+{% get_obj_perms user for game as "perms" %}
+<p>
+  Game state: {{ game.get_state_display|lower }}<br>
+  {% if 'host_game' in perms %}
+  <button class="btn btn-sm btn-outline-danger"
+    {% if game.is_closed %}disabled{% endif %}
+    hx-post="{% url 'update_game_state' game.id 0 %}"
+    hx-swap="outerHTML"
+    hx-target="closest p">{% if game.is_closed %}Game is closed{%else%}Close game{% endif %}</button>
+  <button class="btn btn-sm btn-{% if game.is_accepting_teams %}outline-{% endif %}primary"
+    {% if game.is_accepting_teams %}disabled{% endif %}
+    hx-post="{% url 'update_game_state' game.id 1 %}"
+    hx-swap="outerHTML"
+    hx-target="closest p">{% if game.is_accepting_teams %}New teams are allowed{%else%}Allow new teams{% endif %}</button>
+  <button class="btn btn-sm btn-{% if game.is_open_but_not_accepting_teams %}outline-{% endif %}primary"
+    {% if game.is_open_but_not_accepting_teams %}disabled{% endif %}
+    hx-post="{% url 'update_game_state' game.id 2 %}"
+    hx-swap="outerHTML"
+    hx-target="closest p">{% if game.is_open_but_not_accepting_teams %}New teams are blocked{%else%}Block new teams{% endif %}</button>
+  {% endif %}
+</p>

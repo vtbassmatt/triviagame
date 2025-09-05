@@ -33,7 +33,7 @@ User = get_user_model()
 __all__ = [
     'host_home',
     'host_confirm_logout',
-    'toggle_game',
+    'update_game_state',
     'pages',
     'set_page_state',
     'score_page',
@@ -92,21 +92,31 @@ def host_confirm_logout(request):
 @login_required
 @can_host_game
 @require_POST
-def toggle_game(request, game_id):
+def update_game_state(request, game_id, new_state):
     # this is an HTMX-only view
     if not request.htmx:
         return HttpResponseBadRequest("expected HTMX request")
 
     game = request.game
 
-    game.open = not game.open
-    game.save()
-    if game.open:
-        messages.success(request, "You opened the game.")
-    else:
-        messages.success(request, "You closed the game.")
+    if game.id != game_id:
+        print("game.id != game_id")
+        ... # TODO, this means something has gone wrong
+
+    if new_state in Game.GameState.values:
+        game.state = new_state
+        game.save()
+
+    messages.success(
+        request,
+        {
+            Game.GameState.CLOSED: "You closed the game.",
+            Game.GameState.ACCEPTING_TEAMS: "You opened the game. New teams can join.",
+            Game.GameState.NO_NEW_TEAMS: "Game is open, but no new teams can join.",
+        }[game.state],
+    )
     
-    response = render(request, 'host/_toggle_game.html', {
+    response = render(request, 'host/_update_game_state.html', {
         'user': request.user,
         'game': game,
     })
