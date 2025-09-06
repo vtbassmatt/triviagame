@@ -1,12 +1,52 @@
 {% extends 'host_base.html' %}
 {% block heading %}Hosting {{ game.name }}{% endblock %}
 {% block contents %}
-<div class="row justify-content-center">
+<div class="row justify-content-center d-print-none">
   <div class="col-12 mb-2">
     <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     {% include 'host/_team_fragment.html' %}
     <p>Rejoin link: <code>{{ rejoin_link }}</code></p>
     <p><a href="{% url 'pages' game.id %}">Back to game</a></p>
+  </div>
+</div>
+<hr>
+{# printable version of the team's answers #}
+<div class="row justify-content-center">
+  <div class="col-12 mb-2">
+    <p class="d-no-print">
+      You can print this page if the team wants a record of their answers.
+      Any question the team didn't answer will not appear here.
+    </p>
+    <h3>Team <i>{{ team.name }}</i>'s answers</h3>
+    <p>Members: {{ team.members }}</p>
+    {% for response in responses %}
+      {% ifchanged response.question.page.order %}
+      <h4>Round {{ response.question.page.order }}: {{ response.question.page.title }}</h4>
+      {% endifchanged %}
+      <dl>
+        <dt class="hstack gap-2 p-1 border rounded-start">
+          <div>{{ response.question.order }}</div>
+          <div class="vr"></div>
+          <div class="markdown-needed">{{ response.question.question }}</div>
+        </dt>
+        <dd class="hstack gap-2 p-1 border rounded-start">
+          <div>Correct answer</div>
+          <div class="vr"></div>
+          <div class="markdown-needed bg-success-subtle">{{ response.question.answer }}</div>
+          {% if response.question.possible_points > 1 %}
+          <div class="vr"></div>
+          <div>up to {{ response.question.possible_points }} pt</div>
+          {% endif %}
+        </dd>
+        <dd class="hstack gap-2 p-1 border rounded-start">
+          <div>Team's answer</div>
+          <div class="vr"></div>
+          <div class="bg-primary-subtle">{{ response.value }}</div>
+          <div class="vr"></div>
+          <div>{% if response.graded %}{{ response.score }} pt{% else %}<i>ungraded</i>{% endif %}</div>
+        </dd>
+      </dl>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

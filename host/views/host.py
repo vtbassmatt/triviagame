@@ -269,8 +269,14 @@ def team_page(request, game_id, team_id):
     team = Team.objects.get(pk=team_id)
 
     template = 'host/team.html'
+    responses = (
+        Response.objects
+        .filter(team=team)
+        .order_by('question__page__order', 'question__order')
+    )
     if request.htmx:
         template = 'host/_team_fragment.html'
+        responses = None
     
     rejoin_link = build_absolute_uri(
         request,
@@ -281,6 +287,7 @@ def team_page(request, game_id, team_id):
         'game': request.game,
         'team': team,
         'rejoin_link': rejoin_link,
+        'responses': responses,
     })
 
 

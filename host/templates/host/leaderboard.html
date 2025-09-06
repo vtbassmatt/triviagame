@@ -1,6 +1,17 @@
 {% extends 'host_base.html' %}
 {% load dict_extras %}
 {% block heading %}{{ game.name }}{% endblock %}
+{% block morehead %}
+<style>
+  body {
+    background-color: #eaf4f8;
+  }
+  @page {
+    size: landscape;
+    margin: .25in;
+  }
+</style>
+{% endblock %}
 {% block contents %}
 <div class="row justify-content-center">
   <div class="col-12">
@@ -31,7 +42,7 @@
   </table>
   </div>
 </div>
-<div class="row">
+<div class="row d-print-none">
 <hr>
 <a href="{% url 'pages' game.id %}">🔙 Manage the game</a>
 </div>
