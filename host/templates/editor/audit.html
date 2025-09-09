@@ -27,15 +27,17 @@
         {{ page.order }}. {{ page.title }}{% if page.is_hidden %} (hidden){% endif %}
       </div>
       <div class="card-body markdown-needed">{{ page.description }}</div>
+      <div class="card-body d-print-none"><small><a href="{% url 'edit_page' page.id %}" target="_blank">[edit page]</a></small></div>
       <div class="card-body">
         <table class="table table-striped">
-          <tr><th>#</th><th>Points</th><th>Question</th><th>Answer</th></tr>
+          <tr><th>#</th><th>Points</th><th>Question</th><th>Answer</th><th class="d-print-none">Edit</th></tr>
           {% for question in page.question_set.all %}
           <tr>
             <td>{{ question.order }}</td>
             <td>{{ question.possible_points }}</td>
             <td class="markdown-needed">{{ question.question }}</td>
             <td class="markdown-needed">{{ question.answer }}</td>
+            <td class="d-print-none"><a href="{% url 'edit_question' question.id %}" target="_blank">[edit]</a></td>
           </tr>
           {% endfor %}
         </table>
