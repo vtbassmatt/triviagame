@@ -1,0 +1,64 @@
+{% extends 'host_base.html' %}
+{% block title %}👑 Tr¿via editor{% endblock %}
+{% block heading %}<q>{{ game.name }}</q> audit{% endblock %}
+{% block contents %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <p class="d-print-none">You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">Game metadata</div>
+      <div class="card-body">
+        <h4>Name: {{ game.name }}</h4>
+        <p class="card-text mt-2">
+          Hosts:
+          {% for host in game_hosts %}
+          {% if host == request.user %}you{% else %}{% firstof host.get_full_name host %}{% endif %}{% if not forloop.last %}, {% endif %}
+          {% endfor %}<br>
+          Pages: {{ game.page_set.count }}<br>
+          Nomal points: {{ game_max_points }}<br>
+          Hidden points: {{ game_hidden_points }}
+        </p>
+      </div>
+    </div>
+
+    {% for page in game.page_set.all %}
+    <div class="card mb-3">
+      <div class="card-header">
+        {{ page.order }}. {{ page.title }}{% if page.is_hidden %} (hidden){% endif %}
+      </div>
+      <div class="card-body markdown-needed">{{ page.description }}</div>
+      <div class="card-body d-print-none"><small><a href="{% url 'edit_page' page.id %}" target="_blank">[edit page]</a></small></div>
+      <div class="card-body">
+        <table class="table table-striped">
+          <tr><th>#</th><th>Points</th><th>Question</th><th>Answer</th><th class="d-print-none">Edit</th></tr>
+          {% for question in page.question_set.all %}
+          <tr>
+            <td>{{ question.order }}</td>
+            <td>{{ question.possible_points }}</td>
+            <td class="markdown-needed">{{ question.question }}</td>
+            <td class="markdown-needed">{{ question.answer }}</td>
+            <td class="d-print-none"><a href="{% url 'edit_question' question.id %}" target="_blank">[edit]</a></td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div class="card-footer">
+        Total points: {{ page.total_points }}
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="col-12 mb-2 d-print-none">
+      <h2>Utilities</h2>
+      <table class="table table-striped">
+      <tr>
+        <th>Editor home</th><td><a href="{% url 'edit_game' game.id %}">Edit this game</a></td>
+      </tr>
+      <tr>
+        <th>Host home</th><td><a href="{% url 'host_home' %}">Return to host interface</a></td>
+      </tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -44,7 +44,17 @@
       </div>
     </div>
 
-    <a href="{% url 'host_home' %}">Return to host interface</a>
+    <div class="col-12 mb-2">
+      <h2>Utilities</h2>
+      <table class="table table-striped">
+      <tr>
+        <th>Audit this game</th><td><a href="{% url 'audit_game' game.id %}">View all questions, answers, and points at once</a></td>
+      </tr>
+      <tr>
+        <th>Host home</th><td><a href="{% url 'host_home' %}">Return to host interface</a></td>
+      </tr>
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %}
