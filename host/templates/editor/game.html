@@ -48,7 +48,7 @@
       <h2>Utilities</h2>
       <table class="table table-striped">
       <tr>
-        <th>Audit this game</th><td><a href="#">View all questions, answers, and points at once</a></td>
+        <th>Audit this game</th><td><a href="{% url 'audit_game' game.id %}">View all questions, answers, and points at once</a></td>
       </tr>
       <tr>
         <th>Host home</th><td><a href="{% url 'host_home' %}">Return to host interface</a></td>

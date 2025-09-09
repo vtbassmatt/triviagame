@@ -14,6 +14,7 @@ urlpatterns = [
     path('<int:game_id>/team/<int:team_id>/edit', views.hx_edit_team, name='edit_team'),
     path('editor/new/', views.new_game, name='new_game'),
     path('editor/<int:game_id>/', views.edit_game, name='edit_game'),
+    path('editor/<int:game_id>/audit', views.audit_game, name='audit_game'),
     path('editor/<int:game_id>/hosts', views.edit_game_hosts, name='edit_game_hosts'),
     path('editor/<int:game_id>/hosts/<int:user_id>', views.hx_remove_game_host, name='remove_game_host'),
     path('editor/page/<int:page_id>/', views.edit_page, name='edit_page'),

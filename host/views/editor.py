@@ -38,6 +38,7 @@ User = get_user_model()
 __all__ = [
     'new_game',
     'edit_game',
+    'audit_game',
     'edit_game_hosts',
     'hx_remove_game_host',
     'new_page',
@@ -112,6 +113,47 @@ def edit_game(request, game_id):
         game_form = GameForm(instance=game)
 
     return render(request, 'editor/game.html', {
+        'game': game,
+        'game_hosts': game_hosts,
+        'game_max_points': game_max_points,
+        'game_hidden_points': game_hidden_points,
+        'game_form': game_form,
+    })
+
+
+@login_required
+@can_edit_game
+def audit_game(request, game_id):
+    game = request.game
+    game_hosts = get_users_with_perms(
+        game,
+        with_superusers=True,
+        with_group_users=True,
+        only_with_perms_in=['view_game', 'host_game', 'edit_game'],
+    )
+    game_max_points = (
+        game.page_set
+        .filter(is_hidden=False)
+        .aggregate(points=Sum('question__possible_points'))
+    ).get('points', None) or 0
+    game_hidden_points = (
+        game.page_set
+        .filter(is_hidden=True)
+        .aggregate(points=Sum('question__possible_points'))
+    ).get('points', None) or 0
+
+    if request.method == 'POST':
+        game_form = GameForm(request.POST, instance=game)
+        if game.is_open:
+            game_form.add_error(None, ValidationError('Cannot edit an open game', code='gamestate'))
+        elif game_form.is_valid():
+            updated_game = game_form.save()
+            messages.success(request, "Game data saved.")
+            return HttpResponseRedirect(reverse('edit_game', args=(updated_game.id,)))
+    else:
+        game_form = GameForm(instance=game)
+
+    return render(request, 'editor/audit.html', {
         'game': game,
         'game_hosts': game_hosts,
         'game_max_points': game_max_points,
