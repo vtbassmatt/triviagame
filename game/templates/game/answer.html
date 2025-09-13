@@ -22,8 +22,8 @@
   {% for question in page.question_set.all %}
   <div class="col-12" id="question-{{ question.id }}"
         hx-get="{% url 'question_hx' question.id %}"
-        hx-trigger="load"
-        hx-swap="morph:outerHTML">
+        hx-trigger="revealed"
+        hx-swap="outerHTML">
     <div class="card mb-3">
       <div class="card-header">Question {{ question.order }}</div>
       <div class="card-body">
