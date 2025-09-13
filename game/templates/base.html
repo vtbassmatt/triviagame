@@ -11,7 +11,6 @@
     <link rel="manifest" href="{% static 'icons/site.webmanifest' %}">
 
     {% htmx_script %}
-    <script src="{% static 'htmx/idiomorph-ext.min.js' %}" defer></script>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" defer></script>
     <script src="{% static 'htmx/messages.js' %}" defer></script>
     <script src="{% static 'markdown/marked.min.js' %}" defer></script>
@@ -29,7 +28,7 @@
 
     <title>{% block title %}Welcome to Tr¿via{% endblock %}</title>
   </head>
-  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-ext="morph">
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <div class="container">
       <div class="row">
         <div class="col-12">

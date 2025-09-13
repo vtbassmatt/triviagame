@@ -22,11 +22,11 @@
   {% for question in page.question_set.all %}
   <div class="col-12" id="question-{{ question.id }}"
         hx-get="{% url 'question_hx' question.id %}"
-        hx-trigger="load"
-        hx-swap="morph:outerHTML">
-    <div class="card mb-3">
-      <div class="card-header">Question {{ question.order }}</div>
-      <div class="card-body">
+        hx-trigger="revealed"
+        hx-swap="outerHTML">
+    <div class="card mb-3" id="question-card-{{ question.id }}">
+      <div class="card-header" id="question-header-{{ question.id }}">Question {{ question.order }}</div>
+      <div class="card-body" id="question-body-{{ question.id }}">
         {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
         <p class="card-text markdown-needed">{{ question.question }}</p>
         <p class="card-text placeholder-glow">

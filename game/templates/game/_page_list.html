@@ -22,9 +22,7 @@
       {% endif %}
     </div>
     {% if page.is_open %}
-    <div class="card-body markdown-needed">
-      {% firstof page.description '&nbsp;' %}
-    </div>
+    <div class="card-body markdown-needed">{% firstof page.description '&nbsp;' %}</div>
     {% else %}
     <div class="card-body">
       <p class="card-text text-body-secondary">This round is complete! You can still view the description and questions, but you can no longer submit answers.</p>

@@ -1,7 +1,7 @@
 <div class="col-12" id="question-{{ question.id }}">
-  <div class="card mb-3">
-    <div class="card-header">Question {{ question.order }}</div>
-    <div class="card-body">
+  <div class="card mb-3" id="question-card-{{ question.id }}">
+    <div class="card-header" id="question-header-{{ question.id }}">Question {{ question.order }}</div>
+    <div class="card-body" id="question-body-{{ question.id }}">
       {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
       <p class="card-text markdown-needed">{{ question.question }}</p>
 
@@ -18,7 +18,7 @@
       <p class="card-text">
         <form autocomplete="off"{% if did_save == True or did_save == False or response %} novalidate class="was-validated"{% endif %}>
           <div class="row">
-            <label class="visually-hidden" for="response_{{ question.id }}">Your answer</label>
+            <label class="visually-hidden" for="answer-field-{{ question.id }}">Your answer</label>
             <div class="input-group">
               <div class="input-group-text">Answer?</div>
               <input
@@ -30,7 +30,7 @@
                 value="{{ response.value }}"
                 hx-post="{% url 'question_hx' question.id %}"
                 hx-target="#question-{{ question.id }}"
-                hx-swap="morph:outerHTML"
+                hx-swap="outerHTML"
                 hx-trigger="input changed delay:500ms">
               <div class="valid-feedback">Saved {% if response.value %}"{{ response.value }}"{% else %}a blank answer{% endif %}.</div>
               <div class="invalid-feedback">Something went wrong saving. {% if response and response.value %}"{{ response.value }}"{% elif not response %}No answer{% else %}A blank answer{% endif %} was recorded.</div>
