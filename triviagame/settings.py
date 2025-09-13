@@ -55,9 +55,11 @@ INSTALLED_APPS = [
     'game.apps.GameConfig',
     'host.apps.HostConfig',
     'django.forms',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'triviagame.middleware.MultipleProxyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -138,6 +140,11 @@ AUTHENTICATION_BACKENDS = (
 
 # django-guardian
 ANONYMOUS_USER_NAME = None
+
+# for debug-toolbar
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
