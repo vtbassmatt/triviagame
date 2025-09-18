@@ -39,6 +39,7 @@ __all__ = [
     'score_page',
     'assign_score',
     'host_leaderboard',
+    'host_leaderboard_stats',
     'team_page',
     'hx_edit_team',
 ]
@@ -261,6 +262,22 @@ def host_leaderboard(request, game_id):
         'leaderboard': ldr_board,
         'gold_medals': gold_medals,
     })
+
+
+@login_required
+@can_view_game
+def host_leaderboard_stats(request, game_id):
+    game = request.game
+
+    rounds, ldr_board, gold_medals = compute_leaderboard_data(game)
+
+    return render(request, 'host/leaderboard.json', {
+        'game': game,
+        'rounds': rounds,
+        'teams': { t.name: t.members for t in game.team_set.all() },
+        'leaderboard': ldr_board,
+        'gold_medals': gold_medals,
+    }, content_type="text/json")
 
 
 @login_required

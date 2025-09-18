@@ -1,0 +1,15 @@
+{% load dict_extras %}{
+  "round_labels": [{% for round in rounds %}{% if not forloop.first %},{% endif %}"{{round|escapejs}}"{% endfor %}],
+  "leaderboard": [
+  {% for line in leaderboard %}{% if not forloop.first %},{% endif %}
+  {
+    "team_name": "{{line.0|escapejs}}",
+    "members": "{{teams|dict_value:line.0|escapejs}}",
+    "is_gold": {% if line.0 in gold_medals %}true{% else %}false{% endif %},
+    "scores": [
+    {% for entry in line %}{% if not forloop.first %}{{entry}}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+    ]
+  }
+  {% endfor %}
+  ]
+}
