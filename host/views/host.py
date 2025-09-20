@@ -298,6 +298,30 @@ def host_leaderboard_stats(request, game_id):
 def game_data(request, game_id):
     game = request.game
 
+    data_out = [
+        {
+            'round': page.order,
+            'question': q.order,
+            'possible_points': q.possible_points,
+            # we'll process each question in the next step
+            'q': q,
+        }
+        for page in game.page_set.all()
+        for q in page.question_set.all()
+    ]
+
+    for row in data_out:
+        q = row.pop('q')
+        responses = q.response_set.all()
+        row['responses'] = [
+            {
+                'team': str(r.team.id),
+                'awarded_points': r.score,
+                'is_graded': r.graded,
+            }
+            for r in responses
+        ]
+
     response = JsonResponse({
         'game': {
             'name': game.name,
@@ -308,34 +332,13 @@ def game_data(request, game_id):
         ],
         'rounds': [
             {
-                'id': str(r.id),
                 'title': r.title,
                 'order': r.order,
                 'is_hidden': r.is_hidden,
             }
             for r in game.page_set.all()
         ],
-        'responses': [
-            {
-                'id': str(resp.id),
-                'possible_points': q.possible_points,
-                'awarded_points': resp.score,
-                'is_graded': resp.graded,
-                'team': {
-                    'id': str(resp.team.id),
-                },
-                'question': {
-                    'id': str(q.id),
-                    'order': q.order,
-                },
-                'round': {
-                    'id': str(page.id),
-                },
-            }
-            for page in game.page_set.all()
-            for q in page.question_set.all()
-            for resp in q.response_set.all()
-        ],
+        'data': data_out
     })
     return response
 
