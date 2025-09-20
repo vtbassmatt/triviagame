@@ -384,6 +384,7 @@ def compute_leaderboard_data(game):
     # We want the sum of scores per team per page.
     responses = (
         models.Response.objects
+        .select_related("team", "question", "question__page")
         .filter(team__game=game, graded=True)
     )
     rounds = [

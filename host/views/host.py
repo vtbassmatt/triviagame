@@ -8,6 +8,7 @@ from django.core.exceptions import BadRequest
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
+    JsonResponse,
     QueryDict,
 )
 from django.db.models import Sum
@@ -20,7 +21,7 @@ from guardian.shortcuts import (
     get_users_with_perms,
 )
 
-from game.models import Game, Page, Response, Team
+from game.models import Game, Page, Question, Response, Team
 from game.views import compute_leaderboard_data
 from host.forms import TeamForm
 from host.view_utils import (
@@ -39,6 +40,8 @@ __all__ = [
     'score_page',
     'assign_score',
     'host_leaderboard',
+    'host_leaderboard_stats',
+    'game_data',
     'team_page',
     'hx_edit_team',
 ]
@@ -261,6 +264,101 @@ def host_leaderboard(request, game_id):
         'leaderboard': ldr_board,
         'gold_medals': gold_medals,
     })
+
+
+@login_required
+@can_view_game
+def host_leaderboard_stats(request, game_id):
+    game = request.game
+
+    rounds, ldr_board, gold_medals = compute_leaderboard_data(game)
+
+    response = JsonResponse({
+        'game': {
+            'name': game.name,
+        },
+        'rounds': [
+            {'name': str(round)}
+            for round in rounds
+        ],
+        'teams': [
+            { 'name': t.name, 'members': t.members }
+            for t in game.team_set.all()
+        ],
+        'leaderboard': [
+            { 'name': l[0], 'scores': l[1:], 'has_gold_medal': l[0] in gold_medals }
+            for l in ldr_board
+        ],
+    })
+    return response
+
+
+@login_required
+@can_view_game
+def game_data(request, game_id):
+    game = request.game
+
+    # all this ugly preloading saves us from some, but not all,
+    # SQL "n+1" problems. I stopped trying to whittle it down
+    # any further when it had saved half the original queries
+    # and half the time.
+    questions = (
+        Question.objects
+        .filter(page__game=game)
+        .select_related('page')
+    )
+    responses = (
+        Response.objects
+        .filter(question__page__game=game)
+        .select_related('question', 'team')
+        .values('question__id', 'team__id', 'score', 'graded')
+    )
+
+    data_out = [
+        {
+            'round': q.page.order,
+            'question': q.order,
+            'possible_points': q.possible_points,
+            # we'll process each question in the next step
+            'q_id': q.id,
+        }
+        for q in questions
+    ]
+
+    for row in data_out:
+        q_id = row.pop('q_id')
+        q_responses = responses.filter(question__id=q_id)
+        row['responses'] = [
+            {
+                'team': f"t{r['team__id']}",
+                'awarded_points': r['score'],
+                'is_graded': r['graded'],
+            }
+            for r in q_responses
+        ]
+
+    response = JsonResponse({
+        'game': {
+            'name': game.name,
+        },
+        'teams': { 
+            f"t{t.id}": {
+                'name': t.name,
+                'members': t.members,
+            }
+            for t in game.team_set.all()
+        },
+        'rounds': [
+            {
+                'title': r.title,
+                'order': r.order,
+                'is_hidden': r.is_hidden,
+            }
+            for r in game.page_set.all()
+        ],
+        'data': data_out
+    })
+    return response
 
 
 @login_required

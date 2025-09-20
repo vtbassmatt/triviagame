@@ -43,7 +43,15 @@
   </div>
 </div>
 <div class="row d-print-none">
-<hr>
-<a href="{% url 'pages' game.id %}">🔙 Manage the game</a>
+  <hr>
+  <h2>Utilities</h2>
+  <table class="table table-striped">
+  <tr>
+    <th>Leaderboard data</th><td><a href="{% url 'host_leaderboard_stats' game.id %}">Download JSON</a></td>
+  </tr>
+  <tr>
+    <th>Manage the game</th><td><a href="{% url 'pages' game.id %}">Game home</a></td>
+  </tr>
+  </table>
 </div>
 {% endblock %}

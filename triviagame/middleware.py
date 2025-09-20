@@ -1,5 +1,6 @@
 import json
 from django.contrib.messages import get_messages
+from django.http import HttpResponse
 from django.utils.decorators import async_only_middleware
 
 
@@ -62,3 +63,17 @@ async def _get_initial_trigger(response):
     else:
         # HX-Trigger using string syntax
         return {hx_trigger: True}
+
+
+# h/t to https://medium.com/@jwgarcia003/unlocking-django-debug-toolbar-for-json-responses-an-elegant-solution-8c6c231ba760
+# but this is only safe in dev, so don't enable it in production
+# class NonHtmlDebugToolbarMiddleware:
+#     def __init__(self, get_response):
+#         self.get_response = get_response
+
+#     def __call__(self, request):
+#         response = self.get_response(request)
+#         if request.GET.get('debug') and response['Content-Type'] == 'application/json':
+#             content = json.dumps(json.loads(response.content), sort_keys=True, indent=2)
+#             response = HttpResponse(f'<!DOCTYPE html><html><body><pre>JSON: {content}</pre></body></html>')
+#         return response
