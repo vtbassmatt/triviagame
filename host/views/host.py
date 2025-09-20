@@ -315,7 +315,7 @@ def game_data(request, game_id):
         responses = q.response_set.all()
         row['responses'] = [
             {
-                'team': str(r.team.id),
+                'team': f"t{r.team.id}",
                 'awarded_points': r.score,
                 'is_graded': r.graded,
             }
@@ -326,10 +326,13 @@ def game_data(request, game_id):
         'game': {
             'name': game.name,
         },
-        'teams': [
-            { 'id': str(t.id), 'name': t.name, 'members': t.members }
+        'teams': { 
+            f"t{t.id}": {
+                'name': t.name,
+                'members': t.members,
+            }
             for t in game.team_set.all()
-        ],
+        },
         'rounds': [
             {
                 'title': r.title,
