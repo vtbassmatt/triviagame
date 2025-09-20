@@ -41,6 +41,7 @@ __all__ = [
     'assign_score',
     'host_leaderboard',
     'host_leaderboard_stats',
+    'game_data',
     'team_page',
     'hx_edit_team',
 ]
@@ -287,6 +288,53 @@ def host_leaderboard_stats(request, game_id):
         'leaderboard': [
             { 'name': l[0], 'scores': l[1:], 'has_gold_medal': l[0] in gold_medals }
             for l in ldr_board
+        ],
+    })
+    return response
+
+
+@login_required
+@can_view_game
+def game_data(request, game_id):
+    game = request.game
+
+    response = JsonResponse({
+        'game': {
+            'name': game.name,
+        },
+        'teams': [
+            { 'id': str(t.id), 'name': t.name, 'members': t.members }
+            for t in game.team_set.all()
+        ],
+        'rounds': [
+            {
+                'id': str(r.id),
+                'title': r.title,
+                'order': r.order,
+                'is_hidden': r.is_hidden,
+            }
+            for r in game.page_set.all()
+        ],
+        'responses': [
+            {
+                'id': str(resp.id),
+                'possible_points': q.possible_points,
+                'awarded_points': resp.score,
+                'is_graded': resp.graded,
+                'team': {
+                    'id': str(resp.team.id),
+                },
+                'question': {
+                    'id': str(q.id),
+                    'order': q.order,
+                },
+                'round': {
+                    'id': str(page.id),
+                },
+            }
+            for page in game.page_set.all()
+            for q in page.question_set.all()
+            for resp in q.response_set.all()
         ],
     })
     return response

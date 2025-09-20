@@ -44,6 +44,9 @@
       <th>Leaderboard</th><td><a href="{% url 'host_leaderboard' game.id %}">Leaderboard</a></td>
     </tr>
     <tr>
+      <th>Game data</th><td><a href="{% url 'game_data' game.id %}">Download JSON</a></td>
+    </tr>
+    <tr>
       <th>Host home</th><td><a href="{% url 'host_home' %}">Host home</a></td>
     </tr>
     </table>
