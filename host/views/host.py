@@ -21,7 +21,7 @@ from guardian.shortcuts import (
     get_users_with_perms,
 )
 
-from game.models import Game, Page, Response, Team
+from game.models import Game, Page, Question, Response, Team
 from game.views import compute_leaderboard_data
 from host.forms import TeamForm
 from host.view_utils import (
@@ -298,28 +298,43 @@ def host_leaderboard_stats(request, game_id):
 def game_data(request, game_id):
     game = request.game
 
+    # all this ugly preloading saves us from some, but not all,
+    # SQL "n+1" problems. I stopped trying to whittle it down
+    # any further when it had saved half the original queries
+    # and half the time.
+    questions = (
+        Question.objects
+        .filter(page__game=game)
+        .select_related('page')
+    )
+    responses = (
+        Response.objects
+        .filter(question__page__game=game)
+        .select_related('question', 'team')
+        .values('question__id', 'team__id', 'score', 'graded')
+    )
+
     data_out = [
         {
-            'round': page.order,
+            'round': q.page.order,
             'question': q.order,
             'possible_points': q.possible_points,
             # we'll process each question in the next step
-            'q': q,
+            'q_id': q.id,
         }
-        for page in game.page_set.all()
-        for q in page.question_set.all()
+        for q in questions
     ]
 
     for row in data_out:
-        q = row.pop('q')
-        responses = q.response_set.all()
+        q_id = row.pop('q_id')
+        q_responses = responses.filter(question__id=q_id)
         row['responses'] = [
             {
-                'team': f"t{r.team.id}",
-                'awarded_points': r.score,
-                'is_graded': r.graded,
+                'team': f"t{r['team__id']}",
+                'awarded_points': r['score'],
+                'is_graded': r['graded'],
             }
-            for r in responses
+            for r in q_responses
         ]
 
     response = JsonResponse({
