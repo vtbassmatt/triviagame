@@ -8,6 +8,7 @@ from django.core.exceptions import BadRequest
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
+    JsonResponse,
     QueryDict,
 )
 from django.db.models import Sum
@@ -271,13 +272,24 @@ def host_leaderboard_stats(request, game_id):
 
     rounds, ldr_board, gold_medals = compute_leaderboard_data(game)
 
-    return render(request, 'host/leaderboard.json', {
-        'game': game,
-        'rounds': rounds,
-        'teams': { t.name: t.members for t in game.team_set.all() },
-        'leaderboard': ldr_board,
-        'gold_medals': gold_medals,
-    }, content_type="text/json")
+    response = JsonResponse({
+        'game': {
+            'name': game.name,
+        },
+        'rounds': [
+            {'name': str(round)}
+            for round in rounds
+        ],
+        'teams': [
+            { 'name': t.name, 'members': t.members }
+            for t in game.team_set.all()
+        ],
+        'leaderboard': [
+            { 'name': l[0], 'scores': l[1:], 'has_gold_medal': l[0] in gold_medals }
+            for l in ldr_board
+        ],
+    })
+    return response
 
 
 @login_required
