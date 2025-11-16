@@ -17,6 +17,7 @@ class CreateTeamForm(forms.ModelForm):
         # "The Scranton Stranglers",
         "Harry, You're a Quizard",
         "I Can't Feel My Mace When I'm Windu",
+        "Jar Jar Thinks",
         "Walt Quizney World",
         "Bears, Beets, Battlestar Galactica",
         "Dame Agatha Quiztie",
@@ -33,6 +34,8 @@ class CreateTeamForm(forms.ModelForm):
         "The Quizard of Oz",
         "Don Quizote",
         "Get Down to Quizness",
+        "Quizly Bears",
+        "Misery Quizness",
     )
 
     class Meta:
