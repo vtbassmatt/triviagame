@@ -27,9 +27,9 @@ class Game(models.Model):
 
     class Meta:
         ordering = ['-last_edit_time']
-        permissions = (
+        permissions = [
             ('host_game', 'Host game'),
-        )
+        ]
 
     def __str__(self):
         return self.name
