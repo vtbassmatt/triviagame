@@ -68,7 +68,7 @@
             {% endif %}
           <q>{{ response.value }}</q>
           {% if response.score > 0 %}
-            ✅{% if response.score > 1 %} {{ response.score }} points{% endif %}
+            ✅{% if question.possible_points > 1 %} {{ response.score }} of {{ question.possible_points }} points{% endif %}
           {% else %}
             ❌ no points
           {% endif %}
