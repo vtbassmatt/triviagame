@@ -58,6 +58,10 @@ fly machine update -a some-db-app-name-1234 --vm-cpus 1 --vm-memory 256
 
 `TODO`!
 
+### Known Issues
+
+- **macOS Emoji Picker in Firefox**: If you're using Firefox on macOS and the emoji picker shortcut (`Fn-e`) doesn't work when editing questions or answers, see [docs/EMOJI_PICKER_MACOS.md](docs/EMOJI_PICKER_MACOS.md) for solutions.
+
 ## Running a game
 
 `TODO`!
