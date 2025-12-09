@@ -9,11 +9,11 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "daphne~=4.1",
+    "daphne~=4.2",
     "dj-database-url~=3.0",
-    "django~=5.2.0",
-    "django-debug-toolbar>=6.0.0",
-    "django-guardian~=3.0",
-    "django-htmx~=1.19",
-    "psycopg[binary]~=3.2",
+    "django~=6.0",
+    "django-debug-toolbar~=6.1",
+    "django-guardian~=3.2",
+    "django-htmx~=1.27",
+    "psycopg[binary]~=3.3",
 ]
