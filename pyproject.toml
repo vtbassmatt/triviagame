@@ -18,3 +18,8 @@ dependencies = [
     "psycopg[binary]~=3.3",
     "python-decouple>=3.8",
 ]
+
+[dependency-groups]
+prod = [
+    "gunicorn>=23.0.0",
+]
