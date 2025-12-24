@@ -5,7 +5,7 @@ It was recently named "Tr¿via" because I couldn't think of a better name.
 
 ## To get started
 
-Tested locally with Python 3.10 on macOS.
+Tested locally with Python 3.14 on macOS.
 
 ```
 uv install
@@ -25,6 +25,9 @@ On the Game entry in the admin, you can click "View on site" to open the "join a
 From there, click "Manage game" and you can find the "Player join" link.
 
 ## Deploying to fly.io
+
+**I used to deploy this to fly.io, but have recently switched to a VPS.**
+Therefore the fly.io infrastructure won't be maintained, and will eventually be removed.
 
 If you aren't me, you'll need to edit fly.toml with a new app name.
 
