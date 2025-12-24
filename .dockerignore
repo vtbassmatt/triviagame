@@ -5,7 +5,7 @@ fly.toml
 *.sqlite3
 
 # Files that store secrets
-.env
+**/.env
 
 # macOS file
 .DS_Store
