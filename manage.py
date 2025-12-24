@@ -19,5 +19,4 @@ def main():
 
 
 if __name__ == '__main__':
-    os.environ.setdefault('DJANGO_SECRET_KEY', 'django-insecure-7pf_5c3&%p=w*htljd7*jf1(3dnv7d4v!i(c#q&(n)+z6@t727')
     main()
