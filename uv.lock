@@ -244,6 +244,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-runserveronhostname"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/88/fd/fb7debcc88ca03c2af16000692fe94a8b1d0159213f29108bb5c1e48f79c/django_runserveronhostname-0.1.0.tar.gz", hash = "sha256:832c461ce90d21f26151b1ebb2e36243b25491dfdd76f9f1e43d21572e02d196", size = 2324, upload-time = "2026-02-15T19:11:11.044Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/dc/1945844b3f7ed6fbb60aac2fcb19ab6587e09ca36556a96210925c3da801/django_runserveronhostname-0.1.0-py3-none-any.whl", hash = "sha256:f69fe94362cd8ddd8de8326ecd109275ba4c119d1b49a672fba20e4fcfe25d48", size = 4438, upload-time = "2026-02-15T19:11:11.688Z" },
+]
+
+[[package]]
 name = "gunicorn"
 version = "23.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -450,6 +462,7 @@ dependencies = [
     { name = "django-debug-toolbar" },
     { name = "django-guardian" },
     { name = "django-htmx" },
+    { name = "django-runserveronhostname" },
     { name = "psycopg", extra = ["binary"] },
     { name = "python-decouple" },
 ]
@@ -467,6 +480,7 @@ requires-dist = [
     { name = "django-debug-toolbar", specifier = "~=6.1" },
     { name = "django-guardian", specifier = "~=3.2" },
     { name = "django-htmx", specifier = "~=1.27" },
+    { name = "django-runserveronhostname", specifier = ">=0.1.0" },
     { name = "psycopg", extras = ["binary"], specifier = "~=3.3" },
     { name = "python-decouple", specifier = ">=3.8" },
 ]

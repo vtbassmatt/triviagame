@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_htmx',  
+    'django_htmx',
+    'runserveronhostname',
     'game.apps.GameConfig',
     'host.apps.HostConfig',
     'django.forms',
@@ -147,6 +148,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+RUNSERVER_ON = 'trivia.localhost:8000'
 
 
 # Static files (CSS, JavaScript, Images)
