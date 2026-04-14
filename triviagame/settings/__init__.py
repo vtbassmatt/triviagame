@@ -155,7 +155,7 @@ RUNSERVER_ON = 'trivia.localhost:8000'
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / config('STATIC_ROOT', default='static')
+STATIC_ROOT = config('STATIC_DIR', default=BASE_DIR / '_static')
 
 # Default primary key field type
 
