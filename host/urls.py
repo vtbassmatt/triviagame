@@ -1,3 +1,4 @@
+from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
 from . import views
@@ -31,5 +32,11 @@ urlpatterns = [
     path('editor/question/new/<int:page_id>/', views.new_question, name='new_question'),
     path('editor/question/<int:question_id>/delete/', views.delete_question, name='delete_question'),
     path('auth/prelogout', views.host_confirm_logout, name='confirm_logout'),
+    path('auth/password_change/', auth_views.PasswordChangeView.as_view(
+        template_name='host/password_change_form.html',
+    ), name='password_change'),
+    path('auth/password_change/done/', auth_views.PasswordChangeDoneView.as_view(
+        template_name='host/password_change_done.html',
+    ), name='password_change_done'),
     path('auth/', include('django.contrib.auth.urls')),
 ]
