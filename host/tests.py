@@ -21,7 +21,7 @@ class PasswordChangeTests(TestCase):
         self.client.login(username='testhost', password='oldpassword123')
         response = self.client.get(reverse('password_change'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'registration/password_change_form.html')
+        self.assertTemplateUsed(response, 'host/password_change_form.html')
 
     def test_password_change_success(self):
         self.client.login(username='testhost', password='oldpassword123')
@@ -49,7 +49,7 @@ class PasswordChangeTests(TestCase):
         self.client.login(username='testhost', password='oldpassword123')
         response = self.client.get(reverse('password_change_done'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'registration/password_change_done.html')
+        self.assertTemplateUsed(response, 'host/password_change_done.html')
 
     def test_home_contains_change_password_link(self):
         self.client.login(username='testhost', password='oldpassword123')
