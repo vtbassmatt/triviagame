@@ -1,0 +1,35 @@
+{% extends 'host_base.html' %}
+{% block title %}MONACO TEST{% endblock %}
+{% block heading %}MONACO TEST{% endblock %}
+{% block contents %}
+{# TODO: integrate with database content #}
+{# TODO: on mobile, don't load Monaco #}
+{# TODO: grab embeddable-mono assets and self-host #}
+<iframe id="the_monaco"
+        src="https://embeddable-monaco.lukasbach.com{% querystring code='initial_code' lang='markdown' minimap='false' contextmenu='false' lineNumbers='off' folding='false' dontPostValueOnChange='true' %}"
+        width=400
+        height=300></iframe>
+<br>
+<button id="save_button" disabled>Save</button>
+<script>
+const iframe = document.getElementById("the_monaco");
+window.addEventListener("message", ({ data }) => {
+    switch(data.type) {
+        case "ready": {
+            const save = document.getElementById("save_button");
+            save.addEventListener("click", () => {
+                console.log("click!");
+                iframe.contentWindow.postMessage({ type: "get-content" }, "*");
+            })
+            save.disabled = false;
+
+            break;
+        }
+        case "content": {
+            console.log("saving content:", data.value)
+            break;
+        }
+    }
+});
+</script>
+{% endblock %}
