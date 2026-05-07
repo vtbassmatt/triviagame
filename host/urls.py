@@ -40,4 +40,5 @@ urlpatterns = [
     ), name='password_change_done'),
     path('auth/', include('django.contrib.auth.urls')),
     path('monaco_test/', views.monaco_test, name='monaco_test'),
+    path('monaco/iframe/', views.monaco_iframe, name='monaco_iframe'),
 ]

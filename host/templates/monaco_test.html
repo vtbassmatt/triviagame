@@ -4,9 +4,8 @@
 {% block contents %}
 {# TODO: integrate with database content #}
 {# TODO: on mobile, don't load Monaco #}
-{# TODO: grab embeddable-mono assets and self-host #}
 <iframe id="the_monaco"
-        src="https://embeddable-monaco.lukasbach.com{% querystring code='initial_code' lang='markdown' minimap='false' contextmenu='false' lineNumbers='off' folding='false' dontPostValueOnChange='true' %}"
+        src="{% url 'monaco_iframe' %}{% querystring code='initial_code' lang='markdown' minimap='false' contextmenu='false' lineNumbers='off' folding='false' dontPostValueOnChange='true' %}"
         width=400
         height=300></iframe>
 <br>
