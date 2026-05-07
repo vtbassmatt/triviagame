@@ -1,3 +1,4 @@
+# Monaco embeddable support courtesy of https://github.com/lukasbach/embeddable-monaco
 from django.shortcuts import render
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 
@@ -10,7 +11,7 @@ def monaco_test(request):
         'contextmenu': 'false',
         'lineNumbers': 'off',
         'folding': 'false',
-        'dontPostValueOnChange': 'true',
+        # 'dontPostValueOnChange': 'true',
     }
     return render(request, 'monaco_test.html', {'monaco_options': monaco_options})
 

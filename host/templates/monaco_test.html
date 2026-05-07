@@ -9,39 +9,42 @@
         width=400
         height=300></iframe>
 <br>
-<button id="save_button" disabled>Save</button><br>
+<div id="the_output"></div>
 
 <iframe id="the_other_monaco"
         src="{% url 'monaco_iframe' %}{% querystring monaco_options %}&context=other"
         width=300
         height=300></iframe>
 <br>
-<button id="other_save_button" disabled>Save</button><br>
+<div id="the_other_output"></div>
 
 
 <script>
 const iframe = document.getElementById("the_monaco");
+const output = document.getElementById("the_output");
 const iframe2 = document.getElementById("the_other_monaco");
+const output2 = document.getElementById("the_other_output");
 window.addEventListener("message", ({ data }) => {
     switch(data.type) {
         case "ready": {
-            const save = document.getElementById("save_button");
-            const save2 = document.getElementById("other_save_button");
-            save.addEventListener("click", () => {
-                console.log("click!");
-                iframe.contentWindow.postMessage({ type: "get-content" }, "*");
-            })
-            save.disabled = false;
-            save2.addEventListener("click", () => {
-                console.log("click!");
-                iframe2.contentWindow.postMessage({ type: "get-content" }, "*");
-            })
-            save2.disabled = false;
-
-            break;
+            if (data.context == 'first') {
+                iframe.contentWindow?.postMessage({
+                    type: "change-value",
+                    value: "loaded 1"
+                }, "*");
+            } else if (data.context == 'other') {
+                iframe2.contentWindow?.postMessage({
+                    type: "change-value",
+                    value: "loaded 2"
+                }, "*");
+            }
         }
-        case "content": {
-            console.log(`saving ${data.context} content: ${data.value}`)
+        case "change": {
+            if (data.context == 'first') {
+                output.innerHTML = data.value;
+            } else if (data.context == 'other') {
+                output2.innerHTML = data.value;
+            }
             break;
         }
     }
