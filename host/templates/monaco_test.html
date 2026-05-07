@@ -5,27 +5,43 @@
 {# TODO: integrate with database content #}
 {# TODO: on mobile, don't load Monaco #}
 <iframe id="the_monaco"
-        src="{% url 'monaco_iframe' %}{% querystring code='initial_code' lang='markdown' minimap='false' contextmenu='false' lineNumbers='off' folding='false' dontPostValueOnChange='true' %}"
+        src="{% url 'monaco_iframe' %}{% querystring monaco_options %}&context=first"
         width=400
         height=300></iframe>
 <br>
-<button id="save_button" disabled>Save</button>
+<button id="save_button" disabled>Save</button><br>
+
+<iframe id="the_other_monaco"
+        src="{% url 'monaco_iframe' %}{% querystring monaco_options %}&context=other"
+        width=300
+        height=300></iframe>
+<br>
+<button id="other_save_button" disabled>Save</button><br>
+
+
 <script>
 const iframe = document.getElementById("the_monaco");
+const iframe2 = document.getElementById("the_other_monaco");
 window.addEventListener("message", ({ data }) => {
     switch(data.type) {
         case "ready": {
             const save = document.getElementById("save_button");
+            const save2 = document.getElementById("other_save_button");
             save.addEventListener("click", () => {
                 console.log("click!");
                 iframe.contentWindow.postMessage({ type: "get-content" }, "*");
             })
             save.disabled = false;
+            save2.addEventListener("click", () => {
+                console.log("click!");
+                iframe2.contentWindow.postMessage({ type: "get-content" }, "*");
+            })
+            save2.disabled = false;
 
             break;
         }
         case "content": {
-            console.log("saving content:", data.value)
+            console.log(`saving ${data.context} content: ${data.value}`)
             break;
         }
     }
