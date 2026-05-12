@@ -322,11 +322,13 @@ def question_hx(request, question_id):
     except models.Response.DoesNotExist:
         response = None
     
-    return render(request, 'game/_question.html', {
+    http_response = render(request, 'game/_question.html', {
         'team': team,
         'question': question,
         'response': response,
     })
+
+    return _generate_validation(http_response, response, question, True)
 
 
 def question_response(request, question_id):
@@ -374,6 +376,10 @@ def question_response(request, question_id):
             response.save()
             did_save = True
 
+    return _generate_validation(HttpResponse(), response, question, did_save)
+
+
+def _generate_validation(http_response, response: models.Response, question: models.Question, did_save: bool):
     if did_save:
         answer = f'"{response.value}"' if response.value else "a blank answer"
         message = f"Saved {answer}."
@@ -387,7 +393,7 @@ def question_response(request, question_id):
         message = f"{answer} was recorded. Maybe the host closed the round already?"
 
     return trigger_client_event(
-        HttpResponse(),
+        http_response,
         "validateForm",
         {
             "isValid": did_save,
