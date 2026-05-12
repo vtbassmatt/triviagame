@@ -16,7 +16,7 @@
       {# page accepting answers, response not scored #}
       {% if question.page.is_open and not response.graded %}
       <p class="card-text">
-        <form autocomplete="off"{% if did_save == True or did_save == False or response %} novalidate class="was-validated"{% endif %}>
+        <form id="form-{{ question.id }}" autocomplete="off">
           <div class="row">
             <label class="visually-hidden" for="answer-field-{{ question.id }}">Your answer</label>
             <div class="input-group">
@@ -24,16 +24,15 @@
               <input
                 type="text"
                 id="answer-field-{{ question.id }}"
-                class="form-control{% if did_save == True %} is-valid{% elif did_save == False %} is-invalid{% endif %}"
+                class="form-control"
                 name="response_value"
                 placeholder="..."
                 value="{{ response.value }}"
-                hx-post="{% url 'question_hx' question.id %}"
-                hx-target="#question-{{ question.id }}"
+                hx-post="{% url 'respond' question.id %}"
+                hx-target="#question-{{ question.id }}-feedback"
                 hx-swap="outerHTML"
                 hx-trigger="input changed delay:500ms">
-              <div class="valid-feedback">Saved {% if response.value %}"{{ response.value }}"{% else %}a blank answer{% endif %}.</div>
-              <div class="invalid-feedback">Something went wrong saving. {% if response and response.value %}"{{ response.value }}"{% elif not response %}No answer{% else %}A blank answer{% endif %} was recorded.</div>
+              {% include 'game/_respond.html' %}
             </div>
           </div>
         </form>

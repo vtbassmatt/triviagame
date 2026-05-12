@@ -1,0 +1,24 @@
+{% if did_save == True or response %}
+<div id="question-{{ question.id }}-feedback" class="valid-feedback">Saved {% if response.value %}"{{ response.value }}"{% else %}a blank answer{% endif %}.</div>
+<script>
+  (async () => {
+    const frm = document.getElementById("form-{{ question.id }}");
+    frm.noValidate = true;
+    frm.classList.add("was-validated");
+    const ans = document.getElementById("answer-field-{{ question.id }}");
+    ans.classList.add("is-valid");
+  })();
+</script>
+{% elif did_save == False %}
+<div id="question-{{ question.id }}-feedback" class="invalid-feedback">{% if response and response.value %}"{{ response.value }}"{% elif not response %}No answer{% else %}A blank answer{% endif %} was recorded. Maybe the host closed the round already?</div>
+<script>
+  (async () => {
+    const frm = document.getElementById("form-{{ question.id }}");
+    frm.noValidate = true;
+    const ans = document.getElementById("answer-field-{{ question.id }}");
+    ans.classList.add("is-invalid");
+  })();
+</script>
+{% else %}
+<div id="question-{{ question.id }}-feedback" class="valid-feedback"></div>
+{% endif %}

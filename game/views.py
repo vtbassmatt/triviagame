@@ -302,7 +302,35 @@ def answer_sheet(request, page_order):
 
 
 def question_hx(request, question_id):
-    game, team, response = _get_game_team(request, HttpResponseClientRedirect)
+    _, team, response = _get_game_team(request, HttpResponseClientRedirect)
+    if response:
+        return response
+
+    try:
+        question = models.Question.objects.get(pk=question_id)
+        if question.page.state == models.Page.PageState.LOCKED:
+            question = None
+    except models.Question.DoesNotExist:
+        question = None
+
+    if not question:
+        _flash_bad_question(request)
+        return HttpResponseClientRedirect(reverse('play'))
+    
+    try:
+        response = models.Response.objects.get(team=team, question=question)
+    except models.Response.DoesNotExist:
+        response = None
+    
+    return render(request, 'game/_question.html', {
+        'team': team,
+        'question': question,
+        'response': response,
+    })
+
+
+def question_response(request, question_id):
+    _, team, response = _get_game_team(request, HttpResponseClientRedirect)
     if response:
         return response
 
@@ -332,7 +360,7 @@ def question_hx(request, question_id):
             messages.error(request, "This page is not accepting answers now.")
             keep_going = False
         if response and response.graded:
-            messages.error(request, f"Your existing response to question {question.order} is already being scored.")
+            messages.error(request, f"Your existing response to question {question.order} has already been scored.")
             keep_going = False
         
         new_response = request.POST['response_value']
@@ -346,9 +374,7 @@ def question_hx(request, question_id):
             response.save()
             did_save = True
     
-    return render(request, 'game/_question.html', {
-        'game': game,
-        'team': team,
+    return render(request, 'game/_respond.html', {
         'question': question,
         'response': response,
         'did_save': did_save,
