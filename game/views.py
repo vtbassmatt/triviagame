@@ -8,7 +8,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from . import models
 from .forms import JoinGameForm, CreateTeamForm, ReJoinTeamForm
@@ -302,7 +302,37 @@ def answer_sheet(request, page_order):
 
 
 def question_hx(request, question_id):
-    game, team, response = _get_game_team(request, HttpResponseClientRedirect)
+    _, team, response = _get_game_team(request, HttpResponseClientRedirect)
+    if response:
+        return response
+
+    try:
+        question = models.Question.objects.get(pk=question_id)
+        if question.page.state == models.Page.PageState.LOCKED:
+            question = None
+    except models.Question.DoesNotExist:
+        question = None
+
+    if not question:
+        _flash_bad_question(request)
+        return HttpResponseClientRedirect(reverse('play'))
+    
+    try:
+        response = models.Response.objects.get(team=team, question=question)
+    except models.Response.DoesNotExist:
+        response = None
+    
+    http_response = render(request, 'game/_question.html', {
+        'team': team,
+        'question': question,
+        'response': response,
+    })
+
+    return _generate_validation(http_response, response, question, True)
+
+
+def question_response(request, question_id):
+    _, team, response = _get_game_team(request, HttpResponseClientRedirect)
     if response:
         return response
 
@@ -332,7 +362,7 @@ def question_hx(request, question_id):
             messages.error(request, "This page is not accepting answers now.")
             keep_going = False
         if response and response.graded:
-            messages.error(request, f"Your existing response to question {question.order} is already being scored.")
+            messages.error(request, f"Your existing response to question {question.order} has already been scored.")
             keep_going = False
         
         new_response = request.POST['response_value']
@@ -345,14 +375,33 @@ def question_hx(request, question_id):
 
             response.save()
             did_save = True
-    
-    return render(request, 'game/_question.html', {
-        'game': game,
-        'team': team,
-        'question': question,
-        'response': response,
-        'did_save': did_save,
-    })
+
+    return _generate_validation(HttpResponse(), response, question, did_save)
+
+
+def _generate_validation(http_response, response: models.Response, question: models.Question, did_save: bool):
+    if did_save:
+        answer = f'"{response.value}"' if response.value else "a blank answer"
+        message = f"Saved {answer}."
+    else:
+        if response and response.value:
+            answer = f'"{response.value}"'
+        elif not response:
+            answer = "No answer"
+        else:
+            answer = "A blank answer"
+        message = f"{answer} was recorded. Maybe the host closed the round already?"
+
+    return trigger_client_event(
+        http_response,
+        "validateForm",
+        {
+            "isValid": did_save,
+            "message": message,
+            "questionId": question.pk,
+        },
+        after="swap",
+    )
 
 
 def leaderboard(request):
