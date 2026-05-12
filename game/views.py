@@ -8,7 +8,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from . import models
 from .forms import JoinGameForm, CreateTeamForm, ReJoinTeamForm
@@ -373,12 +373,29 @@ def question_response(request, question_id):
 
             response.save()
             did_save = True
-    
-    return render(request, 'game/_respond.html', {
-        'question': question,
-        'response': response,
-        'did_save': did_save,
-    })
+
+    if did_save:
+        answer = f'"{response.value}"' if response.value else "a blank answer"
+        message = f"Saved {answer}."
+    else:
+        if response and response.value:
+            answer = f'"{response.value}"'
+        elif not response:
+            answer = "No answer"
+        else:
+            answer = "A blank answer"
+        message = f"{answer} was recorded. Maybe the host closed the round already?"
+
+    return trigger_client_event(
+        HttpResponse(),
+        "validateForm",
+        {
+            "isValid": did_save,
+            "message": message,
+            "questionId": question.pk,
+        },
+        after="swap",
+    )
 
 
 def leaderboard(request):

@@ -30,9 +30,9 @@
                 value="{{ response.value }}"
                 hx-post="{% url 'respond' question.id %}"
                 hx-target="#question-{{ question.id }}-feedback"
-                hx-swap="outerHTML"
+                hx-swap="none"
                 hx-trigger="input changed delay:500ms">
-              {% include 'game/_respond.html' %}
+              <div id="question-{{ question.id }}-feedback" class="valid-feedback">[placeholder]</div>
             </div>
           </div>
         </form>
