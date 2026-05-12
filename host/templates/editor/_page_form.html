@@ -3,5 +3,6 @@
   hx-target="closest div">
   {% csrf_token %}
   {{ page_form }}
+  {{ page_form.media }}
   <button type="submit" class="btn btn-outline-primary mt-3">Save page metadata</button>
 </form>

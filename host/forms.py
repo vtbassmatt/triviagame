@@ -8,6 +8,7 @@ from game.widgets import (
     Bs5Textarea,
     Bs5Select,
 )
+from host.widgets import MonacoEditor
 
 
 User = get_user_model()
@@ -55,7 +56,7 @@ class PageForm(forms.ModelForm):
             'title': Bs5TextInput(attrs={
                 'autocomplete': 'off',
             }),
-            'description': Bs5Textarea,
+            'description': MonacoEditor,
         }
         labels = {
             'title': 'Page title',
