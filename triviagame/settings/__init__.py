@@ -30,6 +30,10 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in config(
     cast=Csv(),
 )]
 
+COMMIT_HASH = config('COMMIT_HASH', default='-')
+DEPLOY_REF = config('DEPLOY_REF', default='none')
+
+
 
 # Application definition
 
@@ -78,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'triviagame.context_processors.deployment_details',
             ],
         },
     },
