@@ -52,7 +52,9 @@
           {% endfor %}  
         </div>
       </div>
+
 {% block contents %}check your 🧠 - something's gone wrong{% endblock %}
+      <div class="row"><div class="col-12 text-body-secondary text-center"><small>(git:<span class="font-monospace">{{ COMMIT_HASH }}</span> ref:<span class="font-monospace">{{ DEPLOY_REF }}</span>)</small></div></div>
     </div>
   </body>
 </html>
