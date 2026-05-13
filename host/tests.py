@@ -23,6 +23,15 @@ class PasswordChangeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'host/password_change_form.html')
 
+    def test_password_change_form_has_password_manager_metadata(self):
+        self.client.login(username='testhost', password='oldpassword123')
+        response = self.client.get(reverse('password_change'))
+        content = response.content.decode()
+        self.assertRegex(content, r'<input[^>]*name="username"[^>]*autocomplete="username"[^>]*value="testhost"')
+        self.assertRegex(content, r'<input[^>]*name="old_password"[^>]*autocomplete="current-password"')
+        self.assertRegex(content, r'<input[^>]*name="new_password1"[^>]*autocomplete="new-password"')
+        self.assertRegex(content, r'<input[^>]*name="new_password2"[^>]*autocomplete="new-password"')
+
     def test_password_change_success(self):
         self.client.login(username='testhost', password='oldpassword123')
         response = self.client.post(reverse('password_change'), {
@@ -56,4 +65,3 @@ class PasswordChangeTests(TestCase):
         response = self.client.get(reverse('host_home'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse('password_change'))
-
