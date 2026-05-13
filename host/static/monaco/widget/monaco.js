@@ -13,4 +13,6 @@ window.addEventListener("message", ({ data }) => {
 function wireUpMonaco(context, iframe) {
   if (!iframe) { throw new Error(`iframe ${iFrameID} not found`); }
   monacoWidgets.set(context, iframe);
+  // turn off tab-trapping
+  iframe.contentWindow.postMessage({ type: "change-options", options: {'tabFocusMode': true} }, "*");
 }
