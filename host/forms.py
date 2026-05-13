@@ -1,13 +1,14 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from game.models import Game, Page, Question, Team
+from game.models import Game, Page, Question
 from game.widgets import (
     Bs5TextInput,
     Bs5NumberInput,
     Bs5Textarea,
     Bs5Select,
 )
+from host.widgets import MonacoEditor
 
 
 User = get_user_model()
@@ -55,7 +56,7 @@ class PageForm(forms.ModelForm):
             'title': Bs5TextInput(attrs={
                 'autocomplete': 'off',
             }),
-            'description': Bs5Textarea,
+            'description': MonacoEditor,
         }
         labels = {
             'title': 'Page title',
@@ -65,6 +66,8 @@ class PageForm(forms.ModelForm):
 
 
 class QuestionForm(forms.ModelForm):
+    template_name = "editor/forms/question.html"
+
     class Meta:
         model = Question
         fields = [
@@ -73,8 +76,8 @@ class QuestionForm(forms.ModelForm):
             'possible_points',
         ]
         widgets = {
-            'question': Bs5Textarea,
-            'answer': Bs5Textarea,
+            'question': MonacoEditor,
+            'answer': MonacoEditor,
             'possible_points': Bs5NumberInput,
         }
         labels = {
