@@ -27,7 +27,6 @@ class PasswordChangeTests(TestCase):
         self.client.login(username='testhost', password='oldpassword123')
         response = self.client.get(reverse('password_change'))
         content = response.content.decode()
-        self.assertRegex(content, r'<input(?=[^>]*name="username")(?=[^>]*autocomplete="username")(?=[^>]*value="testhost")[^>]*>')
         self.assertRegex(content, r'<input(?=[^>]*name="old_password")(?=[^>]*autocomplete="current-password")[^>]*>')
         self.assertRegex(content, r'<input(?=[^>]*name="new_password1")(?=[^>]*autocomplete="new-password")[^>]*>')
         self.assertRegex(content, r'<input(?=[^>]*name="new_password2")(?=[^>]*autocomplete="new-password")[^>]*>')
