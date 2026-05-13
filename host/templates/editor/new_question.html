@@ -6,9 +6,11 @@
   <div class="col-12 mb-3">
     <p>You are logged in as <span class="text-success">{% firstof request.user.get_full_name request.user %}</span>{% if request.user.is_superuser %} <span class="badge rounded-pill bg-secondary">admin</span>{% endif %} (<a class="link-danger" href="{% url 'confirm_logout' %}">log out</a>)</p>
     <form method="post" autocomplete="off">
+      <div class="row">
       {% csrf_token %}
       {{ form }}
-      <button type="submit" class="btn btn-outline-primary">Create question</button>
+      <button type="submit" class="col-md-6 btn btn-outline-primary">Create question</button>
+      </div>
     </form>
   </div>
 </div>

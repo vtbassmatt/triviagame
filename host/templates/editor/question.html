@@ -11,10 +11,12 @@
         <p class="card-text">From page <q><a href="{% url 'edit_page' question.page.id %}">{{ question.page.title }}</a></q> in game <q><a href="{% url 'edit_game' question.page.game.id %}">{{ question.page.game.name }}</a></q></p>
         <form method="post" autocomplete="off">
           <p class="card-text">
+            <div class="row">
             {% csrf_token %}
             {{ question_form }}
+            <button type="submit" class="col-md-6 btn btn-outline-primary">Update question</button>
+            </div>
           </p>
-          <button type="submit" class="btn btn-outline-primary">Update question</button>
         </form>    
       </div>
     </div>

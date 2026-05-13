@@ -66,6 +66,8 @@ class PageForm(forms.ModelForm):
 
 
 class QuestionForm(forms.ModelForm):
+    template_name = "editor/forms/question.html"
+
     class Meta:
         model = Question
         fields = [
