@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from game.models import Game, Page, Question, Team
+from game.models import Game, Page, Question
 from game.widgets import (
     Bs5TextInput,
     Bs5NumberInput,
@@ -76,8 +76,8 @@ class QuestionForm(forms.ModelForm):
             'possible_points',
         ]
         widgets = {
-            'question': Bs5Textarea,
-            'answer': Bs5Textarea,
+            'question': MonacoEditor,
+            'answer': MonacoEditor,
             'possible_points': Bs5NumberInput,
         }
         labels = {

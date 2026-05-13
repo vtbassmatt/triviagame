@@ -9,6 +9,7 @@
       <div class="row">
       {% csrf_token %}
       {{ form }}
+      {{ form.media }}
       <button type="submit" class="col-md-6 btn btn-outline-primary">Create question</button>
       </div>
     </form>

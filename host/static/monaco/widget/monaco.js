@@ -3,7 +3,7 @@ window.addEventListener("message", ({ data }) => {
     switch(data.type) {
       case "change": {
         if (monacoWidgets.has(data.context)) {
-          console.log('has context!');
+          // console.log('has context!');
           document.querySelector(`input[name='${data.context}']`).value = data.value;
         }
         break;
