@@ -3,8 +3,9 @@ window.addEventListener("message", ({ data }) => {
     switch(data.type) {
       case "change": {
         if (monacoWidgets.has(data.context)) {
-          // console.log('has context!');
           document.querySelector(`input[name='${data.context}']`).value = data.value;
+        } else {
+          console.log(`did not find a Monaco iframe for ${data.context}`);
         }
         break;
       }
