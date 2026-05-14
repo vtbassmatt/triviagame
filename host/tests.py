@@ -258,7 +258,8 @@ class GameLifecycleIntegrationTests(TestCase):
         self.assertEqual(leaderboard.status_code, 200)
         self.assertEqual(len(leaderboard.context['leaderboard']), 1)
         leading_team = leaderboard.context['leaderboard'][0]
-        self.assertEqual(len(leading_team), 3)
+        expected_columns = ('team_name', 'round_one_score', 'total_score')
+        self.assertEqual(len(leading_team), len(expected_columns))
         team_name, round_one_score, total_score = leading_team
         self.assertEqual(team_name, 'Integration Team')
         self.assertEqual(round_one_score, 2)
