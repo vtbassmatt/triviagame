@@ -256,5 +256,9 @@ class GameLifecycleIntegrationTests(TestCase):
 
         leaderboard = self.player_client.get(reverse('leaderboard'))
         self.assertEqual(leaderboard.status_code, 200)
-        self.assertEqual(leaderboard.context['leaderboard'], [['Integration Team', 2, 2]])
+        self.assertEqual(len(leaderboard.context['leaderboard']), 1)
+        leading_team = leaderboard.context['leaderboard'][0]
+        self.assertEqual(leading_team[0], 'Integration Team')
+        self.assertEqual(leading_team[1], 2)
+        self.assertEqual(leading_team[2], 2)
         self.assertEqual(leaderboard.context['gold_medals'], ['Integration Team'])
