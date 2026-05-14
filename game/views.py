@@ -48,15 +48,6 @@ def home(request):
     })
 
 
-def healthcheck(request):
-    return render(
-        request,
-        'healthcheck.txt',
-        {},
-        content_type='text/plain'
-    )
-
-
 def uncurse(request):
     # if something bad has happened, this will clear the session
     request.session.clear()

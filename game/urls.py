@@ -17,5 +17,4 @@ urlpatterns = [
     path('play/q/<int:question_id>', views.question_hx, name='question_hx'),
     path('play/q/<int:question_id>/a', views.question_response, name='respond'),
     path('leaderboard/', views.leaderboard, name='leaderboard'),
-    path('healthcheck/', views.healthcheck, name='healthcheck'),
 ]
