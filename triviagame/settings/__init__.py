@@ -38,7 +38,6 @@ DEPLOY_REF = config('DEPLOY_REF', default='none')
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'guardian',
