@@ -50,14 +50,14 @@
       const frm = document.getElementById(`form-${questionId}`);
       const ans = document.getElementById(`answer-field-${questionId}`);
       const fb = document.getElementById(`question-${questionId}-feedback`);
-      if (evt.detail.isValid) {
+      if (evt.detail.isValid === true) {
         frm.noValidate = true;
         frm.classList.add("was-validated");
         ans.classList.add("is-valid");
         fb.innerHTML = evt.detail.message;
         fb.classList.add('valid-feedback');
         fb.classList.remove('invalid-feedback');
-      } else {
+      } else if (evt.detail.isValid === false) {
         frm.noValidate = true;
         ans.classList.add("is-invalid");
         fb.innerHTML = evt.detail.message;
