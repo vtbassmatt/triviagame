@@ -328,7 +328,7 @@ def question_hx(request, question_id):
         'response': response,
     })
 
-    return _generate_validation(http_response, response, question, True)
+    return _generate_validation(http_response, response, question, None)
 
 
 def question_response(request, question_id):
@@ -380,9 +380,11 @@ def question_response(request, question_id):
 
 
 def _generate_validation(http_response, response: models.Response, question: models.Question, did_save: bool):
-    if did_save:
-        answer = f'"{response.value}"' if response.value else "a blank answer"
+    if did_save == True:
+        answer = f'"{response.value}"' if response and response.value else "a blank answer"
         message = f"Saved {answer}."
+    elif did_save is None:
+        message = ""
     else:
         if response and response.value:
             answer = f'"{response.value}"'
