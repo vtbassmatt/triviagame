@@ -16,7 +16,6 @@ dependencies = [
     "django-guardian~=3.2",
     "django-htmx~=1.27",
     "django-runserveronhostname>=0.1.0",
-    "psycopg[binary]~=3.3",
     "python-decouple>=3.8",
 ]
 
