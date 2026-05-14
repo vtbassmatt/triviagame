@@ -114,3 +114,66 @@ class EditorTests(TestCase):
         question = page.question_set.get(order=2)
         self.assertRedirects(response, reverse('edit_page', args=(page.id,)))
         self.assertEqual(question.question, 'Q2')
+
+
+class HostInterfaceTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='hoster',
+            password='hostpass123',
+        )
+        self.client.login(username='hoster', password='hostpass123')
+
+    def test_host_home_only_lists_games_user_can_view(self):
+        visible_game = models.Game.objects.create(name='Visible Game')
+        hidden_game = models.Game.objects.create(name='Hidden Game')
+        assign_perm('view_game', self.user, visible_game)
+
+        response = self.client.get(reverse('host_home'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Visible Game')
+        self.assertNotContains(response, 'Hidden Game')
+
+    def test_update_game_state_htmx_updates_state(self):
+        game = models.Game.objects.create(name='Host State Game')
+        assign_perm('host_game', self.user, game)
+
+        response = self.client.post(
+            reverse('update_game_state', args=(game.id, models.Game.GameState.ACCEPTING_TEAMS)),
+            HTTP_HX_REQUEST='true',
+        )
+
+        game.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(game.state, models.Game.GameState.ACCEPTING_TEAMS)
+
+    def test_assign_score_grades_response_when_page_is_scoring(self):
+        game = models.Game.objects.create(name='Scoring Game')
+        page = models.Page.objects.create(
+            game=game,
+            order=1,
+            title='Round 1',
+            state=models.Page.PageState.SCORING,
+        )
+        question = models.Question.objects.create(page=page, order=1, question='Q1')
+        team = models.Team.objects.create(game=game, name='Team')
+        response_row = models.Response.objects.create(
+            question=question,
+            team=team,
+            value='Answer',
+            graded=False,
+            score=0,
+        )
+        assign_perm('host_game', self.user, game)
+
+        response = self.client.post(
+            reverse('assign_score', args=(game.id,)),
+            {'response': response_row.id, 'score': '2'},
+            HTTP_HX_REQUEST='true',
+        )
+
+        response_row.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response_row.graded)
+        self.assertEqual(response_row.score, 2)
