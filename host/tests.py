@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 from guardian.shortcuts import assign_perm
 
@@ -177,3 +177,84 @@ class HostInterfaceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response_row.graded)
         self.assertEqual(response_row.score, 2)
+
+
+class GameLifecycleIntegrationTests(TestCase):
+    def setUp(self):
+        self.host_user = User.objects.create_user(
+            username='integration_host',
+            password='hostpass123',
+        )
+        add_game_perm = Permission.objects.get(codename='add_game')
+        self.host_user.user_permissions.add(add_game_perm)
+        self.host_client = Client()
+        self.player_client = Client()
+        self.host_client.login(username='integration_host', password='hostpass123')
+
+    def test_lifecycle_from_host_editor_to_player_scoring_and_leaderboard(self):
+        create_game = self.host_client.post(reverse('new_game'), {'name': 'Lifecycle Game'})
+        self.assertEqual(create_game.status_code, 302)
+        game = models.Game.objects.get(name='Lifecycle Game')
+
+        create_page = self.host_client.post(
+            reverse('new_page', args=(game.id,)),
+            {'title': 'Round 1', 'description': 'Round details'},
+        )
+        self.assertEqual(create_page.status_code, 302)
+        page = game.page_set.get(order=1)
+
+        create_question = self.host_client.post(
+            reverse('new_question', args=(page.id,)),
+            {'question': 'Ultimate answer?', 'answer': '42', 'possible_points': 2},
+        )
+        self.assertEqual(create_question.status_code, 302)
+        question = page.question_set.get(order=1)
+
+        open_game = self.host_client.post(
+            reverse('update_game_state', args=(game.id, models.Game.GameState.ACCEPTING_TEAMS)),
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(open_game.status_code, 200)
+        open_page = self.host_client.post(
+            reverse('set_page_state', args=(game.id,)),
+            {'page': page.id, 'state': 'OPEN'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(open_page.status_code, 204)
+
+        join_game = self.player_client.post(reverse('join_game'), {
+            'id': game.id,
+            'code': game.passcode,
+        })
+        self.assertRedirects(join_game, reverse('create_team'))
+        create_team = self.player_client.post(reverse('create_team'), {
+            'name': 'Integration Team',
+            'members': 'Alice, Bob',
+        })
+        self.assertRedirects(create_team, reverse('play'))
+        team = game.team_set.get(name='Integration Team')
+
+        answer = self.player_client.post(reverse('respond', args=(question.id,)), {
+            'response_value': '42',
+        })
+        self.assertEqual(answer.status_code, 200)
+        response_row = models.Response.objects.get(team=team, question=question)
+        self.assertEqual(response_row.value, '42')
+
+        scoring_page = self.host_client.post(
+            reverse('set_page_state', args=(game.id,)),
+            {'page': page.id, 'state': 'SCORING'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(scoring_page.status_code, 204)
+        score_response = self.host_client.post(
+            reverse('assign_score', args=(game.id,)),
+            {'response': response_row.id, 'score': '2'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(score_response.status_code, 200)
+
+        leaderboard = self.player_client.get(reverse('leaderboard'))
+        self.assertEqual(leaderboard.status_code, 200)
+        self.assertEqual(leaderboard.context['leaderboard'], [['Integration Team', 2, 2]])
+        self.assertEqual(leaderboard.context['gold_medals'], ['Integration Team'])
