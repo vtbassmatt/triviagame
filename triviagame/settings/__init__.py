@@ -21,12 +21,12 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='divine-mountain-3508.fly.dev, trivia.vtbassmatt.com',
+    default='trivia.vtbassmatt.com',
     cast=Csv(),
 )
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in config(
     'ALLOWED_HOSTS',
-    default='divine-mountain-3508.fly.dev, trivia.vtbassmatt.com',
+    default='trivia.vtbassmatt.com',
     cast=Csv(),
 )]
 

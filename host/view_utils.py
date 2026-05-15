@@ -73,7 +73,7 @@ Assumes `game_id` is in the view args, and puts a `game` attribute on the reques
 
 
 def build_absolute_uri(request, relative_url):
-    # on fly.io, we see the request proxied in over HTTP, but we want to
+    # on some platforms, we see the request proxied in over HTTP, but we want to
     # generate HTTPS links. but if we do that blindly, then in debug
     # mode, we generate https links that don't work. this is a decent
     # hack.
