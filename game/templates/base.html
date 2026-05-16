@@ -1,5 +1,4 @@
 {% load static %}
-{% load django_htmx %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -10,7 +9,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'icons/site.webmanifest' %}">
 
-    {% htmx_script %}
+    <script src="{% static 'htmx/htmx.4.0.0-beta3.min.js' %}"></script>
+    <script src="{% static 'htmx/htmx-2-compat.min.js' %}"></script>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" defer></script>
     <script src="{% static 'htmx/messages.js' %}" defer></script>
     <script src="{% static 'markdown/marked.min.js' %}" defer></script>
