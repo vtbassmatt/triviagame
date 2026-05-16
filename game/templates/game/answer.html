@@ -15,7 +15,11 @@
     </div>
   </div>
   {% if page.is_open %}<p><span class="badge bg-success">Note!</span> Answers are saved as you type, no need to submit anything.</p>{% endif %}
+  {% if page.hide_questions %}
+  <p><i>Questions are hidden until the round is over.</i></p>
+  {% else %}
   <p>When you're done, you can go <a href="{% url 'play' %}">back to the list of rounds</a>.</p>
+  {% endif %}
 </div>
 
 <div class="row mb-3">

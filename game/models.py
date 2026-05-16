@@ -94,6 +94,7 @@ class Page(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     is_hidden = models.BooleanField(default=False)
+    hide_questions = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.game} :: {self.order}. {self.title}"

@@ -9,6 +9,7 @@ urlpatterns = [
     path('<int:game_id>/pages/', views.pages, name='pages'),
     path('<int:game_id>/pages/state/', views.set_page_state, name='set_page_state'),
     path('<int:game_id>/pages/<int:page_id>', views.score_page, name='score_page'),
+    path('<int:game_id>/pages/<int:page_id>/state/', views.toggle_hidden_questions, name='toggle_hidden_questions'),
     path('<int:game_id>/score/', views.assign_score, name='assign_score'),
     path('<int:game_id>/game.json', views.game_data, name='game_data'),
     path('<int:game_id>/leaderboard.json', views.host_leaderboard_stats, name='host_leaderboard_stats'),
