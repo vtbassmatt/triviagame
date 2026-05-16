@@ -402,7 +402,6 @@ def _generate_validation(http_response, response: models.Response, question: mod
             "message": message,
             "questionId": question.pk,
         },
-        after="swap",
     )
 
 
