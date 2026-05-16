@@ -3,7 +3,11 @@
     <div class="card-header" id="question-header-{{ question.id }}">Question {{ question.order }}</div>
     <div class="card-body" id="question-body-{{ question.id }}">
       {% if question.possible_points > 1 %}<p class="card-text fst-italic">Worth up to <span class="text-primary fw-bold">{{ question.possible_points }}</span> points.</p>{% endif %}
+      {% if question.page.hide_questions and not question.page.is_scoring %}
+      <p class="card-text text-secondary"><i>??????</i></p>
+      {% else %}
       <p class="card-text markdown-needed">{{ question.question }}</p>
+      {% endif %}
 
       {% comment %}
       assured by the view:
