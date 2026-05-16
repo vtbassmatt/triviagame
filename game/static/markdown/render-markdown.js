@@ -54,7 +54,7 @@ function renderMarkdown(root) {
 }
 
 // htmx stuff
-htmx.on("htmx:afterSwap", (e) => {
+htmx.on("htmx:after:swap", (e) => {
   renderMarkdown(/*e.detail.target*/);
 })
 
