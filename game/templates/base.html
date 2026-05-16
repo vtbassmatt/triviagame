@@ -10,7 +10,6 @@
     <link rel="manifest" href="{% static 'icons/site.webmanifest' %}">
 
     <script src="{% static 'htmx/htmx.4.0.0-beta3.min.js' %}"></script>
-    <script src="{% static 'htmx/htmx-2-compat.min.js' %}"></script>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" defer></script>
     <script src="{% static 'htmx/messages.js' %}" defer></script>
     <script src="{% static 'markdown/marked.min.js' %}" defer></script>
@@ -28,7 +27,7 @@
 
     <title>{% block title %}Welcome to Tr¿via{% endblock %}</title>
   </head>
-  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <body hx-headers:inherited='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <div class="container">
       <div class="row">
         <div class="col-12">
