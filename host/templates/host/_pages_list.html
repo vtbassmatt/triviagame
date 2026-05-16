@@ -6,6 +6,11 @@
   <div class="card-body">
     <div class="card-title markdown-needed">{{ page.description }}</div>
     <div class="card-text">
+      Questions are <strong>{% if page.hide_questions %}hidden{% else %}shown{% endif %}</strong> while the round is open.
+      <a class="btn btn-outline-secondary"
+         hx-post="{% url 'toggle_hidden_questions' game.id page.id %}">{% if page.hide_questions %}Show them 🙂{% else %}Hide them 🫥{% endif %}</a>
+    </div>
+    <div class="card-text mt-2">
       {% if 'host_game' in perms %}
       <a class="btn {{ page.bootstrap_locked_button_styles }}"
         hx-post="{% url 'set_page_state' game.id %}"

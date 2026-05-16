@@ -37,6 +37,7 @@ __all__ = [
     'update_game_state',
     'pages',
     'set_page_state',
+    'toggle_hidden_questions',
     'score_page',
     'assign_score',
     'host_leaderboard',
@@ -194,6 +195,32 @@ def set_page_state(request, game_id):
     page.state = new_state
     page.save()
     messages.success(request, f"{page.title} is now {page.state.label}.")
+
+    response = HttpResponseNoContent()
+    # report that some page's state has updated
+    return trigger_client_event(
+        response,
+        'pageStateUpdated',
+        {'page': page_id},
+    )
+
+
+@login_required
+@can_host_game
+@require_POST
+def toggle_hidden_questions(request, game_id, page_id):
+    # this is an HTMX-only view
+    if not request.htmx:
+        return HttpResponseBadRequest("expected HTMX request")
+
+    page = get_object_or_404(Page, pk=page_id)
+
+    if int(game_id) != page.game.id:
+        return HttpResponseBadRequest("page/game IDs didn't match")
+    
+    page.hide_questions = not page.hide_questions
+    page.save()
+    # messages.success(request, f"{page.title} questions are now {page.state.label}.")
 
     response = HttpResponseNoContent()
     # report that some page's state has updated
